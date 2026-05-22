@@ -217,7 +217,7 @@ export default async function AboutPage() {
                 {aboutSectionHeading}
               </h2>
             </header>
-            <div className="relative mt-8 aspect-16/5 w-full overflow-hidden bg-stone-100">
+            {/* <div className="relative mt-8 aspect-16/5 w-full overflow-hidden bg-stone-100">
               <Image
                 src={aboutSectionImage}
                 alt="About section visual"
@@ -226,7 +226,7 @@ export default async function AboutPage() {
                 sizes="100vw"
                 unoptimized={preferUnoptimizedImage(aboutSectionImage)}
               />
-            </div>
+            </div> */}
             <div className="mt-8 max-w-5xl space-y-6">
               {leadParagraphs.map((paragraph) => (
                 <p
