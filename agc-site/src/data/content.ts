@@ -42,7 +42,8 @@ export const siteConfig = {
  * Set `NEXT_PUBLIC_DONATE_HREF` in `.env` (e.g. `/your-page` or `https://…`). Defaults to `/contact`.
  */
 export const donateHref =
-  typeof process.env.NEXT_PUBLIC_DONATE_HREF === "string" && process.env.NEXT_PUBLIC_DONATE_HREF.trim() !== ""
+  typeof process.env.NEXT_PUBLIC_DONATE_HREF === "string" &&
+  process.env.NEXT_PUBLIC_DONATE_HREF.trim() !== ""
     ? process.env.NEXT_PUBLIC_DONATE_HREF.trim()
     : "/contact";
 
@@ -51,7 +52,8 @@ export const defaultHomeHeroBackgroundImage =
   "https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=2400&q=80";
 
 /** Main home hero headline (`HeroConsultar` `h1`; CMS Home Settings title aligns with this default). */
-export const HOME_HERO_DISPLAY_TAGLINE = "When governance works, people can thrive";
+export const HOME_HERO_DISPLAY_TAGLINE =
+  "When governance works, people can thrive";
 
 export const heroContent = {
   eyebrow: "",
@@ -129,19 +131,31 @@ export const aboutContent = {
   hero: {
     subtitle: "Advancing Democratic Governance",
   },
-  intro: "Africa Governance Centre is an independent think tank committed to promoting governance excellence, policy development, and institutional capacity building to support Africa's economic transformation.",
-  description: "Through research, capacity development, and strategic collaborations, we aim to strengthen government institutions and facilitate systemic change to achieve a prosperous and inclusive continent. Our focus is on fostering transparent, accountable, and inclusive governance systems that contribute to sustainable economic growth. Guided by the vision of a prosperous, inclusive, and empowered Africa, we believe that effective governance is essential to unlocking the continent's full potential.",
-  mission: "Our mission is to equip African nations with the tools, knowledge, and partnerships necessary to transform governance into a catalyst for economic prosperity and sustainable development. We welcome collaboration with governments, institutions, civil society organizations, and partners committed to advancing good governance and driving Africa's economic progress.",
+  intro:
+    "Africa Governance Centre is an independent think tank committed to promoting governance excellence, policy development, and institutional capacity building to support Africa's economic transformation.",
+  description:
+    "Through research, capacity development, and strategic collaborations, we aim to strengthen government institutions and facilitate systemic change to achieve a prosperous and inclusive continent. Our focus is on fostering transparent, accountable, and inclusive governance systems that contribute to sustainable economic growth. Guided by the vision of a prosperous, inclusive, and empowered Africa, we believe that effective governance is essential to unlocking the continent's full potential.",
+  mission:
+    "Our mission is to equip African nations with the tools, knowledge, and partnerships necessary to transform governance into a catalyst for economic prosperity and sustainable development. We welcome collaboration with governments, institutions, civil society organizations, and partners committed to advancing good governance and driving Africa's economic progress.",
   strategicObjectives: {
     title: "Mission and Strategic Objectives",
-    content: "Our primary mission is to promote governance excellence as a key driver of economic transformation and sustainable development across Africa. We are committed to equipping African governments, institutions, and stakeholders with the knowledge, tools, and partnerships necessary to establish transparent, accountable, and inclusive governance systems that foster socio-economic growth and improve living standards for all.",
-    principles: "Upholding principles of excellence, transparency, and intellectual rigor, we believe that open-minded inquiry and innovative ideas are essential for Africa's pursuit of a prosperous, peaceful, and influential future.",
-    agenda2063: "Aligned with the vision of the African Union's Agenda 2063: The Africa We Want, there are significant opportunities for economic transformation as the continent seeks to leverage its vast resources. The Africa Governance Centre aims to lead evidence-based policy engagement to facilitate change in global governance structures and empower stakeholders across the continent to deliver effective governance in Africa.",
+    content:
+      "Our primary mission is to promote governance excellence as a key driver of economic transformation and sustainable development across Africa. We are committed to equipping African governments, institutions, and stakeholders with the knowledge, tools, and partnerships necessary to establish transparent, accountable, and inclusive governance systems that foster socio-economic growth and improve living standards for all.",
+    principles:
+      "Upholding principles of excellence, transparency, and intellectual rigor, we believe that open-minded inquiry and innovative ideas are essential for Africa's pursuit of a prosperous, peaceful, and influential future.",
+    agenda2063:
+      "Aligned with the vision of the African Union's Agenda 2063: The Africa We Want, there are significant opportunities for economic transformation as the continent seeks to leverage its vast resources. The Africa Governance Centre aims to lead evidence-based policy engagement to facilitate change in global governance structures and empower stakeholders across the continent to deliver effective governance in Africa.",
   },
   aboutSectionEyebrow: "About us",
   aboutSectionHeading: "Who we are",
   aboutSectionImage: "",
-  teamSections: ["Executive Council", "Advisory Board", "Management Team", "Fellows", "Associate Fellows"],
+  teamSections: [
+    "Executive Council",
+    "Advisory Board",
+    "Management Team",
+    "Fellows",
+    "Associate Fellows",
+  ],
   teamTabs: {
     executiveCouncil: "Executive Council",
     advisoryBoard: "Advisory Board",
@@ -209,7 +223,8 @@ export const workContent = {
   },
   approach: {
     title: "Our Approach",
-    intro: "The Africa Governance Centre's work and engagements are grounded in open-minded, innovative, independent, and peer-reviewed inquiry, reflecting a diversity of perspectives. Our programs address topics such as innovations in public service delivery, human rights, economic development, natural resources and extractives frameworks, institutional structures, political leadership, government machinery, and sustainable development. Our work maintains a nonpartisan stance, and our positions are independent of our funding sources.",
+    intro:
+      "The Africa Governance Centre's work and engagements are grounded in open-minded, innovative, independent, and peer-reviewed inquiry, reflecting a diversity of perspectives. Our programs address topics such as innovations in public service delivery, human rights, economic development, natural resources and extractives frameworks, institutional structures, political leadership, government machinery, and sustainable development. Our work maintains a nonpartisan stance, and our positions are independent of our funding sources.",
     objectivesLead: "The Africa Governance Centre's objectives include:",
     objectives: [
       "Producing knowledge that critically examines the impacts of current socioeconomic and political governance systems, and promoting systemic change aimed at achieving just outcomes and inclusive development.",
@@ -226,7 +241,8 @@ export const workContent = {
   programs: {
     title: "Programs",
     subtitle: "Our core focus areas",
-    description: "Through forums and expert roundtables, the Africa Governance Centre promotes a culture of collaboration, knowledge sharing, and collective action to advance good governance practices and support economic transformation in Africa.",
+    description:
+      "Through forums and expert roundtables, the Africa Governance Centre promotes a culture of collaboration, knowledge sharing, and collective action to advance good governance practices and support economic transformation in Africa.",
     programs: [
       {
         title: "African Political Parties Initiative",
@@ -260,36 +276,102 @@ export const workContent = {
       },
     ],
     cards: [
-      { title: "Youth and Women Empowerment Workshops", description: "AGC organizes workshops and forums dedicated to empowering youth and women in governance and leadership positions." },
-      { title: "Research and Policy Forums", description: "AGC hosts research and policy forums to highlight recent findings, policy analyses, and best practices in governance." },
-      { title: "Annual Summits and Meetings", description: "AGC organizes annual meetings and events that bring together distinguished leaders, experts, and policymakers." },
-      { title: "Public-Private Dialogues", description: "AGC organizes public-private dialogues to promote collaboration between government entities and the private sector." },
-      { title: "Expert Forums on Good Governance", description: "AGC conducts regular forums focused on good governance, bringing together policymakers, experts, civil society organizations, and stakeholders from across Africa." },
-      { title: "Regional Governance Conferences", description: "AGC collaborates with regional organizations such as the African Union, ECOWAS, and SADC to convene governance conferences." },
-      { title: "Sector-Specific Roundtables", description: "AGC organizes expert roundtables focused on sector-specific governance challenges, involving key stakeholders from sectors such as health, education, infrastructure, agriculture, and energy." },
+      {
+        title: "Youth and Women Empowerment Workshops",
+        description:
+          "AGC organizes workshops and forums dedicated to empowering youth and women in governance and leadership positions.",
+      },
+      {
+        title: "Research and Policy Forums",
+        description:
+          "AGC hosts research and policy forums to highlight recent findings, policy analyses, and best practices in governance.",
+      },
+      {
+        title: "Annual Summits and Meetings",
+        description:
+          "AGC organizes annual meetings and events that bring together distinguished leaders, experts, and policymakers.",
+      },
+      {
+        title: "Public-Private Dialogues",
+        description:
+          "AGC organizes public-private dialogues to promote collaboration between government entities and the private sector.",
+      },
+      {
+        title: "Expert Forums on Good Governance",
+        description:
+          "AGC conducts regular forums focused on good governance, bringing together policymakers, experts, civil society organizations, and stakeholders from across Africa.",
+      },
+      {
+        title: "Regional Governance Conferences",
+        description:
+          "AGC collaborates with regional organizations such as the African Union, ECOWAS, and SADC to convene governance conferences.",
+      },
+      {
+        title: "Sector-Specific Roundtables",
+        description:
+          "AGC organizes expert roundtables focused on sector-specific governance challenges, involving key stakeholders from sectors such as health, education, infrastructure, agriculture, and energy.",
+      },
     ],
   },
   projects: {
     title: "Projects",
     subtitle: "Our targeted interventions",
-    description: "The Africa Governance Centre's projects are strategically aimed at strengthening the governance frameworks of African countries to promote transformative and sustainable development.",
+    description:
+      "The Africa Governance Centre's projects are strategically aimed at strengthening the governance frameworks of African countries to promote transformative and sustainable development.",
     cards: [
-      { title: "Africa Governance Review", description: "The Africa Governance Review Project is a comprehensive initiative dedicated to conducting detailed assessments, offering policy recommendations, and facilitating discussions on governance challenges and opportunities across African nations." },
-      { title: "Media and Democracy Initiative", description: "The Media and Democracy Initiative of the Africa Governance Centre seeks to empower media professionals, support independent journalism, and strengthen the media's ability to facilitate informed citizen participation in governance processes." },
-      { title: "Public Sector Efficiency and Innovation Project", description: "The Public Sector Efficiency and Innovation Project is dedicated to addressing the critical need for streamlined operations, improved public service delivery, and the integration of innovative solutions to support Africa's development." },
-      { title: "African Political Parties Initiative", description: "The African Political Parties Initiative (APPI) is a project developed by the Africa Governance Centre dedicated to supporting the role of political parties in Africa's development." },
-      { title: "Africa Resource Governance Initiative", description: "The Africa Resource Governance Initiative (ARGI), a project of the Africa Governance Centre, is dedicated to promoting transparency, accountability, and sustainable management of natural resources across Africa." },
+      {
+        title: "Africa Governance Review",
+        description:
+          "The Africa Governance Review Project is a comprehensive initiative dedicated to conducting detailed assessments, offering policy recommendations, and facilitating discussions on governance challenges and opportunities across African nations.",
+      },
+      {
+        title: "Media and Democracy Initiative",
+        description:
+          "The Media and Democracy Initiative of the Africa Governance Centre seeks to empower media professionals, support independent journalism, and strengthen the media's ability to facilitate informed citizen participation in governance processes.",
+      },
+      {
+        title: "Public Sector Efficiency and Innovation Project",
+        description:
+          "The Public Sector Efficiency and Innovation Project is dedicated to addressing the critical need for streamlined operations, improved public service delivery, and the integration of innovative solutions to support Africa's development.",
+      },
+      {
+        title: "African Political Parties Initiative",
+        description:
+          "The African Political Parties Initiative (APPI) is a project developed by the Africa Governance Centre dedicated to supporting the role of political parties in Africa's development.",
+      },
+      {
+        title: "Africa Resource Governance Initiative",
+        description:
+          "The Africa Resource Governance Initiative (ARGI), a project of the Africa Governance Centre, is dedicated to promoting transparency, accountability, and sustainable management of natural resources across Africa.",
+      },
     ],
   },
   advisory: {
     title: "Advisory",
     subtitle: "Our expert services",
-    description: "The Africa Governance Review Project is a comprehensive initiative dedicated to conducting detailed assessments, offering policy recommendations, and facilitating discussions on governance challenges and opportunities across African nations.",
+    description:
+      "The Africa Governance Review Project is a comprehensive initiative dedicated to conducting detailed assessments, offering policy recommendations, and facilitating discussions on governance challenges and opportunities across African nations.",
     cards: [
-      { title: "Policy Research and Analysis", description: "We provide in-depth research and analysis on key governance issues to inform policy development and decision-making." },
-      { title: "Capacity Building and Training", description: "We offer training programs and workshops to enhance the skills and knowledge of policymakers, civil society actors, and other stakeholders." },
-      { title: "Strategic Advocacy and Engagement", description: "We engage in strategic advocacy to influence policy agendas and promote positive governance outcomes at local, national, and regional levels." },
-      { title: "Institutional Strengthening", description: "We support the development and strengthening of institutions to improve their effectiveness, accountability, and responsiveness." },
+      {
+        title: "Policy Research and Analysis",
+        description:
+          "We provide in-depth research and analysis on key governance issues to inform policy development and decision-making.",
+      },
+      {
+        title: "Capacity Building and Training",
+        description:
+          "We offer training programs and workshops to enhance the skills and knowledge of policymakers, civil society actors, and other stakeholders.",
+      },
+      {
+        title: "Strategic Advocacy and Engagement",
+        description:
+          "We engage in strategic advocacy to influence policy agendas and promote positive governance outcomes at local, national, and regional levels.",
+      },
+      {
+        title: "Institutional Strengthening",
+        description:
+          "We support the development and strengthening of institutions to improve their effectiveness, accountability, and responsiveness.",
+      },
     ],
   },
   /** Homepage pillar + `/our-work/research` — placeholder until expanded in Admin → Pages. */
@@ -318,7 +400,8 @@ export type OurWorkPageContent = typeof workContent;
 export const getInvolvedContent = {
   title: "Get Involved",
   subtitle: "Make a Difference",
-  intro: "There are many ways to get involved with our work. Whether you're a researcher, policymaker, or concerned citizen, we welcome your participation.",
+  intro:
+    "There are many ways to get involved with our work. Whether you're a researcher, policymaker, or concerned citizen, we welcome your participation.",
   bottomSection: {
     getInTouch: {
       title: "Get in Touch",
@@ -328,9 +411,24 @@ export const getInvolvedContent = {
       title: "Upcoming Events",
       description: "Join us at our upcoming events and workshops",
       events: [
-        { startDate: "2025-08-12", endDate: "2025-08-14", label: "August 12, 2025 - August 14, 2025", registerHref: "/events" },
-        { startDate: "2026-03-03", endDate: "2026-03-06", label: "March 3, 2026 - March 6, 2026", registerHref: "/events" },
-        { startDate: "2026-03-28", endDate: "2026-03-30", label: "March 28, 2026 - March 30, 2026", registerHref: "/events" },
+        {
+          startDate: "2025-08-12",
+          endDate: "2025-08-14",
+          label: "August 12, 2025 - August 14, 2025",
+          registerHref: "/events",
+        },
+        {
+          startDate: "2026-03-03",
+          endDate: "2026-03-06",
+          label: "March 3, 2026 - March 6, 2026",
+          registerHref: "/events",
+        },
+        {
+          startDate: "2026-03-28",
+          endDate: "2026-03-30",
+          label: "March 28, 2026 - March 30, 2026",
+          registerHref: "/events",
+        },
       ],
     },
   },
@@ -338,8 +436,14 @@ export const getInvolvedContent = {
     {
       id: "volunteer",
       title: "Volunteer",
-      description: "Contribute your time and skills to support our research and advocacy efforts.",
-      items: ["Research assistance", "Event coordination", "Communications support", "Administrative tasks"],
+      description:
+        "Contribute your time and skills to support our research and advocacy efforts.",
+      items: [
+        "Research assistance",
+        "Event coordination",
+        "Communications support",
+        "Administrative tasks",
+      ],
       cta: "Apply to Volunteer",
       href: "/applications",
       pageHref: "/get-involved/volunteer",
@@ -347,8 +451,14 @@ export const getInvolvedContent = {
     {
       id: "join-us",
       title: "Work with us",
-      description: "Join our team and contribute to advancing governance excellence across Africa.",
-      items: ["Research opportunities", "Policy development", "Program management", "Capacity building"],
+      description:
+        "Join our team and contribute to advancing governance excellence across Africa.",
+      items: [
+        "Research opportunities",
+        "Policy development",
+        "Program management",
+        "Capacity building",
+      ],
       cta: "Work with us",
       href: "/contact",
       pageHref: "/get-involved/join-us",
@@ -356,10 +466,18 @@ export const getInvolvedContent = {
   ],
   volunteer: {
     title: "Volunteer",
-    subtitle: "Contribute your time and skills to advance governance excellence",
-    intro: "Volunteers play a vital role in supporting our research, advocacy, and capacity-building initiatives. Whether you bring expertise in policy analysis, event coordination, communications, or administration, we welcome your contribution.",
-    description: "Through volunteering with the Africa Governance Centre, you will work alongside researchers and policymakers to advance good governance practices across the continent. Our volunteers gain hands-on experience in evidence-based policy development and contribute to meaningful change.",
-    items: ["Research assistance", "Event coordination", "Communications support", "Administrative tasks"],
+    subtitle:
+      "Contribute your time and skills to advance governance excellence",
+    intro:
+      "Volunteers play a vital role in supporting our research, advocacy, and capacity-building initiatives. Whether you bring expertise in policy analysis, event coordination, communications, or administration, we welcome your contribution.",
+    description:
+      "Through volunteering with the Africa Governance Centre, you will work alongside researchers and policymakers to advance good governance practices across the continent. Our volunteers gain hands-on experience in evidence-based policy development and contribute to meaningful change.",
+    items: [
+      "Research assistance",
+      "Event coordination",
+      "Communications support",
+      "Administrative tasks",
+    ],
     cta: "Apply to Volunteer",
     applicationHref: "/applications",
   },
@@ -370,7 +488,12 @@ export const getInvolvedContent = {
       "Partnerships are central to AGC's approach. We collaborate with regional and international institutions, development partners, academia, civil society, and the private sector to advance shared governance objectives.",
     description:
       "Through these collaborations, we leverage complementary expertise, expand our reach, and support coordinated responses to governance challenges across different contexts.",
-    items: ["Research collaboration", "Joint events", "Policy advocacy", "Capacity building"],
+    items: [
+      "Research collaboration",
+      "Joint events",
+      "Policy advocacy",
+      "Capacity building",
+    ],
     cards: [
       {
         id: 1,
@@ -403,9 +526,16 @@ export const getInvolvedContent = {
   joinUs: {
     title: "Work with us",
     subtitle: "Join our team and advance governance excellence across Africa",
-    intro: "We are always looking for talented individuals who are passionate about governance, policy development, and Africa's economic transformation.",
-    description: "Our team works on research, policy development, program management, and capacity building. We offer opportunities to contribute to evidence-based governance reforms and to support African nations in establishing effective governance systems.",
-    items: ["Research opportunities", "Policy development", "Program management", "Capacity building"],
+    intro:
+      "We are always looking for talented individuals who are passionate about governance, policy development, and Africa's economic transformation.",
+    description:
+      "Our team works on research, policy development, program management, and capacity building. We offer opportunities to contribute to evidence-based governance reforms and to support African nations in establishing effective governance systems.",
+    items: [
+      "Research opportunities",
+      "Policy development",
+      "Program management",
+      "Capacity building",
+    ],
     cta: "Get in Touch",
     contactHref: "/contact",
   },
@@ -414,9 +544,11 @@ export const getInvolvedContent = {
 export const contactContent = {
   title: "Get In Touch",
   subtitle: "Connect With Us",
-  intro: "We welcome inquiries from individuals and organizations interested in our work. Please feel free to reach out to us.",
+  intro:
+    "We welcome inquiries from individuals and organizations interested in our work. Please feel free to reach out to us.",
   formTitle: "Send us a Message",
-  formDescription: "Fill out the form below and we'll get back to you as soon as possible.",
+  formDescription:
+    "Fill out the form below and we'll get back to you as soon as possible.",
   formPlaceholders: {
     name: "Your name",
     email: "your.email@africagovernancecentre.org",
@@ -426,22 +558,28 @@ export const contactContent = {
   submitLabel: "Send Message",
   divisions: [
     { name: "Programs Division", email: "programs@africagovernancecentre.org" },
-    { name: "Public Relations and Media Division", email: "media@africagovernancecentre.org" },
+    {
+      name: "Public Relations and Media Division",
+      email: "media@africagovernancecentre.org",
+    },
   ],
 };
 
 export const eventsContent = {
   title: "Upcoming Events",
-  subtitle: "Discover upcoming events, conferences, and workshops that advance governance excellence across Africa.",
+  subtitle:
+    "Discover upcoming events, conferences, and workshops that advance governance excellence across Africa.",
   intro:
     "We convene high-level summits, policy dialogues, workshops, and roundtable discussions. These engagements serve as strategic platforms for policymakers, development partners, civil society, and the public to engage with our research, exchange ideas, and contribute to shaping governance outcomes across the continent.\n\nOur events are designed to foster evidence-based dialogue on critical issues including democratic governance, institutional reform, public policy, and Africa's economic transformation.\n\nOur events feature distinguished speakers and thought leaders from across Africa and beyond, bringing deep expertise and diverse perspectives to the conversations we host.",
-  emptyContact: "For event inquiries, contact our Programs Division at programs@africagovernancecentre.org.",
+  emptyContact:
+    "For event inquiries, contact our Programs Division at programs@africagovernancecentre.org.",
   sections: { upcoming: "Upcoming Events", past: "Past Events" },
   /** Schedule grid (Brookings-style) */
   gridHeadings: { upcoming: "Upcoming", past: "Recent Past Events" },
   gridBadges: { upcoming: "Upcoming event", past: "Past event" },
   gridEmpty: {
-    upcoming: "No upcoming events are scheduled right now. Check back soon or contact our Programs team.",
+    upcoming:
+      "No upcoming events are scheduled right now. Check back soon or contact our Programs team.",
     past: "Past event summaries will appear here when available.",
   },
   seeAllPastEvents: "See all past events",
@@ -460,7 +598,8 @@ export const eventsContent = {
   /** Full past-events archive (`/events/past`) */
   pastArchive: {
     title: "Past Events",
-    subtitle: "Search and browse our archive of workshops, dialogues, and convenings.",
+    subtitle:
+      "Search and browse our archive of workshops, dialogues, and convenings.",
     searchPlaceholder: "Search",
     filterBy: "Filter by",
     eventCheckboxLabel: "Event",
@@ -501,7 +640,8 @@ export const fallbackEvents = [
     status: "published",
     title: "Our Programs Description",
     slug: "our-programs-description",
-    description: "Join us for our flagship programs designed to advance governance excellence across Africa.",
+    description:
+      "Join us for our flagship programs designed to advance governance excellence across Africa.",
     location: "Nairobi, Kenya",
     start_date: "2026-03-28",
     end_date: "2026-03-30",
@@ -514,7 +654,8 @@ export const fallbackEvents = [
     status: "published",
     title: "Accra Declaration Implementation Workshop",
     slug: "accra-declaration-implementation-workshop-2026",
-    description: "A working session for partners and practitioners on translating the Accra Declaration into measurable governance reforms.",
+    description:
+      "A working session for partners and practitioners on translating the Accra Declaration into measurable governance reforms.",
     location: "Accra, Ghana",
     start_date: "2026-04-15",
     end_date: "2026-04-17",
@@ -527,7 +668,8 @@ export const fallbackEvents = [
     status: "published",
     title: "Research & Policy Fellows Colloquium",
     slug: "research-policy-fellows-colloquium-2026",
-    description: "Fellows present policy briefs and research on governance, institutions, and inclusive development—with discussants from government and civil society.",
+    description:
+      "Fellows present policy briefs and research on governance, institutions, and inclusive development—with discussants from government and civil society.",
     location: "Virtual / Accra",
     start_date: "2026-05-20",
     end_date: "2026-05-22",
@@ -540,7 +682,8 @@ export const fallbackEvents = [
     status: "published",
     title: "African Political Parties Summit 2025",
     slug: "african-political-parties-summit-2025",
-    description: "The premier continental political convening bringing together heads of state, political party leaders, and key stakeholders to advance democratic governance across Africa.",
+    description:
+      "The premier continental political convening bringing together heads of state, political party leaders, and key stakeholders to advance democratic governance across Africa.",
     location: "Accra",
     start_date: "2025-08-12",
     end_date: "2025-08-14",
@@ -553,7 +696,8 @@ export const fallbackEvents = [
     status: "published",
     title: "AFRICA WOMEN POLITICAL LEADERSHIP SUMMIT",
     slug: "africa-women-political-leadership-summit",
-    description: "The Africa Governance Centre developed the Africa Women Political Leadership Summit (AWPLS) with the goal of empowering women leaders and advancing gender-inclusive governance across the continent.",
+    description:
+      "The Africa Governance Centre developed the Africa Women Political Leadership Summit (AWPLS) with the goal of empowering women leaders and advancing gender-inclusive governance across the continent.",
     location: "Nairobi, Kenya",
     start_date: "2026-03-05",
     end_date: "2026-03-08",
@@ -566,7 +710,8 @@ export const fallbackEvents = [
     status: "published",
     title: "East Africa Governance Dialogue 2024",
     slug: "east-africa-governance-dialogue-2024",
-    description: "Regional dialogue on electoral integrity, party systems, and inclusive participation—with policymakers and practitioners from across the East African Community.",
+    description:
+      "Regional dialogue on electoral integrity, party systems, and inclusive participation—with policymakers and practitioners from across the East African Community.",
     location: "Kigali, Rwanda",
     start_date: "2024-11-18",
     end_date: "2024-11-20",
@@ -578,7 +723,8 @@ export const fallbackEvents = [
 
 export const newsContent = {
   title: "Latest News",
-  subtitle: "Stay updated with the latest news, insights, and developments from Africa Governance Centre.",
+  subtitle:
+    "Stay updated with the latest news, insights, and developments from Africa Governance Centre.",
   intro: "Stay up-to-date with our latest news and initiatives.",
   filters: {
     allCategories: "All Categories",
@@ -619,11 +765,14 @@ export const fallbackNews = [
   {
     id: 1,
     status: "published",
-    title: "Africa Governance Centre Deepens Engagement with Algerian Political Parties",
+    title:
+      "Africa Governance Centre Deepens Engagement with Algerian Political Parties",
     slug: "agc-deepens-engagement-algerian-political-parties",
     categories: ["appi", "events"],
+    author: "Africa Governance Centre",
     tags: ["political-parties", "governance", "algeria"],
-    excerpt: "The Africa Governance Centre has advanced its continental outreach under the African Political Parties Initiative (APPI) with a series of high-level consultations in Algeria.",
+    excerpt:
+      "The Africa Governance Centre has advanced its continental outreach under the African Political Parties Initiative (APPI) with a series of high-level consultations in Algeria.",
     content: `<p>The Africa Governance Centre has advanced its continental outreach under the African Political Parties Initiative (APPI) with a series of high-level consultations in Algeria. The Chair of AGC's Executive Council, Benedicta Lasi Esq., led the mission to Algiers, where she met with the leaders and national executive committee members of three of the country's most significant political parties: the National Liberation Front (FLN), Front El Moustakbal, and the Movement of Society for Peace (MSP). The visit formed part of APPI's broader stakeholder consultation process, which seeks to strengthen political institutions, promote inclusive leadership, and support parties across Africa in contributing more effectively to governance and development.</p>
 <p>Algeria holds a special place in Africa's political history and its contemporary governance landscape. The FLN's role in the country's independence struggle provided inspiration to liberation movements across the continent, and its continuing presence as Algeria's largest political force has made it a central pillar of governance. Alongside it, parties such as Front El Moustakbal reflect the drive for political renewal and inclusivity, while opposition movements like the MSP broaden the scope of dialogue and ensure that multiple perspectives are represented in national life. This diversity of traditions made Algeria an important setting for APPI's consultations, creating space to engage with institutions that reflect both continuity and reform within political systems.</p>
 <p>In her consultations with the FLN, Ms. Lasi engaged Abdelkrim Benmbarek and members of the national executive on the party's institutional role and its enduring influence in Algeria's political life. With Front El Moustakbal, led by Fateh Boutbigh, the dialogue focused on renewal and inclusivity, reflecting the party's emphasis on youth participation and broader citizen engagement. In discussions with the MSP, Ms. Lasi met with Abdelaali Hassani Cherif and senior members of the executive. These consultations centred on the role of political parties in advancing Africa's development agenda, while also underlining the need to expand opportunities for youth and women within political institutions. Across all three meetings, a unifying theme was the recognition that political parties have a vital role to play in Africa's development and economic transformation, positioning themselves as institutions that connect governance with inclusive growth and long-term progress.</p>
@@ -639,12 +788,15 @@ export const fallbackNews = [
     title: "Summary Report of the African Political Parties Summit (APPS) 2025",
     slug: "apps-summary-report-2025",
     categories: ["appi", "reports", "events"],
+    author: "Africa Governance Centre",
     tags: ["political-parties", "summit", "accra-declaration"],
-    excerpt: "The Summary Report of the 2025 African Political Parties Summit is now available and can be downloaded.",
+    excerpt:
+      "The Summary Report of the 2025 African Political Parties Summit is now available and can be downloaded.",
     downloadResources: [
       {
         label: "Download APPS 2025 Summary Report (PDF)",
-        description: "Full summary report from the African Political Parties Summit in Accra.",
+        description:
+          "Full summary report from the African Political Parties Summit in Accra.",
         href: "/uploads/documents/apps-2025-summary-report.pdf",
       },
     ],
@@ -662,12 +814,15 @@ export const fallbackNews = [
     title: "Call for Applications: AGC Research and Policy Fellows",
     slug: "call-applications-agc-fellows",
     categories: ["announcements", "fellowships"],
+    author: "Africa Governance Centre",
     tags: ["fellows", "research", "governance"],
-    excerpt: "The Africa Governance Centre (AGC) is pleased to announce its call for Research and Policy Fellows, designed to engage leading scholars, policy experts, and thought leaders in advancing governance innovation across Africa.",
+    excerpt:
+      "The Africa Governance Centre (AGC) is pleased to announce its call for Research and Policy Fellows, designed to engage leading scholars, policy experts, and thought leaders in advancing governance innovation across Africa.",
     downloadResources: [
       {
         label: "Call for fellows — application pack (PDF)",
-        description: "Scope, eligibility, and how to apply for the Research and Policy Fellows programme.",
+        description:
+          "Scope, eligibility, and how to apply for the Research and Policy Fellows programme.",
         href: "/uploads/documents/agc-research-policy-fellows-call.pdf",
       },
     ],
@@ -681,11 +836,14 @@ export const fallbackNews = [
   {
     id: 4,
     status: "published",
-    title: "Africa Governance Centre Calls for Peaceful Participation in Akwatia By-Election",
+    title:
+      "Africa Governance Centre Calls for Peaceful Participation in Akwatia By-Election",
     slug: "agc-calls-peaceful-akwatia-byelection",
     categories: ["announcements", "elections"],
+    author: "Africa Governance Centre",
     tags: ["elections", "ghana", "governance"],
-    excerpt: "As indigenes of Akwatia go to the polls for the parliamentary by-election in the Akwatia Constituency on Tuesday, September 2, 2025, the Africa Governance Centre (AGC) urges all stakeholders to uphold peace, tolerance, and democratic integrity throughout the electoral process.",
+    excerpt:
+      "As indigenes of Akwatia go to the polls for the parliamentary by-election in the Akwatia Constituency on Tuesday, September 2, 2025, the Africa Governance Centre (AGC) urges all stakeholders to uphold peace, tolerance, and democratic integrity throughout the electoral process.",
     content: `<p>As indigenes of Akwatia go to the polls for the parliamentary by-election in the Akwatia Constituency on Tuesday, September 2, 2025, the Africa Governance Centre (AGC) urges all stakeholders, political parties, security agencies, civil society, media, and citizens to uphold peace, tolerance, and democratic integrity throughout the electoral process.</p>
 <p><strong>Accra, Ghana – September 1, 2025</strong> As indigenes of Akwatia go to the polls for the parliamentary by-election in the Akwatia Constituency on Tuesday, September 2, 2025, the Africa Governance Centre (AGC) urges all stakeholders, political parties, security agencies, civil society, media, and citizens to uphold peace, tolerance, and democratic integrity throughout the electoral process.</p>
 <p>Akwatia, a historically competitive constituency in the Eastern Region, has become a focal point of national attention due to heightened political tensions and symbolic stakes for both the ruling National Democratic Congress (NDC) and the opposition New Patriotic Party (NPP). While political enthusiasm is welcome in any democracy, recent reports of inflammatory rhetoric, vote-buying allegations, and threats of violence have raised concerns about the safety and credibility of the polls. The AGC commends the Ghana Police Service for deploying 5,500 officers and initiating community assurance patrols to foster public confidence and deter electoral violence. We also recognize the Electoral Commission's commitment to transparency, logistical readiness, and peaceful conduct. However, peace is not the responsibility of institutions alone.</p>
@@ -710,7 +868,8 @@ export const fallbackPublications = [
     status: "published",
     title: "African Political Parties Summit 2025 – Summary Report",
     slug: "apps-summary-report-2025",
-    excerpt: "The Summary Report of the 2025 African Political Parties Summit, held in Accra, Ghana. The summit convened over 700 delegates from 30 countries and 48 political parties.",
+    excerpt:
+      "The Summary Report of the 2025 African Political Parties Summit, held in Accra, Ghana. The summit convened over 700 delegates from 30 countries and 48 political parties.",
     types: ["report"],
     file: "/uploads/documents/apps-2025-summary-report.pdf",
     date_published: "2025-09-09T00:00:00Z",
@@ -721,7 +880,8 @@ export const fallbackPublications = [
     status: "published",
     title: "Governance and Economic Transformation in Africa",
     slug: "governance-economic-transformation-africa",
-    excerpt: "A policy brief examining the linkages between governance reforms and sustainable economic development across the continent.",
+    excerpt:
+      "A policy brief examining the linkages between governance reforms and sustainable economic development across the continent.",
     types: ["policy_brief"],
     date_published: "2025-08-15T00:00:00Z",
     author: "AGC Research Team",
@@ -731,7 +891,8 @@ export const fallbackPublications = [
     status: "published",
     title: "Political Party Institutional Capacity – Research Findings",
     slug: "political-party-institutional-capacity",
-    excerpt: "Research findings on institutional capacity building for political parties in Africa, based on APPI stakeholder consultations.",
+    excerpt:
+      "Research findings on institutional capacity building for political parties in Africa, based on APPI stakeholder consultations.",
     types: ["research"],
     date_published: "2025-07-20T00:00:00Z",
     author: "Africa Governance Centre",
@@ -740,8 +901,10 @@ export const fallbackPublications = [
 
 export const publicationsContent = {
   title: "Publications",
-  subtitle: "Reports, policy briefs, and research from the Africa Governance Centre.",
-  intro: "Our publications contribute to evidence-based policymaking and governance dialogue across Africa.",
+  subtitle:
+    "Reports, policy briefs, and research from the Africa Governance Centre.",
+  intro:
+    "Our publications contribute to evidence-based policymaking and governance dialogue across Africa.",
   /** Publication detail page (sidebar + related grid), aligned with `newsContent.articleDetail` */
   articleDetail: {
     relatedHeading: "Related publications",
@@ -757,7 +920,8 @@ export const publicationsContent = {
     previous: "Previous",
     next: "Next",
     allOption: "All",
-    noMatchesFiltered: "No publications match these filters. Try adjusting or reset.",
+    noMatchesFiltered:
+      "No publications match these filters. Try adjusting or reset.",
     noResults: "No publications found for this filter.",
   },
 };
@@ -767,18 +931,48 @@ export const volunteerFormFields = {
     { name: "fullName", label: "Full Name", type: "text", required: true },
     { name: "email", label: "Email Address", type: "email", required: true },
     { name: "phone", label: "Phone Number", type: "tel", required: false },
-    { name: "position", label: "Current Position", type: "text", required: false },
-    { name: "organization", label: "Organization", type: "text", required: false },
+    {
+      name: "position",
+      label: "Current Position",
+      type: "text",
+      required: false,
+    },
+    {
+      name: "organization",
+      label: "Organization",
+      type: "text",
+      required: false,
+    },
     { name: "country", label: "Country", type: "text", required: true },
     { name: "city", label: "City", type: "text", required: true },
   ],
   experience: [
-    { name: "experience", label: "Relevant Experience", type: "textarea", required: false },
-    { name: "skills", label: "Skills & Expertise", type: "textarea", required: false },
+    {
+      name: "experience",
+      label: "Relevant Experience",
+      type: "textarea",
+      required: false,
+    },
+    {
+      name: "skills",
+      label: "Skills & Expertise",
+      type: "textarea",
+      required: false,
+    },
   ],
   motivation: [
-    { name: "motivation", label: "Why do you want to volunteer with AGC?", type: "textarea", required: true },
-    { name: "availability", label: "Availability", type: "select", required: false },
+    {
+      name: "motivation",
+      label: "Why do you want to volunteer with AGC?",
+      type: "textarea",
+      required: true,
+    },
+    {
+      name: "availability",
+      label: "Availability",
+      type: "select",
+      required: false,
+    },
   ],
 };
 

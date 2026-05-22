@@ -25,28 +25,76 @@ const prisma = new PrismaClient();
 
 /** Deep-clone so Prisma JSON is plain objects (seed row matches what Admin saves after mergeSiteChrome). */
 function cloneDefaultChrome(): Record<string, unknown> {
-  return JSON.parse(JSON.stringify(DEFAULT_SITE_CHROME)) as Record<string, unknown>;
+  return JSON.parse(JSON.stringify(DEFAULT_SITE_CHROME)) as Record<
+    string,
+    unknown
+  >;
 }
 
 /** When "1" or "true", seed overwrites existing PageContent rows from repo defaults (destructive). Default: only create missing slugs. */
 const resetPageContent =
-  process.env.SEED_RESET_PAGE_CONTENT === "1" || process.env.SEED_RESET_PAGE_CONTENT === "true";
+  process.env.SEED_RESET_PAGE_CONTENT === "1" ||
+  process.env.SEED_RESET_PAGE_CONTENT === "true";
 
 const defaultTaxonomyJson = {
   newsCategories: [
-    { slug: "appi", label: "African Political Parties Initiative", description: "APPI-related news and engagements" },
-    { slug: "reports", label: "Reports & Publications", description: "Summary reports and publications" },
-    { slug: "announcements", label: "Announcements", description: "Official announcements and calls" },
-    { slug: "elections", label: "Elections & Democracy", description: "Electoral processes and democratic governance" },
-    { slug: "fellowships", label: "Fellowships & Opportunities", description: "Calls for applications and opportunities" },
-    { slug: "events", label: "Events", description: "Summits, conferences, and events" },
+    {
+      slug: "appi",
+      label: "African Political Parties Initiative",
+      description: "APPI-related news and engagements",
+    },
+    {
+      slug: "reports",
+      label: "Reports & Publications",
+      description: "Summary reports and publications",
+    },
+    {
+      slug: "announcements",
+      label: "Announcements",
+      description: "Official announcements and calls",
+    },
+    {
+      slug: "elections",
+      label: "Elections & Democracy",
+      description: "Electoral processes and democratic governance",
+    },
+    {
+      slug: "fellowships",
+      label: "Fellowships & Opportunities",
+      description: "Calls for applications and opportunities",
+    },
+    {
+      slug: "events",
+      label: "Events",
+      description: "Summits, conferences, and events",
+    },
   ],
   publicationTypes: [
-    { slug: "report", label: "Report", description: "Summary and thematic reports" },
-    { slug: "policy_brief", label: "Policy brief", description: "Short policy-oriented briefs" },
-    { slug: "research", label: "Research", description: "Research papers and findings" },
-    { slug: "working_paper", label: "Working paper", description: "Draft or discussion papers" },
-    { slug: "toolkit", label: "Toolkit / guide", description: "Practical guides and toolkits" },
+    {
+      slug: "report",
+      label: "Report",
+      description: "Summary and thematic reports",
+    },
+    {
+      slug: "policy_brief",
+      label: "Policy brief",
+      description: "Short policy-oriented briefs",
+    },
+    {
+      slug: "research",
+      label: "Research",
+      description: "Research papers and findings",
+    },
+    {
+      slug: "working_paper",
+      label: "Working paper",
+      description: "Draft or discussion papers",
+    },
+    {
+      slug: "toolkit",
+      label: "Toolkit / guide",
+      description: "Practical guides and toolkits",
+    },
   ],
   newsTags: [
     { slug: "political-parties", label: "Political Parties" },
@@ -62,7 +110,9 @@ const defaultTaxonomyJson = {
 };
 
 async function main() {
-  const publicationsTypesColumn = await prisma.$queryRaw<Array<{ exists: boolean }>>`
+  const publicationsTypesColumn = await prisma.$queryRaw<
+    Array<{ exists: boolean }>
+  >`
     SELECT EXISTS (
       SELECT 1
       FROM information_schema.columns
@@ -88,14 +138,16 @@ async function main() {
       objectivesTitle: "Mission and Strategic Objectives",
       objectivesContent:
         "Our primary mission is to promote governance excellence as a key driver of economic transformation and sustainable development across Africa.",
-      objectivesPrinciples: "Upholding principles of excellence, transparency, and intellectual rigor.",
+      objectivesPrinciples:
+        "Upholding principles of excellence, transparency, and intellectual rigor.",
       objectivesAgenda2063:
         "Aligned with the vision of the African Union's Agenda 2063: The Africa We Want.",
       status: "published",
       contentJson: {
         teamPage: {
           title: "Our Team",
-          subtitle: "Advisory Board, Management Team, Fellows, and Associate Fellows",
+          subtitle:
+            "Advisory Board, Management Team, Fellows, and Associate Fellows",
           heroImage: "/uploads/placeholder.svg",
         },
       },
@@ -124,7 +176,10 @@ async function main() {
       slug: "app-summit",
       title: "APP Summit",
       status: "published",
-      contentJson: { ...appSummitContent, heroImage: "/uploads/placeholder.svg" },
+      contentJson: {
+        ...appSummitContent,
+        heroImage: "/uploads/placeholder.svg",
+      },
     },
     {
       slug: "aypf",
@@ -152,7 +207,8 @@ async function main() {
         heroTitle: "Volunteer application",
         heroSubtitle:
           "Your skills and time strengthen research, events, and policy dialogue across the continent. Tell us how you’d like to contribute — we read every submission.",
-        applyIntro: "A few minutes now helps us match you to the right team. Fields marked * are required.",
+        applyIntro:
+          "A few minutes now helps us match you to the right team. Fields marked * are required.",
         heroImage: "/uploads/placeholder.svg",
         ...applicationsPageUiDefaults,
       },
@@ -173,7 +229,10 @@ async function main() {
       slug: "our-work-programs",
       title: "Our Work — Programs",
       status: "published",
-      contentJson: { ...workContent.programs, heroImage: "/uploads/placeholder.svg" },
+      contentJson: {
+        ...workContent.programs,
+        heroImage: "/uploads/placeholder.svg",
+      },
     },
     {
       slug: "our-work",
@@ -197,25 +256,37 @@ async function main() {
       slug: "our-work-research",
       title: "Our Work — Research",
       status: "published",
-      contentJson: { ...workContent.research, heroImage: "/uploads/placeholder.svg" },
+      contentJson: {
+        ...workContent.research,
+        heroImage: "/uploads/placeholder.svg",
+      },
     },
     {
       slug: "our-work-training",
       title: "Our Work — Training",
       status: "published",
-      contentJson: { ...workContent.training, heroImage: "/uploads/placeholder.svg" },
+      contentJson: {
+        ...workContent.training,
+        heroImage: "/uploads/placeholder.svg",
+      },
     },
     {
       slug: "our-work-projects",
       title: "Our Work — Projects",
       status: "published",
-      contentJson: { ...workContent.projects, heroImage: "/uploads/placeholder.svg" },
+      contentJson: {
+        ...workContent.projects,
+        heroImage: "/uploads/placeholder.svg",
+      },
     },
     {
       slug: "our-work-advisory",
       title: "Our Work — Advisory",
       status: "published",
-      contentJson: { ...workContent.advisory, heroImage: "/uploads/placeholder.svg" },
+      contentJson: {
+        ...workContent.advisory,
+        heroImage: "/uploads/placeholder.svg",
+      },
     },
     {
       slug: "events",
@@ -233,7 +304,10 @@ async function main() {
       slug: "publications",
       title: "Publications",
       status: "published",
-      contentJson: { ...publicationsContent, heroImage: "/uploads/placeholder.svg" },
+      contentJson: {
+        ...publicationsContent,
+        heroImage: "/uploads/placeholder.svg",
+      },
     },
     {
       slug: "get-involved",
@@ -241,14 +315,19 @@ async function main() {
       heroTitle: "Get Involved",
       heroSubtitle: "Join us in advancing governance excellence across Africa",
       status: "published",
-      contentJson: { ...getInvolvedContent, heroImage: "/uploads/placeholder.svg" },
+      contentJson: {
+        ...getInvolvedContent,
+        heroImage: "/uploads/placeholder.svg",
+      },
     },
   ];
 
   let pageCreates = 0;
   let pageUpdates = 0;
   for (const p of pages) {
-    const existing = await prisma.pageContent.findUnique({ where: { slug: p.slug } });
+    const existing = await prisma.pageContent.findUnique({
+      where: { slug: p.slug },
+    });
     if (!existing) {
       await prisma.pageContent.create({ data: p });
       pageCreates++;
@@ -269,18 +348,69 @@ async function main() {
   }
   console.log(
     `  Page content: ${pages.length} baseline slugs — created ${pageCreates}, skipped ${pages.length - pageCreates - pageUpdates} (unchanged)` +
-      (resetPageContent ? `, reset ${pageUpdates} (SEED_RESET_PAGE_CONTENT)` : " (set SEED_RESET_PAGE_CONTENT=1 to overwrite CMS pages from seed)")
+      (resetPageContent
+        ? `, reset ${pageUpdates} (SEED_RESET_PAGE_CONTENT)`
+        : " (set SEED_RESET_PAGE_CONTENT=1 to overwrite CMS pages from seed)"),
   );
 
   // Programs (image optional — null in seed; admin sets /uploads/... or media id when needed)
   const programs = [
-    { title: "Youth and Women Empowerment Workshops", description: "AGC organizes workshops and forums dedicated to empowering youth and women in governance and leadership positions.", order: 1, status: "published" as const, image: null as string | null },
-    { title: "Research and Policy Forums", description: "AGC hosts research and policy forums to highlight recent findings, policy analyses, and best practices in governance.", order: 2, status: "published" as const, image: null as string | null },
-    { title: "Annual Summits and Meetings", description: "AGC organizes annual meetings and events that bring together distinguished leaders, experts, and policymakers.", order: 3, status: "published" as const, image: null as string | null },
-    { title: "Public-Private Dialogues", description: "AGC organizes public-private dialogues to promote collaboration between government entities and the private sector.", order: 4, status: "published" as const, image: null as string | null },
-    { title: "Expert Forums on Good Governance", description: "AGC conducts regular forums focused on good governance, bringing together policymakers, experts, civil society organizations, and stakeholders from across Africa.", order: 5, status: "published" as const, image: null as string | null },
-    { title: "Regional Governance Conferences", description: "AGC collaborates with regional organizations such as the African Union, ECOWAS, and SADC to convene governance conferences.", order: 6, status: "published" as const, image: null as string | null },
-    { title: "Sector-Specific Roundtables", description: "AGC organizes expert roundtables focused on sector-specific governance challenges, involving key stakeholders from sectors such as health, education, infrastructure, agriculture, and energy.", order: 7, status: "published" as const, image: null as string | null },
+    {
+      title: "Youth and Women Empowerment Workshops",
+      description:
+        "AGC organizes workshops and forums dedicated to empowering youth and women in governance and leadership positions.",
+      order: 1,
+      status: "published" as const,
+      image: null as string | null,
+    },
+    {
+      title: "Research and Policy Forums",
+      description:
+        "AGC hosts research and policy forums to highlight recent findings, policy analyses, and best practices in governance.",
+      order: 2,
+      status: "published" as const,
+      image: null as string | null,
+    },
+    {
+      title: "Annual Summits and Meetings",
+      description:
+        "AGC organizes annual meetings and events that bring together distinguished leaders, experts, and policymakers.",
+      order: 3,
+      status: "published" as const,
+      image: null as string | null,
+    },
+    {
+      title: "Public-Private Dialogues",
+      description:
+        "AGC organizes public-private dialogues to promote collaboration between government entities and the private sector.",
+      order: 4,
+      status: "published" as const,
+      image: null as string | null,
+    },
+    {
+      title: "Expert Forums on Good Governance",
+      description:
+        "AGC conducts regular forums focused on good governance, bringing together policymakers, experts, civil society organizations, and stakeholders from across Africa.",
+      order: 5,
+      status: "published" as const,
+      image: null as string | null,
+    },
+    {
+      title: "Regional Governance Conferences",
+      description:
+        "AGC collaborates with regional organizations such as the African Union, ECOWAS, and SADC to convene governance conferences.",
+      order: 6,
+      status: "published" as const,
+      image: null as string | null,
+    },
+    {
+      title: "Sector-Specific Roundtables",
+      description:
+        "AGC organizes expert roundtables focused on sector-specific governance challenges, involving key stakeholders from sectors such as health, education, infrastructure, agriculture, and energy.",
+      order: 7,
+      status: "published" as const,
+      image: null as string | null,
+    },
   ];
 
   const existingPrograms = await prisma.program.count();
@@ -291,11 +421,46 @@ async function main() {
 
   // Projects (image optional — null in seed; admin sets image when needed)
   const projects = [
-    { title: "Africa Governance Review", description: "The Africa Governance Review Project is a comprehensive initiative dedicated to conducting detailed assessments, offering policy recommendations, and facilitating discussions on governance challenges and opportunities across African nations.", order: 1, status: "published" as const, image: null as string | null },
-    { title: "Media and Democracy Initiative", description: "The Media and Democracy Initiative of the Africa Governance Centre seeks to empower media professionals, support independent journalism, and strengthen the media's ability to facilitate informed citizen participation in governance processes.", order: 2, status: "published" as const, image: null as string | null },
-    { title: "Public Sector Efficiency and Innovation Project", description: "The Public Sector Efficiency and Innovation Project is dedicated to addressing the critical need for streamlined operations, improved public service delivery, and the integration of innovative solutions to support Africa's development.", order: 3, status: "published" as const, image: null as string | null },
-    { title: "African Political Parties Initiative", description: "The African Political Parties Initiative (APPI) is a project developed by the Africa Governance Centre dedicated to supporting the role of political parties in Africa's development.", order: 4, status: "published" as const, image: null as string | null },
-    { title: "Africa Resource Governance Initiative", description: "The Africa Resource Governance Initiative (ARGI), a project of the Africa Governance Centre, is dedicated to promoting transparency, accountability, and sustainable management of natural resources across Africa.", order: 5, status: "published" as const, image: null as string | null },
+    {
+      title: "Africa Governance Review",
+      description:
+        "The Africa Governance Review Project is a comprehensive initiative dedicated to conducting detailed assessments, offering policy recommendations, and facilitating discussions on governance challenges and opportunities across African nations.",
+      order: 1,
+      status: "published" as const,
+      image: null as string | null,
+    },
+    {
+      title: "Media and Democracy Initiative",
+      description:
+        "The Media and Democracy Initiative of the Africa Governance Centre seeks to empower media professionals, support independent journalism, and strengthen the media's ability to facilitate informed citizen participation in governance processes.",
+      order: 2,
+      status: "published" as const,
+      image: null as string | null,
+    },
+    {
+      title: "Public Sector Efficiency and Innovation Project",
+      description:
+        "The Public Sector Efficiency and Innovation Project is dedicated to addressing the critical need for streamlined operations, improved public service delivery, and the integration of innovative solutions to support Africa's development.",
+      order: 3,
+      status: "published" as const,
+      image: null as string | null,
+    },
+    {
+      title: "African Political Parties Initiative",
+      description:
+        "The African Political Parties Initiative (APPI) is a project developed by the Africa Governance Centre dedicated to supporting the role of political parties in Africa's development.",
+      order: 4,
+      status: "published" as const,
+      image: null as string | null,
+    },
+    {
+      title: "Africa Resource Governance Initiative",
+      description:
+        "The Africa Resource Governance Initiative (ARGI), a project of the Africa Governance Centre, is dedicated to promoting transparency, accountability, and sustainable management of natural resources across Africa.",
+      order: 5,
+      status: "published" as const,
+      image: null as string | null,
+    },
   ];
 
   const existingProjects = await prisma.project.count();
@@ -306,10 +471,30 @@ async function main() {
 
   // Partners
   const partners = [
-    { name: "African Union", url: "https://au.int", order: 1, status: "published" as const },
-    { name: "ECOWAS", url: "https://ecowas.int", order: 2, status: "published" as const },
-    { name: "SADC", url: "https://www.sadc.int", order: 3, status: "published" as const },
-    { name: "UNCTAD", url: "https://unctad.org", order: 4, status: "published" as const },
+    {
+      name: "African Union",
+      url: "https://au.int",
+      order: 1,
+      status: "published" as const,
+    },
+    {
+      name: "ECOWAS",
+      url: "https://ecowas.int",
+      order: 2,
+      status: "published" as const,
+    },
+    {
+      name: "SADC",
+      url: "https://www.sadc.int",
+      order: 3,
+      status: "published" as const,
+    },
+    {
+      name: "UNCTAD",
+      url: "https://unctad.org",
+      order: 4,
+      status: "published" as const,
+    },
   ];
 
   const existingPartners = await prisma.partner.count();
@@ -320,12 +505,48 @@ async function main() {
 
   // Team (advisory board)
   const team = [
-    { name: "Dr. Mamphela Ramphele", role: "Advisory Board Member", bio: "Dr. Mamphela Ramphele is a respected activist, medical professional, academic, business leader, and thought leader. She holds a PhD in Social Anthropology, a BCom degree, as well as diplomas in Tropical Hygiene and Public Health. Her notable career includes serving as Vice Chancellor of the University of Cape Town in 1996 and as Managing Director of the World Bank from 2000 to 2004.", order: 1, status: "published" as const },
-    { name: "Most Honourable Percival Noel James Patterson", role: "Advisory Board Member", bio: "Most Honorable Percival Noel James Patterson is a former Jamaican politician who served as the sixth Prime Minister of Jamaica from 1992 to 2006, becoming the longest-serving Prime Minister in Jamaica's history.", order: 2, status: "published" as const },
-    { name: "His Excellency Dr. Thomas Yayi Boni", role: "Advisory Board Member", bio: "His Excellency Dr. Thomas Yayi Boni is a Beninese politician and banker. He served as the President of Benin from 2006 to 2016.", order: 3, status: "published" as const },
-    { name: "Dr. Muhkisa Kituyi", role: "Advisory Board Member", bio: "Dr. Muhkisa Kituyi was the seventh Secretary-General of UNCTAD from 1 September 2013 to 15 February 2021. He has extensive experience as an academic, public servant, trade negotiator, and diplomat.", order: 4, status: "published" as const },
-    { name: "Prof. Alex Kwaku Danso-Boafo", role: "Advisory Board Member", bio: "Prof. Danso-Boafo began his academic career at the University of Ghana in 1982, contributing extensively as a Political Science lecturer.", order: 5, status: "published" as const },
-    { name: "H.E Jeffrey Thamsanqa Radebe", role: "Advisory Board Member", bio: "H.E. Jeffrey Thamsanqa Radebe is a distinguished South African political leader and experienced government official. He is currently serving as a Special Investment Envoy for President Cyril Ramaphosa.", order: 6, status: "published" as const },
+    {
+      name: "Dr. Mamphela Ramphele",
+      role: "Advisory Board Member",
+      bio: "Dr. Mamphela Ramphele is a respected activist, medical professional, academic, business leader, and thought leader. She holds a PhD in Social Anthropology, a BCom degree, as well as diplomas in Tropical Hygiene and Public Health. Her notable career includes serving as Vice Chancellor of the University of Cape Town in 1996 and as Managing Director of the World Bank from 2000 to 2004.",
+      order: 1,
+      status: "published" as const,
+    },
+    {
+      name: "Most Honourable Percival Noel James Patterson",
+      role: "Advisory Board Member",
+      bio: "Most Honorable Percival Noel James Patterson is a former Jamaican politician who served as the sixth Prime Minister of Jamaica from 1992 to 2006, becoming the longest-serving Prime Minister in Jamaica's history.",
+      order: 2,
+      status: "published" as const,
+    },
+    {
+      name: "His Excellency Dr. Thomas Yayi Boni",
+      role: "Advisory Board Member",
+      bio: "His Excellency Dr. Thomas Yayi Boni is a Beninese politician and banker. He served as the President of Benin from 2006 to 2016.",
+      order: 3,
+      status: "published" as const,
+    },
+    {
+      name: "Dr. Muhkisa Kituyi",
+      role: "Advisory Board Member",
+      bio: "Dr. Muhkisa Kituyi was the seventh Secretary-General of UNCTAD from 1 September 2013 to 15 February 2021. He has extensive experience as an academic, public servant, trade negotiator, and diplomat.",
+      order: 4,
+      status: "published" as const,
+    },
+    {
+      name: "Prof. Alex Kwaku Danso-Boafo",
+      role: "Advisory Board Member",
+      bio: "Prof. Danso-Boafo began his academic career at the University of Ghana in 1982, contributing extensively as a Political Science lecturer.",
+      order: 5,
+      status: "published" as const,
+    },
+    {
+      name: "H.E Jeffrey Thamsanqa Radebe",
+      role: "Advisory Board Member",
+      bio: "H.E. Jeffrey Thamsanqa Radebe is a distinguished South African political leader and experienced government official. He is currently serving as a Special Investment Envoy for President Cyril Ramaphosa.",
+      order: 6,
+      status: "published" as const,
+    },
   ];
 
   const existingTeam = await prisma.team.count();
@@ -384,7 +605,12 @@ async function main() {
       slug: item.slug,
       excerpt: item.excerpt ?? null,
       ...(canWritePublicationTypes
-        ? { types: Array.isArray(item.types) && item.types.length > 0 ? item.types : ["report"] }
+        ? {
+            types:
+              Array.isArray(item.types) && item.types.length > 0
+                ? item.types
+                : ["report"],
+          }
         : {}),
       image: "/uploads/placeholder.svg",
       datePublished: item.date_published ? new Date(item.date_published) : null,
@@ -397,7 +623,9 @@ async function main() {
     console.log(`  Publications: ${publicationRows.length} items`);
   }
 
-  const hasTaxonomy = await prisma.pageContent.findUnique({ where: { slug: "site-taxonomy" } });
+  const hasTaxonomy = await prisma.pageContent.findUnique({
+    where: { slug: "site-taxonomy" },
+  });
   if (!hasTaxonomy) {
     await prisma.pageContent.create({
       data: {
@@ -407,10 +635,14 @@ async function main() {
         contentJson: defaultTaxonomyJson,
       },
     });
-    console.log("  Taxonomy: site defaults (news categories, publication types, news tags) — edit in Admin → Taxonomy");
+    console.log(
+      "  Taxonomy: site defaults (news categories, publication types, news tags) — edit in Admin → Taxonomy",
+    );
   }
 
-  console.log("\nSeed complete. Replace images and edit content via Admin (Media, News, Events, Publications, Partners, Page Content → home).");
+  console.log(
+    "\nSeed complete. Replace images and edit content via Admin (Media, News, Events, Publications, Partners, Page Content → home).",
+  );
 }
 
 main()
