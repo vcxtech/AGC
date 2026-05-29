@@ -25,7 +25,25 @@ export interface MediaItem {
   uploadedAt: string;
 }
 
-const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/gif", "image/webp", "image/svg+xml"];
+const ALLOWED_TYPES = [
+  // Images
+  "image/jpeg",
+  "image/png",
+  "image/gif",
+  "image/webp",
+  "image/svg+xml",
+  // Documents
+  "application/pdf",
+  "application/msword",
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  "application/vnd.ms-excel",
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  "application/vnd.ms-powerpoint",
+  "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+  "application/zip",
+  "text/plain",
+  "text/csv",
+];
 let metadataWriteQueue: Promise<unknown> = Promise.resolve();
 
 async function ensureDirs(): Promise<void> {
@@ -50,14 +68,19 @@ export async function getMediaById(id: string): Promise<MediaItem | null> {
   if (!normalized) return null;
   const exact = items.find((m) => m.id === normalized);
   if (exact) return exact;
-  return items.find((m) => m.id.trim().toLowerCase() === normalized.toLowerCase()) ?? null;
+  return (
+    items.find((m) => m.id.trim().toLowerCase() === normalized.toLowerCase()) ??
+    null
+  );
 }
 
 /**
  * If library JSON is missing an entry but the binary was uploaded (e.g. JSON reset,
  * Docker vs host dev, or manual copy), resolve `/uploads/<id>.<ext>` when a file matches.
  */
-async function findUploadUrlForMediaIdOnDisk(mediaId: string): Promise<string | null> {
+async function findUploadUrlForMediaIdOnDisk(
+  mediaId: string,
+): Promise<string | null> {
   const dir = getUploadsDir();
   if (!existsSync(dir)) return null;
   const prefix = mediaId.trim();
@@ -65,7 +88,10 @@ async function findUploadUrlForMediaIdOnDisk(mediaId: string): Promise<string | 
   try {
     const files = await readdir(dir);
     const match = files.find(
-      (f) => f === prefix || f.startsWith(`${prefix}.`) || f.toLowerCase().startsWith(`${prefix.toLowerCase()}.`)
+      (f) =>
+        f === prefix ||
+        f.startsWith(`${prefix}.`) ||
+        f.toLowerCase().startsWith(`${prefix.toLowerCase()}.`),
     );
     if (match && !match.includes("..")) {
       return `/uploads/${match}`;
@@ -77,7 +103,9 @@ async function findUploadUrlForMediaIdOnDisk(mediaId: string): Promise<string | 
 }
 
 /** Resolve media-xxx ID to full URL (for use in components) */
-export async function getMediaUrlById(id: string | undefined): Promise<string | null> {
+export async function getMediaUrlById(
+  id: string | undefined,
+): Promise<string | null> {
   const t = id?.trim();
   if (!t || !/^media-/i.test(t)) return null;
   const item = await getMediaById(t);
@@ -90,11 +118,13 @@ export async function saveMediaMetadata(items: MediaItem[]): Promise<void> {
   await writeFile(METADATA_PATH, JSON.stringify(items, null, 2), "utf-8");
 }
 
-async function withMediaMetadataWriteLock<T>(operation: () => Promise<T>): Promise<T> {
+async function withMediaMetadataWriteLock<T>(
+  operation: () => Promise<T>,
+): Promise<T> {
   const run = metadataWriteQueue.then(operation, operation);
   metadataWriteQueue = run.then(
     () => undefined,
-    () => undefined
+    () => undefined,
   );
   return run;
 }
@@ -120,7 +150,7 @@ export async function removeMediaItem(id: string): Promise<boolean> {
 
 export async function updateMediaItem(
   id: string,
-  patch: { alt?: string; title?: string }
+  patch: { alt?: string; title?: string },
 ): Promise<MediaItem | null> {
   return withMediaMetadataWriteLock(async () => {
     const items = await listMedia();
@@ -139,14 +169,17 @@ export async function updateMediaItem(
 }
 
 export function getMediaUrl(item: MediaItem): string {
-  return item.url.startsWith("/") ? item.url : `/${item.url.replace(/^\//, "")}`;
+  return item.url.startsWith("/")
+    ? item.url
+    : `/${item.url.replace(/^\//, "")}`;
 }
 
 /** Single segment under uploads/ (flat library); rejects traversal. */
 function uploadsBasename(segment: string | undefined): string | null {
   if (!segment?.trim()) return null;
   const base = path.basename(segment.trim().replace(/^\/+/, ""));
-  if (!base || base === "." || base === ".." || base.includes("..")) return null;
+  if (!base || base === "." || base === ".." || base.includes(".."))
+    return null;
   return base;
 }
 
@@ -154,7 +187,10 @@ function uploadsBasename(segment: string | undefined): string | null {
  * True if the binary exists on disk. Checks both `filename` and path derived from `url`
  * so legacy or inconsistent JSON still detects missing files correctly.
  */
-export function mediaFileExistsOnDisk(item: MediaItem, uploadsDir: string): boolean {
+export function mediaFileExistsOnDisk(
+  item: MediaItem,
+  uploadsDir: string,
+): boolean {
   const names = new Set<string>();
   const fromFilename = uploadsBasename(item.filename);
   if (fromFilename) names.add(fromFilename);
@@ -170,7 +206,7 @@ export function mediaFileExistsOnDisk(item: MediaItem, uploadsDir: string): bool
 
 /** Resolve image reference: media ID (media-xxx), full URL, or path. Use for server components. */
 export async function resolveImageUrl(
-  ref: string | { id: string } | undefined
+  ref: string | { id: string } | undefined,
 ): Promise<string | null> {
   if (ref === undefined || ref === null) return null;
   const id =
@@ -183,12 +219,27 @@ export async function resolveImageUrl(
   if (/^media-/i.test(id)) return getMediaUrlById(id);
   if (id.startsWith("http") || id.startsWith("/")) return id;
   // Content layer paths (uploads/xxx)
-  if (id.includes("/") || id.startsWith("uploads")) return id.startsWith("/") ? id : `/${id}`;
+  if (id.includes("/") || id.startsWith("uploads"))
+    return id.startsWith("/") ? id : `/${id}`;
   return null;
 }
 
 export function isAllowedMimeType(mime: string): boolean {
   return ALLOWED_TYPES.includes(mime);
+}
+
+export function isImageMimeType(mime: string): boolean {
+  return [
+    "image/jpeg",
+    "image/png",
+    "image/gif",
+    "image/webp",
+    "image/svg+xml",
+  ].includes(mime);
+}
+
+export function isDocumentMimeType(mime: string): boolean {
+  return !isImageMimeType(mime) && ALLOWED_TYPES.includes(mime);
 }
 
 export function getUploadsDir(): string {
@@ -197,6 +248,8 @@ export function getUploadsDir(): string {
 
 export function assertUploadWithinLimit(size: number): void {
   if (size > MAX_MEDIA_UPLOAD_BYTES) {
-    throw new Error(`File too large. Maximum size is ${Math.round(MAX_MEDIA_UPLOAD_BYTES / (1024 * 1024))} MB.`);
+    throw new Error(
+      `File too large. Maximum size is ${Math.round(MAX_MEDIA_UPLOAD_BYTES / (1024 * 1024))} MB.`,
+    );
   }
 }

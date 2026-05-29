@@ -21,9 +21,21 @@ function isActiveRoute(pathname: string, href: string): boolean {
   return cleanPath === cleanHref || cleanPath.startsWith(`${cleanHref}/`);
 }
 
-export function Header({ siteSettings, brandLogoSrc }: { siteSettings: SiteSettings; brandLogoSrc: string }) {
+export function Header({
+  siteSettings,
+  brandLogoSrc,
+}: {
+  siteSettings: SiteSettings;
+  brandLogoSrc: string;
+}) {
   const mainNav = resolveHeaderPrimaryNav(siteSettings.chrome.nav);
-  const { mobileOpen, setMobileOpen, searchOpen, setSearchOpen, menuTriggerRef } = useMobileNav();
+  const {
+    mobileOpen,
+    setMobileOpen,
+    searchOpen,
+    setSearchOpen,
+    menuTriggerRef,
+  } = useMobileNav();
   const pathname = usePathname() ?? "/";
   const [scrolled, setScrolled] = useState(false);
   const showTopbar = true;
@@ -51,14 +63,17 @@ export function Header({ siteSettings, brandLogoSrc }: { siteSettings: SiteSetti
 
       <div className="wpo-site-header overflow-visible bg-white">
         <nav className="w-full overflow-visible px-4 py-0 sm:px-6 lg:px-8 xl:px-12 2xl:px-16">
-          <div className="flex min-h-[5.25rem] flex-wrap items-center justify-between gap-x-3 gap-y-3 overflow-visible py-3 lg:min-h-[5.5rem] lg:flex-nowrap lg:gap-x-4 lg:py-2">
-            <Link href="/" className="flex shrink-0 items-center py-1 pr-1 lg:pr-2">
+          <div className="flex min-h-[4rem] flex-wrap items-center justify-between gap-x-3 gap-y-3 overflow-visible py-2 lg:min-h-[3.75rem] lg:flex-nowrap lg:gap-x-4 lg:py-1.5">
+            <Link
+              href="/"
+              className="flex shrink-0 items-center py-1 pr-1 lg:pr-2"
+            >
               <Image
                 src={brandLogoSrc}
                 alt={siteSettings.name}
                 width={480}
                 height={148}
-                className="h-16 w-auto max-h-[5.25rem] max-w-[min(420px,58vw)] object-contain object-left sm:h-[4.5rem] sm:max-h-[5.5rem] md:h-20 md:max-h-[6rem] lg:h-[5.75rem] lg:max-h-[6.5rem] lg:max-w-[min(520px,44vw)]"
+                className="h-12 w-auto max-h-[4rem] max-w-[min(360px,58vw)] object-contain object-left sm:h-14 sm:max-h-[4.25rem] md:h-16 md:max-h-[4.75rem] lg:h-[4.5rem] lg:max-h-[5rem] lg:max-w-[min(450px,44vw)]"
                 priority
                 unoptimized={preferUnoptimizedImage(brandLogoSrc)}
               />
@@ -66,7 +81,10 @@ export function Header({ siteSettings, brandLogoSrc }: { siteSettings: SiteSetti
 
             {/* One row: primary links sit just left of language / tools (not stretched across the bar). */}
             <div className="flex min-w-0 flex-1 items-center justify-end gap-x-2 overflow-visible sm:gap-x-3 lg:min-w-0 lg:gap-x-3">
-              <nav className="hidden min-w-0 overflow-visible lg:block" aria-label="Primary">
+              <nav
+                className="hidden min-w-0 overflow-visible lg:block"
+                aria-label="Primary"
+              >
                 {/* No overflow-x-auto here — it clips absolutely-positioned dropdowns in most browsers. */}
                 <ul className="inline-flex max-w-[min(100%,52rem)] flex-nowrap items-center justify-end gap-x-0.5 overflow-visible xl:max-w-[min(100%,60rem)] xl:gap-x-1">
                   {mainNav.map((item) => {
@@ -74,7 +92,11 @@ export function Header({ siteSettings, brandLogoSrc }: { siteSettings: SiteSetti
                       "relative flex items-center gap-0.5 whitespace-nowrap px-1.5 py-2.5 text-[0.8125rem] font-medium uppercase tracking-wide text-black transition-colors hover:text-black xl:px-2 xl:text-sm [&:focus-visible]:outline [&:focus-visible]:outline-2 [&:focus-visible]:outline-offset-2 [&:focus-visible]:outline-accent-500";
                     const itemActive =
                       isActiveRoute(pathname, item.href) ||
-                      Boolean(item.subLinks?.some((sub) => isActiveRoute(pathname, sub.href)));
+                      Boolean(
+                        item.subLinks?.some((sub) =>
+                          isActiveRoute(pathname, sub.href),
+                        ),
+                      );
                     const bar = itemActive ? (
                       <span className="absolute left-1/2 top-0 h-0.5 w-2/3 -translate-x-1/2 rounded-sm bg-accent-500 opacity-100 transition-all duration-300" />
                     ) : (
@@ -94,10 +116,17 @@ export function Header({ siteSettings, brandLogoSrc }: { siteSettings: SiteSetti
                           >
                             {bar}
                             {item.label}
-                            <ChevronDown className="h-3 w-3 shrink-0 opacity-55" strokeWidth={2.5} aria-hidden />
+                            <ChevronDown
+                              className="h-3 w-3 shrink-0 opacity-55"
+                              strokeWidth={2.5}
+                              aria-hidden
+                            />
                           </Link>
                           {/* Hover bridge so moving to the panel does not close the menu */}
-                          <span className="pointer-events-none absolute left-0 top-full z-[99] h-2 w-full" aria-hidden />
+                          <span
+                            className="pointer-events-none absolute left-0 top-full z-[99] h-2 w-full"
+                            aria-hidden
+                          />
                           <ul
                             role="menu"
                             aria-label={`${item.label} submenu`}
@@ -109,7 +138,9 @@ export function Header({ siteSettings, brandLogoSrc }: { siteSettings: SiteSetti
                                   role="menuitem"
                                   href={sub.href}
                                   className={`block px-4 py-3 text-sm font-medium normal-case tracking-normal transition-colors hover:bg-stone-50 ${
-                                    isActiveRoute(pathname, sub.href) ? "bg-stone-50 text-accent-700" : "text-black"
+                                    isActiveRoute(pathname, sub.href)
+                                      ? "bg-stone-50 text-accent-700"
+                                      : "text-black"
                                   }`}
                                 >
                                   {sub.label}
@@ -121,8 +152,14 @@ export function Header({ siteSettings, brandLogoSrc }: { siteSettings: SiteSetti
                       );
                     }
                     return (
-                      <li key={`${item.href}-${item.label}`} className="group shrink-0">
-                        <Link href={item.href} className={`${linkClass} ${itemActive ? "text-black" : ""}`}>
+                      <li
+                        key={`${item.href}-${item.label}`}
+                        className="group shrink-0"
+                      >
+                        <Link
+                          href={item.href}
+                          className={`${linkClass} ${itemActive ? "text-black" : ""}`}
+                        >
                           {bar}
                           {item.label}
                         </Link>
@@ -158,7 +195,11 @@ export function Header({ siteSettings, brandLogoSrc }: { siteSettings: SiteSetti
                   aria-expanded={mobileOpen}
                   aria-controls="site-mobile-drawer"
                 >
-                  {mobileOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+                  {mobileOpen ? (
+                    <X className="h-6 w-6" />
+                  ) : (
+                    <Menu className="h-6 w-6" />
+                  )}
                 </button>
               </div>
             </div>
