@@ -9,6 +9,7 @@ import { AdminFormPreviewLink } from "../_components/AdminFormPreviewLink";
 import { createNews, updateNews } from "./actions";
 import type { TaxonomyOption } from "@/data/taxonomy-defaults";
 import { ImagePicker, type MediaItem } from "@/components/ImagePicker";
+import { DocumentPicker, type DocumentItem } from "@/components/DocumentPicker";
 import { RichTextEditor } from "@/components/admin/RichTextEditor";
 import { useImageFieldPreview } from "@/hooks/useImageFieldPreview";
 import { sanitizeHtml } from "@/lib/sanitize";
@@ -81,9 +82,23 @@ export function NewsForm({ categoryOptions, tagOptions, item }: NewsFormProps) {
   const [pickerOpen, setPickerOpen] = useState(false);
   const [contentHtml, setContentHtml] = useState(item?.content ?? "");
   const [showContentPreview, setShowContentPreview] = useState(false);
-  const { previewUrl: imagePreviewUrl, loading: imagePreviewLoading } = useImageFieldPreview(image);
+  const [documents, setDocuments] = useState<DocumentItem[]>(() => {
+    const d = item?.downloadResources;
+    if (d == null) return [];
+    if (Array.isArray(d)) return d as DocumentItem[];
+    if (typeof d === "object") {
+      const obj = d as Record<string, unknown>;
+      if (Array.isArray(obj.downloads)) return obj.downloads as DocumentItem[];
+      return [d as DocumentItem];
+    }
+    return [];
+  });
+  const { previewUrl: imagePreviewUrl, loading: imagePreviewLoading } =
+    useImageFieldPreview(image);
 
-  const selectedCategories = new Set((item?.categories as string[] | null) || []);
+  const selectedCategories = new Set(
+    (item?.categories as string[] | null) || [],
+  );
 
   const tags = (item?.tags as string[] | null) || [];
   const socialLinks = socialLinksFromDownloadResources(item?.downloadResources);
@@ -93,7 +108,10 @@ export function NewsForm({ categoryOptions, tagOptions, item }: NewsFormProps) {
       <input type="hidden" name="content" value={contentHtml} />
 
       <div>
-        <label htmlFor="title" className="block text-sm font-medium text-slate-700">
+        <label
+          htmlFor="title"
+          className="block text-sm font-medium text-slate-700"
+        >
           Title *
         </label>
         <input
@@ -106,7 +124,10 @@ export function NewsForm({ categoryOptions, tagOptions, item }: NewsFormProps) {
       </div>
 
       <div>
-        <label htmlFor="slug" className="block text-sm font-medium text-slate-700">
+        <label
+          htmlFor="slug"
+          className="block text-sm font-medium text-slate-700"
+        >
           Slug (optional, auto-generated from title)
         </label>
         <input
@@ -119,7 +140,10 @@ export function NewsForm({ categoryOptions, tagOptions, item }: NewsFormProps) {
       </div>
 
       <div>
-        <label htmlFor="image" className="block text-sm font-medium text-slate-700">
+        <label
+          htmlFor="image"
+          className="block text-sm font-medium text-slate-700"
+        >
           Image URL
         </label>
         <div className="mt-1 flex gap-2">
@@ -140,7 +164,9 @@ export function NewsForm({ categoryOptions, tagOptions, item }: NewsFormProps) {
             <ImagePlus className="h-4 w-4" />
           </button>
         </div>
-        <p className="mt-1 text-xs text-slate-500">Use Media ID (`media-...`) or a path like `/uploads/filename.jpg`.</p>
+        <p className="mt-1 text-xs text-slate-500">
+          Use Media ID (`media-...`) or a path like `/uploads/filename.jpg`.
+        </p>
         {imagePreviewLoading ? (
           <p className="mt-2 text-xs text-slate-500">Loading preview…</p>
         ) : imagePreviewUrl ? (
@@ -155,22 +181,31 @@ export function NewsForm({ categoryOptions, tagOptions, item }: NewsFormProps) {
           </div>
         ) : image.trim() ? (
           <p className="mt-2 text-xs text-amber-800">
-            No preview — for <code className="rounded bg-amber-100 px-1">media-…</code> IDs the file must exist in{" "}
+            No preview — for{" "}
+            <code className="rounded bg-amber-100 px-1">media-…</code> IDs the
+            file must exist in{" "}
             <Link href="/admin/media" className="font-medium underline">
               Media Library
             </Link>
-            . You can also paste a <code className="rounded bg-amber-100 px-1">/uploads/…</code> URL.
+            . You can also paste a{" "}
+            <code className="rounded bg-amber-100 px-1">/uploads/…</code> URL.
           </p>
         ) : null}
       </div>
 
       <div className="rounded-xl border border-border bg-slate-50/80 p-4">
-        <h2 className="text-sm font-semibold text-slate-900">News descriptions</h2>
+        <h2 className="text-sm font-semibold text-slate-900">
+          News descriptions
+        </h2>
         <p className="mt-1 text-xs text-slate-600">
-          Use a short description for cards/lists and full content for the article page.
+          Use a short description for cards/lists and full content for the
+          article page.
         </p>
         <div className="mt-4">
-          <label htmlFor="excerpt" className="block text-sm font-medium text-slate-700">
+          <label
+            htmlFor="excerpt"
+            className="block text-sm font-medium text-slate-700"
+          >
             Short description
           </label>
           <textarea
@@ -185,7 +220,10 @@ export function NewsForm({ categoryOptions, tagOptions, item }: NewsFormProps) {
 
       <div>
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <label htmlFor="news-content-editor" className="block text-sm font-medium text-slate-700">
+          <label
+            htmlFor="news-content-editor"
+            className="block text-sm font-medium text-slate-700"
+          >
             Full description
           </label>
           <button
@@ -197,7 +235,8 @@ export function NewsForm({ categoryOptions, tagOptions, item }: NewsFormProps) {
           </button>
         </div>
         <p className="mt-0.5 text-xs text-slate-500">
-          Rich text (headings, lists, links). Output is sanitized on the public article page.
+          Rich text (headings, lists, links). Output is sanitized on the public
+          article page.
         </p>
         <div className="mt-2">
           <RichTextEditor
@@ -217,7 +256,10 @@ export function NewsForm({ categoryOptions, tagOptions, item }: NewsFormProps) {
       </div>
 
       <div>
-        <label htmlFor="author" className="block text-sm font-medium text-slate-700">
+        <label
+          htmlFor="author"
+          className="block text-sm font-medium text-slate-700"
+        >
           Author
         </label>
         <input
@@ -229,9 +271,12 @@ export function NewsForm({ categoryOptions, tagOptions, item }: NewsFormProps) {
       </div>
 
       <fieldset className="rounded-lg border border-border p-4">
-        <legend className="px-1 text-sm font-medium text-slate-700">Categories (select any that apply)</legend>
+        <legend className="px-1 text-sm font-medium text-slate-700">
+          Categories (select any that apply)
+        </legend>
         <p className="mb-3 text-xs text-slate-500">
-          Options are defined in <strong>Admin → Taxonomy</strong>. You can select multiple categories.
+          Options are defined in <strong>Admin → Taxonomy</strong>. You can
+          select multiple categories.
         </p>
         <ul className="space-y-2">
           {categoryOptions.map((c) => (
@@ -244,9 +289,16 @@ export function NewsForm({ categoryOptions, tagOptions, item }: NewsFormProps) {
                 defaultChecked={selectedCategories.has(c.slug)}
                 className="mt-1 h-4 w-4 rounded border-border text-accent-600 focus:ring-accent-500"
               />
-              <label htmlFor={`cat-${c.slug}`} className="text-sm text-slate-800">
+              <label
+                htmlFor={`cat-${c.slug}`}
+                className="text-sm text-slate-800"
+              >
                 <span className="font-medium">{c.label}</span>
-                {c.description && <span className="block text-xs text-slate-500">{c.description}</span>}
+                {c.description && (
+                  <span className="block text-xs text-slate-500">
+                    {c.description}
+                  </span>
+                )}
               </label>
             </li>
           ))}
@@ -254,7 +306,10 @@ export function NewsForm({ categoryOptions, tagOptions, item }: NewsFormProps) {
       </fieldset>
 
       <div>
-        <label htmlFor="tags" className="block text-sm font-medium text-slate-700">
+        <label
+          htmlFor="tags"
+          className="block text-sm font-medium text-slate-700"
+        >
           Tags (comma-separated slugs)
         </label>
         <input
@@ -264,48 +319,43 @@ export function NewsForm({ categoryOptions, tagOptions, item }: NewsFormProps) {
           placeholder="governance, ghana"
           className="mt-1 w-full rounded-lg border border-border px-4 py-2 text-slate-900"
         />
-        <p className="mt-1 text-xs text-slate-500">Suggested slugs: {tagOptions.map((t) => t.slug).join(", ")}</p>
+        <p className="mt-1 text-xs text-slate-500">
+          Suggested slugs: {tagOptions.map((t) => t.slug).join(", ")}
+        </p>
       </div>
 
       <div>
-        <label htmlFor="downloadResourcesJson" className="block text-sm font-medium text-slate-700">
-          Document downloads (PDFs, calls, reports)
+        <label className="block text-sm font-medium text-slate-700">
+          Document downloads (PDFs, reports, files)
         </label>
         <p className="mt-1 text-xs text-slate-500">
-          JSON array of objects with <code className="rounded bg-slate-100 px-1">label</code>,{" "}
-          <code className="rounded bg-slate-100 px-1">href</code> (path under <code className="rounded bg-slate-100 px-1">/uploads/…</code> or
-          media URL), and optional <code className="rounded bg-slate-100 px-1">description</code>. Leave{" "}
-          <code className="rounded bg-slate-100 px-1">[]</code> if none.
+          Upload documents from your device or select from the media library.
+          Documents will be available as downloads on the news page.
         </p>
-        <textarea
-          id="downloadResourcesJson"
-          name="downloadResourcesJson"
-          rows={10}
-          spellCheck={false}
-          defaultValue={(() => {
-            const d = item?.downloadResources;
-            if (d == null) return "[]";
-            if (Array.isArray(d)) return JSON.stringify(d, null, 2);
-            if (typeof d === "object") {
-              const obj = d as Record<string, unknown>;
-              if (Array.isArray(obj.downloads)) return JSON.stringify(obj.downloads, null, 2);
-              return JSON.stringify([d], null, 2);
-            }
-            return "[]";
-          })()}
-          className="mt-2 w-full rounded-lg border border-border bg-white px-3 py-2 font-mono text-sm text-slate-900"
-          placeholder={`[\n  {\n    "label": "Download report (PDF)",\n    "description": "Short line shown under the title.",\n    "href": "/uploads/documents/example.pdf"\n  }\n]`}
-        />
+        <div className="mt-3">
+          <DocumentPicker
+            documents={documents}
+            onDocumentsChange={setDocuments}
+          />
+        </div>
       </div>
 
       <fieldset className="rounded-lg border border-border p-4">
-        <legend className="px-1 text-sm font-medium text-slate-700">Sidebar social links (per article)</legend>
+        <legend className="px-1 text-sm font-medium text-slate-700">
+          Sidebar social links (per article)
+        </legend>
         <p className="mb-3 text-xs text-slate-500">
-          Optional override for this article’s social icons. Leave blank to use default share links.
+          Optional override for this article’s social icons. Leave blank to use
+          default share links.
         </p>
         <div className="grid gap-3 sm:grid-cols-2">
           <div>
-            <label htmlFor="socialFacebook" className="block text-sm font-medium text-slate-700">Facebook URL</label>
+            <label
+              htmlFor="socialFacebook"
+              className="block text-sm font-medium text-slate-700"
+            >
+              Facebook URL
+            </label>
             <input
               id="socialFacebook"
               name="socialFacebook"
@@ -315,7 +365,12 @@ export function NewsForm({ categoryOptions, tagOptions, item }: NewsFormProps) {
             />
           </div>
           <div>
-            <label htmlFor="socialX" className="block text-sm font-medium text-slate-700">X URL</label>
+            <label
+              htmlFor="socialX"
+              className="block text-sm font-medium text-slate-700"
+            >
+              X URL
+            </label>
             <input
               id="socialX"
               name="socialX"
@@ -325,7 +380,12 @@ export function NewsForm({ categoryOptions, tagOptions, item }: NewsFormProps) {
             />
           </div>
           <div>
-            <label htmlFor="socialLinkedin" className="block text-sm font-medium text-slate-700">LinkedIn URL</label>
+            <label
+              htmlFor="socialLinkedin"
+              className="block text-sm font-medium text-slate-700"
+            >
+              LinkedIn URL
+            </label>
             <input
               id="socialLinkedin"
               name="socialLinkedin"
@@ -335,7 +395,12 @@ export function NewsForm({ categoryOptions, tagOptions, item }: NewsFormProps) {
             />
           </div>
           <div>
-            <label htmlFor="socialInstagram" className="block text-sm font-medium text-slate-700">Instagram URL</label>
+            <label
+              htmlFor="socialInstagram"
+              className="block text-sm font-medium text-slate-700"
+            >
+              Instagram URL
+            </label>
             <input
               id="socialInstagram"
               name="socialInstagram"
@@ -345,7 +410,12 @@ export function NewsForm({ categoryOptions, tagOptions, item }: NewsFormProps) {
             />
           </div>
           <div className="sm:col-span-2">
-            <label htmlFor="socialEmail" className="block text-sm font-medium text-slate-700">Email link</label>
+            <label
+              htmlFor="socialEmail"
+              className="block text-sm font-medium text-slate-700"
+            >
+              Email link
+            </label>
             <input
               id="socialEmail"
               name="socialEmail"
@@ -358,7 +428,10 @@ export function NewsForm({ categoryOptions, tagOptions, item }: NewsFormProps) {
       </fieldset>
 
       <div>
-        <label htmlFor="datePublished" className="block text-sm font-medium text-slate-700">
+        <label
+          htmlFor="datePublished"
+          className="block text-sm font-medium text-slate-700"
+        >
           Date Published
         </label>
         <input
@@ -375,7 +448,10 @@ export function NewsForm({ categoryOptions, tagOptions, item }: NewsFormProps) {
       </div>
 
       <div>
-        <label htmlFor="status" className="block text-sm font-medium text-slate-700">
+        <label
+          htmlFor="status"
+          className="block text-sm font-medium text-slate-700"
+        >
           Status
         </label>
         <select
@@ -392,11 +468,13 @@ export function NewsForm({ categoryOptions, tagOptions, item }: NewsFormProps) {
       <AdminFormStickyActions>
         <SubmitButton isEdit={!!isEdit} />
         {isEdit && item.slug ? (
-          <AdminFormPreviewLink href={`/news/${encodeURIComponent(item.slug)}`}>Preview on site</AdminFormPreviewLink>
+          <AdminFormPreviewLink href={`/news/${encodeURIComponent(item.slug)}`}>
+            Preview on site
+          </AdminFormPreviewLink>
         ) : null}
         <Link
           href="/admin/news"
-          className="flex min-h-[44px] items-center rounded-lg border border-border px-6 py-3 font-medium text-slate-700 hover:bg-slate-50"
+          className="flex min-h-11 items-center rounded-lg border border-border px-6 py-3 font-medium text-slate-700 hover:bg-slate-50"
         >
           Cancel
         </Link>

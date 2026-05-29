@@ -1,10 +1,22 @@
 "use client";
 
 import { useState, useCallback, useEffect, useMemo } from "react";
-import { Copy, Trash2, Check, ImagePlus, Pencil, Save, X } from "lucide-react";
+import {
+  Copy,
+  Trash2,
+  Check,
+  ImagePlus,
+  FileText,
+  Pencil,
+  Save,
+  X,
+} from "lucide-react";
 import { AdminPageHeader } from "../_components/AdminPageHeader";
 import { OrphanMediaPanel } from "../_components/OrphanMediaPanel";
-import { MAX_MEDIA_UPLOAD_BYTES, formatMaxUploadBytes } from "@/lib/media-limits";
+import {
+  MAX_MEDIA_UPLOAD_BYTES,
+  formatMaxUploadBytes,
+} from "@/lib/media-limits";
 import { rasterDimensionsFromFile } from "@/lib/media-upload-client";
 
 type MediaItem = {
@@ -28,7 +40,10 @@ export default function AdminMediaPageClient() {
   const [uploading, setUploading] = useState(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [metaDraft, setMetaDraft] = useState<{ alt: string; title: string }>({ alt: "", title: "" });
+  const [metaDraft, setMetaDraft] = useState<{ alt: string; title: string }>({
+    alt: "",
+    title: "",
+  });
   const [savingMetaId, setSavingMetaId] = useState<string | null>(null);
   const [dragOver, setDragOver] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -36,7 +51,9 @@ export default function AdminMediaPageClient() {
   const [sortBy, setSortBy] = useState<"newest" | "oldest" | "name">("newest");
   const [page, setPage] = useState(1);
   /** Thumbnail 404 / network errors after API said file exists (CDN, race, or path drift). */
-  const [thumbLoadFailed, setThumbLoadFailed] = useState<Record<string, true>>({});
+  const [thumbLoadFailed, setThumbLoadFailed] = useState<Record<string, true>>(
+    {},
+  );
 
   const fetchMedia = useCallback(async () => {
     setLoading(true);
@@ -58,18 +75,52 @@ export default function AdminMediaPageClient() {
 
   const handleUpload = async (files: FileList | File[]) => {
     const fileList = Array.isArray(files) ? files : Array.from(files);
-    const imageFiles = fileList.filter((f) =>
-      ["image/jpeg", "image/png", "image/gif", "image/webp", "image/svg+xml"].includes(f.type)
-    );
-    if (imageFiles.length === 0) {
-      setError("Please select image files (JPEG, PNG, GIF, WebP, SVG)");
+    const supportedFiles = fileList.filter((f) => {
+      const type = f.type;
+      const name = f.name.toLowerCase();
+      // Images
+      if (
+        [
+          "image/jpeg",
+          "image/png",
+          "image/gif",
+          "image/webp",
+          "image/svg+xml",
+        ].includes(type)
+      )
+        return true;
+      // Documents
+      if (
+        [
+          "application/pdf",
+          "application/msword",
+          "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+          "application/vnd.ms-excel",
+          "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+          "application/vnd.ms-powerpoint",
+          "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+          "application/zip",
+          "text/plain",
+          "text/csv",
+        ].includes(type)
+      )
+        return true;
+      // Fallback: check by extension
+      return /\.(pdf|doc|docx|xls|xlsx|ppt|pptx|zip|txt|csv)$/i.test(name);
+    });
+    if (supportedFiles.length === 0) {
+      setError(
+        "Please select image files (JPEG, PNG, GIF, WebP, SVG) or documents (PDF, Word, Excel, PowerPoint, ZIP, CSV, TXT).",
+      );
       return;
     }
     setUploading(true);
     setError(null);
-    for (const file of imageFiles) {
+    for (const file of supportedFiles) {
       if (file.size > MAX_MEDIA_UPLOAD_BYTES) {
-        setError(`"${file.name}" is too large. Maximum size is ${formatMaxUploadBytes()}.`);
+        setError(
+          `"${file.name}" is too large. Maximum size is ${formatMaxUploadBytes()}.`,
+        );
         continue;
       }
       const formData = new FormData();
@@ -78,7 +129,10 @@ export default function AdminMediaPageClient() {
       if (dims.width) formData.append("width", dims.width);
       if (dims.height) formData.append("height", dims.height);
       try {
-        const res = await fetch("/api/media", { method: "POST", body: formData });
+        const res = await fetch("/api/media", {
+          method: "POST",
+          body: formData,
+        });
         const data = await res.json();
         if (res.ok && data.item) {
           setItems((prev) => [data.item, ...prev]);
@@ -99,14 +153,24 @@ export default function AdminMediaPageClient() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm("Delete this image? It must not be used on any page or content item.")) return;
+    if (
+      !confirm(
+        "Delete this image? It must not be used on any page or content item.",
+      )
+    )
+      return;
     try {
       const res = await fetch(`/api/media/${id}`, { method: "DELETE" });
       const data = await res.json().catch(() => ({}));
       if (res.ok) setItems((prev) => prev.filter((m) => m.id !== id));
       else if (res.status === 409 && Array.isArray(data.references)) {
-        const lines = data.references.map((r: { kind: string; label: string; href: string }) => `• ${r.kind}: ${r.label}`);
-        setError(`${data.error || "Cannot delete — in use."}\n${lines.join("\n")}`);
+        const lines = data.references.map(
+          (r: { kind: string; label: string; href: string }) =>
+            `• ${r.kind}: ${r.label}`,
+        );
+        setError(
+          `${data.error || "Cannot delete — in use."}\n${lines.join("\n")}`,
+        );
       } else {
         setError(data.error || "Delete failed");
       }
@@ -138,7 +202,9 @@ export default function AdminMediaPageClient() {
         return;
       }
       if (data.item) {
-        setItems((prev) => prev.map((m) => (m.id === id ? { ...m, ...data.item } : m)));
+        setItems((prev) =>
+          prev.map((m) => (m.id === id ? { ...m, ...data.item } : m)),
+        );
       }
       setEditingId(null);
     } catch {
@@ -152,11 +218,15 @@ export default function AdminMediaPageClient() {
     const q = query.trim().toLowerCase();
     const filtered = q
       ? items.filter((item) =>
-          [item.filename, item.title || "", item.alt || "", item.id].join(" ").toLowerCase().includes(q)
+          [item.filename, item.title || "", item.alt || "", item.id]
+            .join(" ")
+            .toLowerCase()
+            .includes(q),
         )
       : items;
     const sorted = [...filtered].sort((a, b) => {
-      if (sortBy === "name") return (a.title || a.filename).localeCompare(b.title || b.filename);
+      if (sortBy === "name")
+        return (a.title || a.filename).localeCompare(b.title || b.filename);
       const at = new Date(a.uploadedAt).getTime();
       const bt = new Date(b.uploadedAt).getTime();
       return sortBy === "oldest" ? at - bt : bt - at;
@@ -164,8 +234,14 @@ export default function AdminMediaPageClient() {
     return sorted;
   }, [items, query, sortBy]);
 
-  const totalPages = Math.max(1, Math.ceil(visibleItems.length / MEDIA_PAGE_SIZE));
-  const pagedItems = visibleItems.slice((page - 1) * MEDIA_PAGE_SIZE, page * MEDIA_PAGE_SIZE);
+  const totalPages = Math.max(
+    1,
+    Math.ceil(visibleItems.length / MEDIA_PAGE_SIZE),
+  );
+  const pagedItems = visibleItems.slice(
+    (page - 1) * MEDIA_PAGE_SIZE,
+    page * MEDIA_PAGE_SIZE,
+  );
 
   useEffect(() => {
     setPage(1);
@@ -184,9 +260,39 @@ export default function AdminMediaPageClient() {
   const fullUrl = (url: string) =>
     typeof window !== "undefined" ? `${window.location.origin}${url}` : url;
 
+  const isDocument = (filename: string): boolean => {
+    const ext = filename.split(".").pop()?.toLowerCase() || "";
+    return /^(pdf|doc|docx|xls|xlsx|ppt|pptx|zip|txt|csv)$/.test(ext);
+  };
+
+  const getDocumentIcon = (filename: string): string => {
+    const ext = filename.split(".").pop()?.toLowerCase() || "";
+    switch (ext) {
+      case "pdf":
+        return "📄";
+      case "doc":
+      case "docx":
+        return "📝";
+      case "xls":
+      case "xlsx":
+        return "📊";
+      case "ppt":
+      case "pptx":
+        return "🎨";
+      case "zip":
+        return "📦";
+      case "csv":
+        return "📋";
+      case "txt":
+        return "📃";
+      default:
+        return "📁";
+    }
+  };
+
   if (loading && items.length === 0) {
     return (
-      <div className="flex min-h-[400px] items-center justify-center">
+      <div className="flex min-h-96 items-center justify-center">
         <div className="text-slate-500">Loading media library…</div>
       </div>
     );
@@ -196,10 +302,14 @@ export default function AdminMediaPageClient() {
     <div>
       <AdminPageHeader
         title="Media Library"
-        description="Upload images and reuse them across news, events, and pages. Select an image to copy its URL or media ID. Deletion is blocked while an asset is referenced; orphaned files (not linked anywhere) can be removed safely."
+        description="Upload images and documents and reuse them across news, events, and pages. Select a file to copy its URL or media ID. Deletion is blocked while an asset is referenced; orphaned files (not linked anywhere) can be removed safely."
       />
 
-      <OrphanMediaPanel onLibraryItemRemoved={(id) => setItems((prev) => prev.filter((m) => m.id !== id))} />
+      <OrphanMediaPanel
+        onLibraryItemRemoved={(id) =>
+          setItems((prev) => prev.filter((m) => m.id !== id))
+        }
+      />
 
       {error && (
         <div className="mt-4 whitespace-pre-wrap rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700">
@@ -221,7 +331,7 @@ export default function AdminMediaPageClient() {
         <input
           type="file"
           id="media-upload"
-          accept="image/jpeg,image/png,image/gif,image/webp,image/svg+xml"
+          accept="image/jpeg,image/png,image/gif,image/webp,image/svg+xml,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation,application/zip,text/plain,text/csv"
           multiple
           className="hidden"
           onChange={(e) => {
@@ -236,10 +346,11 @@ export default function AdminMediaPageClient() {
         >
           <ImagePlus className="mx-auto h-12 w-12 text-slate-400" />
           <p className="mt-2 font-medium text-slate-700">
-            {uploading ? "Uploading…" : "Drop images here or click to upload"}
+            {uploading ? "Uploading…" : "Drop files here or click to upload"}
           </p>
           <p className="mt-1 text-sm text-slate-500">
-            JPEG, PNG, GIF, WebP, SVG. Images can be reused across the site.
+            Images (JPEG, PNG, GIF, WebP, SVG) or documents (PDF, Word, Excel,
+            PowerPoint, ZIP, CSV, TXT). Files can be reused across the site.
           </p>
         </label>
       </div>
@@ -247,7 +358,8 @@ export default function AdminMediaPageClient() {
       <div className="mt-10">
         <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
           <h2 className="font-serif text-lg font-bold text-slate-900">
-            Library ({visibleItems.length} {visibleItems.length === 1 ? "image" : "images"})
+            Library ({visibleItems.length}{" "}
+            {visibleItems.length === 1 ? "file" : "files"})
           </h2>
           <div className="flex flex-wrap items-center gap-2">
             <input
@@ -260,7 +372,9 @@ export default function AdminMediaPageClient() {
             />
             <select
               value={sortBy}
-              onChange={(e) => setSortBy(e.target.value as "newest" | "oldest" | "name")}
+              onChange={(e) =>
+                setSortBy(e.target.value as "newest" | "oldest" | "name")
+              }
               className="rounded-lg border border-border px-3 py-2 text-sm text-slate-900"
               aria-label="Sort media library"
             >
@@ -272,11 +386,11 @@ export default function AdminMediaPageClient() {
         </div>
         {items.length === 0 ? (
           <div className="rounded-2xl border border-border bg-white p-12 text-center text-slate-500">
-            No images yet. Upload some to get started.
+            No files yet. Upload some to get started.
           </div>
         ) : visibleItems.length === 0 ? (
           <div className="rounded-2xl border border-border bg-white p-12 text-center text-slate-500">
-            No images match your search.
+            No files match your search.
           </div>
         ) : (
           <>
@@ -290,12 +404,23 @@ export default function AdminMediaPageClient() {
                     {item.fileMissing || thumbLoadFailed[item.id] ? (
                       <div className="absolute inset-0 flex flex-col items-center justify-center gap-1 bg-amber-50 p-2 text-center">
                         <span className="text-[0.65rem] font-semibold uppercase text-amber-900">
-                          {thumbLoadFailed[item.id] && !item.fileMissing ? "Preview failed" : "File missing"}
+                          {thumbLoadFailed[item.id] && !item.fileMissing
+                            ? "Preview failed"
+                            : "File missing"}
                         </span>
                         <span className="text-[0.7rem] text-amber-800">
                           {thumbLoadFailed[item.id] && !item.fileMissing
                             ? "URL returned 404 — re-upload or fix volume"
                             : "Mount persists public/uploads + data/media-library.json"}
+                        </span>
+                      </div>
+                    ) : isDocument(item.filename) ? (
+                      <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-slate-50">
+                        <span className="text-5xl">
+                          {getDocumentIcon(item.filename)}
+                        </span>
+                        <span className="text-xs font-medium text-slate-600">
+                          {item.filename.split(".").pop()?.toUpperCase()}
                         </span>
                       </div>
                     ) : (
@@ -307,16 +432,27 @@ export default function AdminMediaPageClient() {
                           className="absolute inset-0 h-full w-full object-cover"
                           loading="lazy"
                           decoding="async"
-                          onError={() => setThumbLoadFailed((p) => ({ ...p, [item.id]: true }))}
+                          onError={() =>
+                            setThumbLoadFailed((p) => ({
+                              ...p,
+                              [item.id]: true,
+                            }))
+                          }
                         />
                       </>
                     )}
                   </div>
                   <div className="p-3">
-                    <p className="truncate text-sm font-medium text-slate-900" title={item.filename}>
+                    <p
+                      className="truncate text-sm font-medium text-slate-900"
+                      title={item.filename}
+                    >
                       {item.title || item.filename}
                     </p>
-                    <p className="mt-0.5 truncate text-xs text-slate-500" title={item.alt || undefined}>
+                    <p
+                      className="mt-0.5 truncate text-xs text-slate-500"
+                      title={item.alt || undefined}
+                    >
                       Alt: {item.alt || "—"}
                     </p>
                     {item.width && item.height ? (
@@ -329,14 +465,24 @@ export default function AdminMediaPageClient() {
                       <div className="mt-2 space-y-2 rounded-lg border border-border bg-slate-50 p-2">
                         <input
                           value={metaDraft.title}
-                          onChange={(e) => setMetaDraft((prev) => ({ ...prev, title: e.target.value }))}
+                          onChange={(e) =>
+                            setMetaDraft((prev) => ({
+                              ...prev,
+                              title: e.target.value,
+                            }))
+                          }
                           placeholder="Title"
                           className="w-full rounded border border-border px-2 py-1 text-xs text-slate-900"
                           aria-label={`Edit title for ${item.filename}`}
                         />
                         <input
                           value={metaDraft.alt}
-                          onChange={(e) => setMetaDraft((prev) => ({ ...prev, alt: e.target.value }))}
+                          onChange={(e) =>
+                            setMetaDraft((prev) => ({
+                              ...prev,
+                              alt: e.target.value,
+                            }))
+                          }
                           placeholder="Alt text"
                           className="w-full rounded border border-border px-2 py-1 text-xs text-slate-900"
                           aria-label={`Edit alt text for ${item.filename}`}
@@ -366,7 +512,9 @@ export default function AdminMediaPageClient() {
                     <div className="mt-2 flex flex-wrap gap-1">
                       <button
                         type="button"
-                        onClick={() => copyToClipboard(fullUrl(item.url), item.id)}
+                        onClick={() =>
+                          copyToClipboard(fullUrl(item.url), item.id)
+                        }
                         className="flex items-center gap-1 rounded-lg bg-slate-100 px-2 py-1.5 text-xs font-medium text-slate-600 transition-colors hover:bg-slate-200"
                       >
                         {copiedId === item.id ? (

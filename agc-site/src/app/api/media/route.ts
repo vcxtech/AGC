@@ -8,16 +8,26 @@ import {
   removeMediaItem,
   getUploadsDir,
   isAllowedMimeType,
+  isImageMimeType,
+  isDocumentMimeType,
   assertUploadWithinLimit,
   mediaFileExistsOnDisk,
   type MediaItem,
 } from "@/lib/media";
 import { requireAdmin } from "@/lib/auth-api";
-import { parseOptionalDimensionsFromForm, probeRasterDimensions } from "@/lib/image-dimensions";
+import {
+  parseOptionalDimensionsFromForm,
+  probeRasterDimensions,
+} from "@/lib/image-dimensions";
 import { formatMaxUploadBytes } from "@/lib/media-limits";
 
 function detectMimeFromBuffer(buffer: Buffer): string | null {
-  if (buffer.length >= 3 && buffer[0] === 0xff && buffer[1] === 0xd8 && buffer[2] === 0xff) {
+  if (
+    buffer.length >= 3 &&
+    buffer[0] === 0xff &&
+    buffer[1] === 0xd8 &&
+    buffer[2] === 0xff
+  ) {
     return "image/jpeg";
   }
   if (
@@ -57,7 +67,10 @@ function detectMimeFromBuffer(buffer: Buffer): string | null {
   ) {
     return "image/webp";
   }
-  const head = buffer.subarray(0, Math.min(buffer.length, 1024)).toString("utf8").trimStart();
+  const head = buffer
+    .subarray(0, Math.min(buffer.length, 1024))
+    .toString("utf8")
+    .trimStart();
   if (head.startsWith("<svg") || head.startsWith("<?xml")) {
     return "image/svg+xml";
   }
@@ -78,7 +91,10 @@ export async function GET() {
     return NextResponse.json({ items: itemsWithDisk });
   } catch (err) {
     console.error("Media list error:", err);
-    return NextResponse.json({ error: "Failed to list media" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to list media" },
+      { status: 500 },
+    );
   }
 }
 
@@ -102,27 +118,71 @@ export async function POST(request: NextRequest) {
       assertUploadWithinLimit(file.size);
     } catch (e) {
       const msg = e instanceof Error ? e.message : "File too large.";
-      return NextResponse.json({ error: `${msg} Limit: ${formatMaxUploadBytes()}.` }, { status: 400 });
+      return NextResponse.json(
+        { error: `${msg} Limit: ${formatMaxUploadBytes()}.` },
+        { status: 400 },
+      );
     }
 
     const mime = file.type || "application/octet-stream";
     if (!isAllowedMimeType(mime)) {
       return NextResponse.json(
-        { error: "Invalid file type. Allowed: JPEG, PNG, GIF, WebP, SVG" },
-        { status: 400 }
+        {
+          error:
+            "Invalid file type. Allowed: JPEG, PNG, GIF, WebP, SVG, PDF, Word, Excel, PowerPoint, ZIP, CSV, TXT",
+        },
+        { status: 400 },
       );
     }
 
     const buffer = Buffer.from(await file.arrayBuffer());
-    const detectedMime = detectMimeFromBuffer(buffer);
-    if (!detectedMime || !isAllowedMimeType(detectedMime) || (mime !== "application/octet-stream" && mime !== detectedMime)) {
-      return NextResponse.json(
-        { error: "File content does not match an allowed image format." },
-        { status: 400 }
-      );
+    let detectedMime = mime;
+    let ext = "bin";
+
+    // For images, detect MIME type from buffer
+    if (isImageMimeType(mime)) {
+      const bufferDetectedMime = detectMimeFromBuffer(buffer);
+      if (
+        !bufferDetectedMime ||
+        !isImageMimeType(bufferDetectedMime) ||
+        (mime !== "application/octet-stream" && mime !== bufferDetectedMime)
+      ) {
+        return NextResponse.json(
+          { error: "File content does not match an allowed image format." },
+          { status: 400 },
+        );
+      }
+      detectedMime = bufferDetectedMime;
+      ext =
+        detectedMime === "image/svg+xml"
+          ? "svg"
+          : detectedMime.split("/")[1] || "jpg";
+    } else if (isDocumentMimeType(mime)) {
+      // For documents, extract extension from filename or MIME type
+      const nameExt = path.extname(file.name).toLowerCase().slice(1);
+      if (nameExt) {
+        ext = nameExt;
+      } else {
+        // Fallback: extract from MIME type
+        const mimeExt: Record<string, string> = {
+          "application/pdf": "pdf",
+          "application/msword": "doc",
+          "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
+            "docx",
+          "application/vnd.ms-excel": "xls",
+          "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet":
+            "xlsx",
+          "application/vnd.ms-powerpoint": "ppt",
+          "application/vnd.openxmlformats-officedocument.presentationml.presentation":
+            "pptx",
+          "application/zip": "zip",
+          "text/plain": "txt",
+          "text/csv": "csv",
+        };
+        ext = mimeExt[mime] || "bin";
+      }
     }
 
-    const ext = detectedMime === "image/svg+xml" ? "svg" : detectedMime.split("/")[1] || "jpg";
     const id = `media-${randomUUID()}`;
     const filename = `${id}.${ext}`;
     const uploadsDir = getUploadsDir();
@@ -130,13 +190,21 @@ export async function POST(request: NextRequest) {
 
     await mkdir(uploadsDir, { recursive: true });
 
+    // Probe dimensions only for images
     const fromForm = parseOptionalDimensionsFromForm(
       typeof widthForm === "string" ? widthForm : undefined,
-      typeof heightForm === "string" ? heightForm : undefined
+      typeof heightForm === "string" ? heightForm : undefined,
     );
-    const probed = detectedMime !== "image/svg+xml" ? probeRasterDimensions(buffer, detectedMime) : {};
-    const width = fromForm.width ?? probed.width;
-    const height = fromForm.height ?? probed.height;
+    const probed =
+      isImageMimeType(detectedMime) && detectedMime !== "image/svg+xml"
+        ? probeRasterDimensions(buffer, detectedMime)
+        : {};
+    const width = isImageMimeType(detectedMime)
+      ? (fromForm.width ?? probed.width)
+      : undefined;
+    const height = isImageMimeType(detectedMime)
+      ? (fromForm.height ?? probed.height)
+      : undefined;
 
     const url = `/uploads/${filename}`;
     const item: MediaItem = {
