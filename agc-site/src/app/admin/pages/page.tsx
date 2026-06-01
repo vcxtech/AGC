@@ -1,7 +1,10 @@
 import Link from "next/link";
 import { prisma } from "@/lib/db";
 import { Pencil } from "lucide-react";
-import { AdminMobileEntityCard, AdminStatusPill } from "../_components/AdminMobileEntityCard";
+import {
+  AdminMobileEntityCard,
+  AdminStatusPill,
+} from "../_components/AdminMobileEntityCard";
 import { AdminPageHeader } from "../_components/AdminPageHeader";
 import { AdminFormErrorSuspense } from "../_components/AdminFormErrorSuspense";
 import { AdminFormSuccessSuspense } from "../_components/AdminFormSuccessSuspense";
@@ -16,9 +19,14 @@ export default async function AdminPagesPage() {
   await requireAdminSession();
   try {
     await ensureMissingBaselinePageRows();
-    const items = (await prisma.pageContent.findMany({
-      orderBy: { slug: "asc" },
-    })).filter((x) => x.slug !== "site-settings" && x.slug !== "home" && x.slug !== "about");
+    const items = (
+      await prisma.pageContent.findMany({
+        orderBy: { slug: "asc" },
+      })
+    ).filter(
+      (x) =>
+        x.slug !== "site-settings" && x.slug !== "home" && x.slug !== "about",
+    );
 
     return (
       <div>
@@ -35,8 +43,16 @@ export default async function AdminPagesPage() {
               <AdminMobileEntityCard
                 title={item.title || item.slug}
                 rows={[
-                  { label: "Slug", value: <span className="font-mono text-sm">{item.slug}</span> },
-                  { label: "Status", value: <AdminStatusPill status={item.status} /> },
+                  {
+                    label: "Slug",
+                    value: (
+                      <span className="font-mono text-sm">{item.slug}</span>
+                    ),
+                  },
+                  {
+                    label: "Status",
+                    value: <AdminStatusPill status={item.status} />,
+                  },
                 ]}
                 actions={
                   <Link
@@ -56,21 +72,35 @@ export default async function AdminPagesPage() {
           <table className="min-w-full divide-y divide-border">
             <thead className="bg-slate-50">
               <tr>
-                <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-slate-500">Slug</th>
-                <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-slate-500">Title</th>
-                <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-slate-500">Status</th>
-                <th className="px-6 py-4 text-right text-xs font-medium uppercase tracking-wider text-slate-500">Actions</th>
+                <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-slate-500">
+                  Slug
+                </th>
+                <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-slate-500">
+                  Title
+                </th>
+                <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-slate-500">
+                  Status
+                </th>
+                <th className="px-6 py-4 text-right text-xs font-medium uppercase tracking-wider text-slate-500">
+                  Actions
+                </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
               {items.map((item) => (
                 <tr key={item.id} className="hover:bg-slate-50">
-                  <td className="px-6 py-4 font-mono text-sm text-slate-600">{item.slug}</td>
-                  <td className="px-6 py-4 font-medium text-slate-900">{item.title || "—"}</td>
+                  <td className="px-6 py-4 font-mono text-sm text-slate-600">
+                    {item.slug}
+                  </td>
+                  <td className="px-6 py-4 font-medium text-slate-900">
+                    {item.heroTitle || "—"}
+                  </td>
                   <td className="px-6 py-4">
                     <span
                       className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                        item.status === "published" ? "bg-green-100 text-green-800" : "bg-slate-100 text-slate-700"
+                        item.status === "published"
+                          ? "bg-green-100 text-green-800"
+                          : "bg-slate-100 text-slate-700"
                       }`}
                     >
                       {item.status}

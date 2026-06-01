@@ -47,11 +47,18 @@ function defaultTeamTabsConfig(content: AboutSettings): string {
   ].join("\n");
 }
 
-export function AboutSettingsForm({ content, saved = false }: { content: AboutSettings; saved?: boolean }) {
+export function AboutSettingsForm({
+  content,
+  saved = false,
+}: {
+  content: AboutSettings;
+  saved?: boolean;
+}) {
   const formRef = useRef<HTMLFormElement>(null);
   const draftKey = "agc:admin:about-settings:draft:v1";
   const initialDraft = useMemo(() => {
-    if (typeof window === "undefined") return null as Record<string, string> | null;
+    if (typeof window === "undefined")
+      return null as Record<string, string> | null;
     try {
       const raw = window.localStorage.getItem(draftKey);
       if (!raw) return null;
@@ -62,25 +69,25 @@ export function AboutSettingsForm({ content, saved = false }: { content: AboutSe
     }
   }, []);
   const [heroImage, setHeroImage] = useState(
-    initialDraft?.heroImage ?? content.heroImage ?? ""
+    initialDraft?.heroImage ?? content.heroImage ?? "",
   );
   const [teamHeroImage, setTeamHeroImage] = useState(
-    initialDraft?.teamHeroImage ?? content.teamPage?.heroImage?.trim() ?? ""
+    initialDraft?.teamHeroImage ?? content.teamPage?.heroImage?.trim() ?? "",
   );
   const [deliveryImage1, setDeliveryImage1] = useState(
-    initialDraft?.deliveryImage1 ?? content.deliveryPoints?.[0]?.image ?? ""
+    initialDraft?.deliveryImage1 ?? content.deliveryPoints?.[0]?.image ?? "",
   );
   const [deliveryImage2, setDeliveryImage2] = useState(
-    initialDraft?.deliveryImage2 ?? content.deliveryPoints?.[1]?.image ?? ""
+    initialDraft?.deliveryImage2 ?? content.deliveryPoints?.[1]?.image ?? "",
   );
   const [deliveryImage3, setDeliveryImage3] = useState(
-    initialDraft?.deliveryImage3 ?? content.deliveryPoints?.[2]?.image ?? ""
+    initialDraft?.deliveryImage3 ?? content.deliveryPoints?.[2]?.image ?? "",
   );
   const [deliveryImage4, setDeliveryImage4] = useState(
-    initialDraft?.deliveryImage4 ?? content.deliveryPoints?.[3]?.image ?? ""
+    initialDraft?.deliveryImage4 ?? content.deliveryPoints?.[3]?.image ?? "",
   );
   const [aboutSectionImage, setAboutSectionImage] = useState(
-    initialDraft?.aboutSectionImage ?? content.aboutSectionImage ?? ""
+    initialDraft?.aboutSectionImage ?? content.aboutSectionImage ?? "",
   );
   const [pickerTarget, setPickerTarget] = useState<
     | "heroImage"
@@ -170,21 +177,38 @@ export function AboutSettingsForm({ content, saved = false }: { content: AboutSe
   }, [saved, draftKey]);
 
   return (
-    <form ref={formRef} action={updateAboutSettings} onInput={saveDraft} className="space-y-6">
+    <form
+      ref={formRef}
+      action={updateAboutSettings}
+      onInput={saveDraft}
+      className="space-y-6"
+    >
       <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500">
         {draftRestored && !saved ? (
           <span className="rounded-md border border-amber-200 bg-amber-50 px-2 py-1 text-amber-700">
             Restored unsaved local draft.
           </span>
         ) : null}
-        {lastSavedAt ? <span>Autosaved locally: {new Date(lastSavedAt).toLocaleTimeString()}</span> : null}
-        <button type="button" onClick={clearDraft} className="rounded-md border border-border px-2 py-1 text-slate-600 hover:bg-slate-100">
+        {lastSavedAt ? (
+          <span>
+            Autosaved locally: {new Date(lastSavedAt).toLocaleTimeString()}
+          </span>
+        ) : null}
+        <button
+          type="button"
+          onClick={clearDraft}
+          className="rounded-md border border-border px-2 py-1 text-slate-600 hover:bg-slate-100"
+        >
           Clear local draft
         </button>
       </div>
       <section className="rounded-2xl border border-border bg-white p-6 shadow-sm">
-        <h2 className="font-serif text-lg font-semibold text-slate-900">About hero</h2>
-        <p className="mt-1 text-sm text-slate-600">Controls the About page hero title, subtitle, and background image.</p>
+        <h2 className="font-serif text-lg font-semibold text-slate-900">
+          About hero
+        </h2>
+        <p className="mt-1 text-sm text-slate-600">
+          Controls the About page hero title, subtitle, and background image.
+        </p>
         <div className="mt-4 grid gap-4">
           <input
             name="title"
@@ -232,30 +256,45 @@ export function AboutSettingsForm({ content, saved = false }: { content: AboutSe
       </section>
 
       <section className="rounded-2xl border border-border bg-white p-6 shadow-sm">
-        <h2 className="font-serif text-lg font-semibold text-slate-900">Who we are section</h2>
-        <p className="mt-1 text-sm text-slate-600">Controls the heading and lead paragraphs on the main About page.</p>
+        <h2 className="font-serif text-lg font-semibold text-slate-900">
+          Who we are section
+        </h2>
+        <p className="mt-1 text-sm text-slate-600">
+          Controls the heading and lead paragraphs on the main About page.
+        </p>
         <div className="mt-4 grid gap-4">
           <input
             name="aboutSectionEyebrow"
-            defaultValue={initialDraft?.aboutSectionEyebrow ?? content.aboutSectionEyebrow ?? ""}
+            defaultValue={
+              initialDraft?.aboutSectionEyebrow ??
+              content.aboutSectionEyebrow ??
+              ""
+            }
             className="rounded-lg border border-border px-4 py-2"
             placeholder="Eyebrow (e.g. Who we are)"
           />
           <input
             name="aboutSectionHeading"
-            defaultValue={initialDraft?.aboutSectionHeading ?? content.aboutSectionHeading ?? content.title}
+            defaultValue={
+              initialDraft?.aboutSectionHeading ??
+              content.aboutSectionHeading ??
+              content.title
+            }
             className="rounded-lg border border-border px-4 py-2"
             placeholder="Section heading"
           />
           <textarea
             name="leadParagraphs"
-            defaultValue={initialDraft?.leadParagraphs ?? (content.leadParagraphs ?? []).join("\n")}
+            defaultValue={
+              initialDraft?.leadParagraphs ??
+              (content.leadParagraphs ?? []).join("\n")
+            }
             rows={6}
             className="rounded-lg border border-border px-4 py-2"
             placeholder="Lead paragraphs (one per line)"
           />
           <div>
-            <div className="flex gap-2">
+            {/* <div className="flex gap-2">
               <input
                 name="aboutSectionImage"
                 value={aboutSectionImage}
@@ -271,7 +310,7 @@ export function AboutSettingsForm({ content, saved = false }: { content: AboutSe
               >
                 <ImagePlus className="h-4 w-4" />
               </button>
-            </div>
+            </div> */}
             {aboutSectionImagePreview ? (
               <div className="mt-2 relative h-28 w-full overflow-hidden rounded-lg border border-border bg-slate-100">
                 <Image
@@ -288,33 +327,77 @@ export function AboutSettingsForm({ content, saved = false }: { content: AboutSe
       </section>
 
       <section className="rounded-2xl border border-border bg-white p-6 shadow-sm">
-        <h2 className="font-serif text-lg font-semibold text-slate-900">Delivery cards and partnerships</h2>
-        <p className="mt-1 text-sm text-slate-600">Controls the “We deliver our work by” cards and partnerships copy.</p>
+        <h2 className="font-serif text-lg font-semibold text-slate-900">
+          Delivery cards and partnerships
+        </h2>
+        <p className="mt-1 text-sm text-slate-600">
+          Controls the “We deliver our work by” cards and partnerships copy.
+        </p>
         <div className="mt-4 grid gap-4">
           <input
             name="deliverySectionHeading"
-            defaultValue={initialDraft?.deliverySectionHeading ?? content.deliverySectionHeading ?? ""}
+            defaultValue={
+              initialDraft?.deliverySectionHeading ??
+              content.deliverySectionHeading ??
+              ""
+            }
             className="rounded-lg border border-border px-4 py-2"
             placeholder="Delivery section heading"
           />
           {[
-            { n: 1, title: content.deliveryPoints?.[0]?.title ?? "", body: content.deliveryPoints?.[0]?.body ?? "", image: deliveryImage1, setImage: setDeliveryImage1, target: "deliveryImage1" as const },
-            { n: 2, title: content.deliveryPoints?.[1]?.title ?? "", body: content.deliveryPoints?.[1]?.body ?? "", image: deliveryImage2, setImage: setDeliveryImage2, target: "deliveryImage2" as const },
-            { n: 3, title: content.deliveryPoints?.[2]?.title ?? "", body: content.deliveryPoints?.[2]?.body ?? "", image: deliveryImage3, setImage: setDeliveryImage3, target: "deliveryImage3" as const },
-            { n: 4, title: content.deliveryPoints?.[3]?.title ?? "", body: content.deliveryPoints?.[3]?.body ?? "", image: deliveryImage4, setImage: setDeliveryImage4, target: "deliveryImage4" as const },
+            {
+              n: 1,
+              title: content.deliveryPoints?.[0]?.title ?? "",
+              body: content.deliveryPoints?.[0]?.body ?? "",
+              image: deliveryImage1,
+              setImage: setDeliveryImage1,
+              target: "deliveryImage1" as const,
+            },
+            {
+              n: 2,
+              title: content.deliveryPoints?.[1]?.title ?? "",
+              body: content.deliveryPoints?.[1]?.body ?? "",
+              image: deliveryImage2,
+              setImage: setDeliveryImage2,
+              target: "deliveryImage2" as const,
+            },
+            {
+              n: 3,
+              title: content.deliveryPoints?.[2]?.title ?? "",
+              body: content.deliveryPoints?.[2]?.body ?? "",
+              image: deliveryImage3,
+              setImage: setDeliveryImage3,
+              target: "deliveryImage3" as const,
+            },
+            {
+              n: 4,
+              title: content.deliveryPoints?.[3]?.title ?? "",
+              body: content.deliveryPoints?.[3]?.body ?? "",
+              image: deliveryImage4,
+              setImage: setDeliveryImage4,
+              target: "deliveryImage4" as const,
+            },
           ].map((card) => (
             <div key={card.n} className="rounded-lg border border-border p-4">
-              <p className="text-xs font-semibold uppercase tracking-wide text-slate-600">Card {card.n}</p>
+              <p className="text-xs font-semibold uppercase tracking-wide text-slate-600">
+                Card {card.n}
+              </p>
               <div className="mt-2 grid gap-3">
                 <input
                   name={`deliveryTitle${card.n}`}
-                  defaultValue={(initialDraft?.[`deliveryTitle${card.n}`] ?? card.title) as string}
+                  defaultValue={
+                    (initialDraft?.[`deliveryTitle${card.n}`] ??
+                      card.title) as string
+                  }
                   className="rounded-lg border border-border px-4 py-2"
                   placeholder="Card title"
                 />
                 <textarea
                   name={`deliveryBody${card.n}`}
-                  defaultValue={(initialDraft?.[`deliveryBody${card.n}`] ?? card.body) as string}
+                  defaultValue={
+                    (initialDraft?.[`deliveryBody${card.n}`] ??
+                      card.body) as string
+                  }
                   rows={3}
                   className="rounded-lg border border-border px-4 py-2"
                   placeholder="Card description"
@@ -341,13 +424,19 @@ export function AboutSettingsForm({ content, saved = false }: { content: AboutSe
           ))}
           <input
             name="partnershipsHeading"
-            defaultValue={initialDraft?.partnershipsHeading ?? content.partnershipsHeading ?? ""}
+            defaultValue={
+              initialDraft?.partnershipsHeading ??
+              content.partnershipsHeading ??
+              ""
+            }
             className="rounded-lg border border-border px-4 py-2"
             placeholder="Partnerships heading"
           />
           <textarea
             name="partnershipsText"
-            defaultValue={initialDraft?.partnershipsText ?? content.partnershipsText ?? ""}
+            defaultValue={
+              initialDraft?.partnershipsText ?? content.partnershipsText ?? ""
+            }
             rows={5}
             className="rounded-lg border border-border px-4 py-2"
             placeholder="Partnerships and network text"
@@ -356,38 +445,61 @@ export function AboutSettingsForm({ content, saved = false }: { content: AboutSe
       </section>
 
       <section className="rounded-2xl border border-border bg-white p-6 shadow-sm">
-        <h2 className="font-serif text-lg font-semibold text-slate-900">Our Team page</h2>
-        <p className="mt-1 text-sm text-slate-600">Hero for individual team profile pages (opened from the About section cards). If no team hero image is set, the main About hero image is used.</p>
+        <h2 className="font-serif text-lg font-semibold text-slate-900">
+          Our Team page
+        </h2>
+        <p className="mt-1 text-sm text-slate-600">
+          Hero for individual team profile pages (opened from the About section
+          cards). If no team hero image is set, the main About hero image is
+          used.
+        </p>
         <div className="mt-4 grid gap-4">
           <input
             name="teamPageTitle"
-            defaultValue={initialDraft?.teamPageTitle ?? content.teamPage?.title ?? aboutDefaults.teamPage.title}
+            defaultValue={
+              initialDraft?.teamPageTitle ??
+              content.teamPage?.title ??
+              aboutDefaults.teamPage.title
+            }
             className="rounded-lg border border-border px-4 py-2"
             placeholder="Team page title"
           />
           <input
             name="teamPageSubtitle"
             defaultValue={
-              initialDraft?.teamPageSubtitle ?? content.teamPage?.subtitle ?? aboutDefaults.teamPage.subtitle
+              initialDraft?.teamPageSubtitle ??
+              content.teamPage?.subtitle ??
+              aboutDefaults.teamPage.subtitle
             }
             className="rounded-lg border border-border px-4 py-2"
             placeholder="Team page subtitle"
           />
           <div>
-            <label htmlFor="teamTabsConfig" className="mb-1 block text-sm font-medium text-slate-700">
+            <label
+              htmlFor="teamTabsConfig"
+              className="mb-1 block text-sm font-medium text-slate-700"
+            >
               Team tabs
             </label>
             <textarea
               id="teamTabsConfig"
               name="teamTabsConfig"
-              defaultValue={initialDraft?.teamTabsConfig ?? defaultTeamTabsConfig(content)}
+              defaultValue={
+                initialDraft?.teamTabsConfig ?? defaultTeamTabsConfig(content)
+              }
               rows={5}
               className="w-full rounded-lg border border-border px-4 py-2 font-mono text-sm"
               placeholder="section_key|Tab label"
             />
             <p className="mt-1 text-xs text-slate-500">
-              One per line: <code className="rounded bg-slate-100 px-1">section_key|Tab label</code>. Example:
-              <code className="ml-1 rounded bg-slate-100 px-1">fellows|Fellows</code>
+              One per line:{" "}
+              <code className="rounded bg-slate-100 px-1">
+                section_key|Tab label
+              </code>
+              . Example:
+              <code className="ml-1 rounded bg-slate-100 px-1">
+                fellows|Fellows
+              </code>
             </p>
           </div>
           <div>
@@ -423,9 +535,18 @@ export function AboutSettingsForm({ content, saved = false }: { content: AboutSe
         </div>
       </section>
 
-      <button type="submit" className="rounded-lg bg-accent-600 px-6 py-2 font-medium text-white hover:bg-accent-700">Save About Settings</button>
+      <button
+        type="submit"
+        className="rounded-lg bg-accent-600 px-6 py-2 font-medium text-white hover:bg-accent-700"
+      >
+        Save About Settings
+      </button>
 
-      <ImagePicker open={pickerTarget !== null} onClose={() => setPickerTarget(null)} onSelect={onSelectMedia} />
+      <ImagePicker
+        open={pickerTarget !== null}
+        onClose={() => setPickerTarget(null)}
+        onSelect={onSelectMedia}
+      />
     </form>
   );
 }

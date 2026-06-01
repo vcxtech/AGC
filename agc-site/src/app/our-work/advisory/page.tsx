@@ -15,6 +15,12 @@ export const metadata = {
     "Our expert services - the Africa Governance Review Project and policy recommendations.",
 };
 
+const AdvisoryHeading = {
+  title: "",
+  description:
+    "AGC provides strategic advisory support to governments, public institutions, and development partners on governance, policy, and institutional reform. Our advisory work is grounded in evidence and practical experience, enabling us to support decision-making processes, policy design, and implementation strategies. We work closely with partners to navigate complex governance environments and strengthen institutional effectiveness.",
+};
+
 type AdvisoryItem = {
   title: string;
   description: string;
@@ -23,6 +29,7 @@ type AdvisoryItem = {
 
 type AdvisoryWorkMerged = typeof workContent.advisory & {
   heroImage?: string;
+  mainTitle?: string;
   cards?: AdvisoryItem[];
 };
 
@@ -76,17 +83,10 @@ export default async function AdvisoryPage() {
           <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="space-y-8">
               <h2 className="font-serif text-[1.85rem] font-semibold tracking-tight text-black sm:text-[2.2rem] lg:text-[2.55rem] lg:leading-tight">
-                Advisory
+                {content.mainTitle || AdvisoryHeading.title}
               </h2>
               <p className="page-prose max-w-none text-black">
-                AGC provides strategic advisory support to governments, public
-                institutions, and development partners on governance, policy,
-                and institutional reform. Our advisory work is grounded in
-                evidence and practical experience, enabling us to support
-                decision-making processes, policy design, and implementation
-                strategies. We work closely with partners to navigate complex
-                governance environments and strengthen institutional
-                effectiveness.
+                {content.description || AdvisoryHeading.description}
               </p>
 
               <ProgramsCarousel programs={advisory} />

@@ -32,7 +32,25 @@ export default async function AdminPagesEditPage({ params }: Props) {
 
   try {
     await ensureMissingBaselinePageRows();
-    const item = await prisma.pageContent.findUnique({ where: { slug: decodedSlug } });
+    const item = await prisma.pageContent.findUnique({
+      where: { slug: decodedSlug },
+      select: {
+        slug: true,
+        title: true,
+        mainTitle: true,
+        status: true,
+        heroTitle: true,
+        heroSubtitle: true,
+        description: true,
+        mission: true,
+        intro: true,
+        objectivesTitle: true,
+        objectivesContent: true,
+        objectivesPrinciples: true,
+        objectivesAgenda2063: true,
+        contentJson: true,
+      },
+    });
     if (!item) notFound();
 
     return (
