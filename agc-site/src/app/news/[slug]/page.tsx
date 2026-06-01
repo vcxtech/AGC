@@ -162,6 +162,8 @@ export default async function NewsDetailPage({ params }: Props) {
       `<p>${(item.excerpt || "Full content coming soon.").replace(/</g, "&lt;").replace(/>/g, "&gt;")}</p>`,
   );
 
+  console.log("Document downloads:", documentDownloads);
+
   const categorySlugs = getNewsCategorySlugs(item);
   const tagSlugs = getNewsTagSlugs(item);
 

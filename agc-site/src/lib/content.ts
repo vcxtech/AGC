@@ -5,8 +5,14 @@
 
 import { fallbackTeam } from "@/data/content";
 import { prisma } from "@/lib/db";
-import type { NewsDocumentDownload, NewsSocialLinks } from "@/lib/news-downloads";
-import { normalizeNewsDownloads, normalizeNewsSocialLinks } from "@/lib/news-downloads";
+import type {
+  NewsDocumentDownload,
+  NewsSocialLinks,
+} from "@/lib/news-downloads";
+import {
+  normalizeNewsDownloads,
+  normalizeNewsSocialLinks,
+} from "@/lib/news-downloads";
 import { devPublicRead } from "@/lib/skip-db";
 
 // ============ Shared types (compatible with former Cms* interfaces) ============
@@ -119,95 +125,107 @@ export interface CmsPartner {
 
 export async function getEvents() {
   return devPublicRead([], async () => {
-  const rows = await prisma.event.findMany({
-    where: { status: "published" },
-    orderBy: { startDate: "desc" },
-  });
-  return rows.map((e) => ({
-    id: e.id,
-    status: e.status,
-    title: e.title,
-    slug: e.slug ?? undefined,
-    short_description: (e as Record<string, unknown>).shortDescription as string | undefined,
-    description: e.description ?? undefined,
-    location: e.location ?? undefined,
-    start_date: e.startDate.toISOString(),
-    end_date: e.endDate?.toISOString(),
-    image: e.image ?? undefined,
-    link: e.link ?? undefined,
-    category: e.category ?? undefined,
-    event_type: e.eventType ?? undefined,
-    venue_name: e.venueName ?? undefined,
-    venue_address: e.venueAddress ?? undefined,
-    capacity: e.capacity ?? undefined,
-    registration_deadline: e.registrationDeadline?.toISOString(),
-    allow_waitlist: e.allowWaitlist,
-    agenda: e.agenda as { time?: string; title: string; description?: string }[] | undefined,
-    speaker_ids: e.speakerIds as number[] | undefined,
-  }));
+    const rows = await prisma.event.findMany({
+      where: { status: "published" },
+      orderBy: { startDate: "desc" },
+    });
+    return rows.map((e) => ({
+      id: e.id,
+      status: e.status,
+      title: e.title,
+      slug: e.slug ?? undefined,
+      short_description: (e as Record<string, unknown>).shortDescription as
+        | string
+        | undefined,
+      description: e.description ?? undefined,
+      location: e.location ?? undefined,
+      start_date: e.startDate.toISOString(),
+      end_date: e.endDate?.toISOString(),
+      image: e.image ?? undefined,
+      link: e.link ?? undefined,
+      category: e.category ?? undefined,
+      event_type: e.eventType ?? undefined,
+      venue_name: e.venueName ?? undefined,
+      venue_address: e.venueAddress ?? undefined,
+      capacity: e.capacity ?? undefined,
+      registration_deadline: e.registrationDeadline?.toISOString(),
+      allow_waitlist: e.allowWaitlist,
+      agenda: e.agenda as
+        | { time?: string; title: string; description?: string }[]
+        | undefined,
+      speaker_ids: e.speakerIds as number[] | undefined,
+    }));
   });
 }
 
 /** Admin: fetch event by slug (any status) */
 export async function getEventBySlugAdmin(slug: string) {
   return devPublicRead(null, async () => {
-  const e = await prisma.event.findFirst({
-    where: { slug },
-  });
-  if (!e) return null;
-  return {
-    id: e.id,
-    status: e.status,
-    title: e.title,
-    slug: e.slug ?? undefined,
-    short_description: (e as Record<string, unknown>).shortDescription as string | undefined,
-    description: e.description ?? undefined,
-    location: e.location ?? undefined,
-    start_date: e.startDate.toISOString(),
-    end_date: e.endDate?.toISOString(),
-    image: e.image ?? undefined,
-    link: e.link ?? undefined,
-    category: e.category ?? undefined,
-    event_type: e.eventType ?? undefined,
-    venue_name: e.venueName ?? undefined,
-    venue_address: e.venueAddress ?? undefined,
-    capacity: e.capacity ?? undefined,
-    registration_deadline: e.registrationDeadline?.toISOString(),
-    allow_waitlist: e.allowWaitlist,
-    agenda: e.agenda as { time?: string; title: string; description?: string }[] | undefined,
-    speaker_ids: e.speakerIds as number[] | undefined,
-  };
+    const e = await prisma.event.findFirst({
+      where: { slug },
+    });
+    if (!e) return null;
+    return {
+      id: e.id,
+      status: e.status,
+      title: e.title,
+      slug: e.slug ?? undefined,
+      short_description: (e as Record<string, unknown>).shortDescription as
+        | string
+        | undefined,
+      description: e.description ?? undefined,
+      location: e.location ?? undefined,
+      start_date: e.startDate.toISOString(),
+      end_date: e.endDate?.toISOString(),
+      image: e.image ?? undefined,
+      link: e.link ?? undefined,
+      category: e.category ?? undefined,
+      event_type: e.eventType ?? undefined,
+      venue_name: e.venueName ?? undefined,
+      venue_address: e.venueAddress ?? undefined,
+      capacity: e.capacity ?? undefined,
+      registration_deadline: e.registrationDeadline?.toISOString(),
+      allow_waitlist: e.allowWaitlist,
+      agenda: e.agenda as
+        | { time?: string; title: string; description?: string }[]
+        | undefined,
+      speaker_ids: e.speakerIds as number[] | undefined,
+    };
   });
 }
 
 export async function getEventBySlug(slug: string) {
   return devPublicRead(null, async () => {
-  const e = await prisma.event.findFirst({
-    where: { slug, status: "published" },
-  });
-  if (!e) return null;
-  return {
-    id: e.id,
-    status: e.status,
-    title: e.title,
-    slug: e.slug ?? undefined,
-    short_description: (e as Record<string, unknown>).shortDescription as string | undefined,
-    description: e.description ?? undefined,
-    location: e.location ?? undefined,
-    start_date: e.startDate.toISOString(),
-    end_date: e.endDate?.toISOString(),
-    image: e.image ?? undefined,
-    link: e.link ?? undefined,
-    category: e.category ?? undefined,
-    event_type: e.eventType ?? undefined,
-    venue_name: e.venueName ?? undefined,
-    venue_address: e.venueAddress ?? undefined,
-    capacity: e.capacity ?? undefined,
-    registration_deadline: e.registrationDeadline?.toISOString(),
-    allow_waitlist: e.allowWaitlist,
-    agenda: e.agenda as { time?: string; title: string; description?: string }[] | undefined,
-    speaker_ids: e.speakerIds as number[] | undefined,
-  };
+    const e = await prisma.event.findFirst({
+      where: { slug, status: "published" },
+    });
+    if (!e) return null;
+    return {
+      id: e.id,
+      status: e.status,
+      title: e.title,
+      slug: e.slug ?? undefined,
+      short_description: (e as Record<string, unknown>).shortDescription as
+        | string
+        | undefined,
+      description: e.description ?? undefined,
+      location: e.location ?? undefined,
+      start_date: e.startDate.toISOString(),
+      end_date: e.endDate?.toISOString(),
+      image: e.image ?? undefined,
+      link: e.link ?? undefined,
+      category: e.category ?? undefined,
+      event_type: e.eventType ?? undefined,
+      venue_name: e.venueName ?? undefined,
+      venue_address: e.venueAddress ?? undefined,
+      capacity: e.capacity ?? undefined,
+      registration_deadline: e.registrationDeadline?.toISOString(),
+      allow_waitlist: e.allowWaitlist,
+      agenda: e.agenda as
+        | { time?: string; title: string; description?: string }[]
+        | undefined,
+      speaker_ids: e.speakerIds as number[] | undefined,
+    };
   });
 }
 
@@ -215,27 +233,37 @@ export async function getEventBySlug(slug: string) {
 
 export async function getNews(limit = 10) {
   return devPublicRead([], async () => {
-  const rows = await prisma.news.findMany({
-    where: { status: "published" },
-    orderBy: [{ datePublished: "desc" }, { createdAt: "desc" }],
-    take: limit,
-  });
+    const rows = await prisma.news.findMany({
+      where: { status: "published" },
+      orderBy: [{ datePublished: "desc" }, { createdAt: "desc" }],
+      take: limit,
+    });
     return rows.map((n) => {
-      const downloads = normalizeNewsDownloads({ downloadResources: n.downloadResources });
-      const socialLinks = normalizeNewsSocialLinks({ downloadResources: n.downloadResources });
+      const downloads = normalizeNewsDownloads({
+        downloadResources: n.downloadResources,
+      });
+      const socialLinks = normalizeNewsSocialLinks({
+        downloadResources: n.downloadResources,
+      });
+      console.log(
+        `[getNews] Article "${n.title}": downloadResources =`,
+        n.downloadResources,
+        ", normalized downloads =",
+        downloads,
+      );
       return {
-    id: n.id,
-    status: n.status,
-    title: n.title,
-    slug: n.slug ?? undefined,
-    excerpt: n.excerpt ?? undefined,
-    content: n.content ?? undefined,
-    image: n.image ?? undefined,
-    date_created: n.createdAt.toISOString(),
-    date_published: n.datePublished?.toISOString(),
-    author: n.author ?? undefined,
-    categories: n.categories as string[] | undefined,
-    tags: n.tags as string[] | undefined,
+        id: n.id,
+        status: n.status,
+        title: n.title,
+        slug: n.slug ?? undefined,
+        excerpt: n.excerpt ?? undefined,
+        content: n.content ?? undefined,
+        image: n.image ?? undefined,
+        date_created: n.createdAt.toISOString(),
+        date_published: n.datePublished?.toISOString(),
+        author: n.author ?? undefined,
+        categories: n.categories as string[] | undefined,
+        tags: n.tags as string[] | undefined,
         ...(downloads.length ? { downloadResources: downloads } : {}),
         ...(Object.keys(socialLinks).length ? { socialLinks } : {}),
       };
@@ -245,28 +273,32 @@ export async function getNews(limit = 10) {
 
 export async function getNewsBySlug(slug: string) {
   return devPublicRead(null, async () => {
-  const n = await prisma.news.findFirst({
-    where: { slug, status: "published" },
-  });
-  if (!n) return null;
-    const downloads = normalizeNewsDownloads({ downloadResources: n.downloadResources });
-    const socialLinks = normalizeNewsSocialLinks({ downloadResources: n.downloadResources });
-  return {
-    id: n.id,
-    status: n.status,
-    title: n.title,
-    slug: n.slug ?? undefined,
-    excerpt: n.excerpt ?? undefined,
-    content: n.content ?? undefined,
-    image: n.image ?? undefined,
-    date_created: n.createdAt.toISOString(),
-    date_published: n.datePublished?.toISOString(),
-    author: n.author ?? undefined,
-    categories: n.categories as string[] | undefined,
-    tags: n.tags as string[] | undefined,
+    const n = await prisma.news.findFirst({
+      where: { slug, status: "published" },
+    });
+    if (!n) return null;
+    const downloads = normalizeNewsDownloads({
+      downloadResources: n.downloadResources,
+    });
+    const socialLinks = normalizeNewsSocialLinks({
+      downloadResources: n.downloadResources,
+    });
+    return {
+      id: n.id,
+      status: n.status,
+      title: n.title,
+      slug: n.slug ?? undefined,
+      excerpt: n.excerpt ?? undefined,
+      content: n.content ?? undefined,
+      image: n.image ?? undefined,
+      date_created: n.createdAt.toISOString(),
+      date_published: n.datePublished?.toISOString(),
+      author: n.author ?? undefined,
+      categories: n.categories as string[] | undefined,
+      tags: n.tags as string[] | undefined,
       ...(downloads.length ? { downloadResources: downloads } : {}),
       ...(Object.keys(socialLinks).length ? { socialLinks } : {}),
-  };
+    };
   });
 }
 
@@ -274,20 +306,20 @@ export async function getNewsBySlug(slug: string) {
 
 export async function getTeam(): Promise<CmsTeamMember[]> {
   return devPublicRead([], async () => {
-  const rows = await prisma.team.findMany({
-    where: { status: "published" },
-    orderBy: { order: "asc" },
-  });
-  return rows.map((t) => ({
-    id: t.id,
-    status: t.status,
-    name: t.name,
-    role: t.role ?? undefined,
-    bio: t.bio ?? undefined,
-    image: t.image ?? undefined,
-    section: (t as Record<string, unknown>).section as string | undefined,
-    order: t.order,
-  }));
+    const rows = await prisma.team.findMany({
+      where: { status: "published" },
+      orderBy: { order: "asc" },
+    });
+    return rows.map((t) => ({
+      id: t.id,
+      status: t.status,
+      name: t.name,
+      role: t.role ?? undefined,
+      bio: t.bio ?? undefined,
+      image: t.image ?? undefined,
+      section: (t as Record<string, unknown>).section as string | undefined,
+      order: t.order,
+    }));
   });
 }
 
@@ -298,7 +330,9 @@ export type CmsTeamMemberPublic = CmsTeamMember & { section?: string };
  * Single published team member for profile pages. Uses static `fallbackTeam` only when the
  * CMS returns no published members (same rule as `TeamSectionTabs`).
  */
-export async function getPublishedTeamMember(id: number): Promise<CmsTeamMemberPublic | null> {
+export async function getPublishedTeamMember(
+  id: number,
+): Promise<CmsTeamMemberPublic | null> {
   const fromDb = await devPublicRead<CmsTeamMember | null>(null, async () => {
     const row = await prisma.team.findFirst({
       where: { id, status: "published" },
@@ -388,52 +422,52 @@ export async function getPublicationBySlug(slug: string) {
 
 export async function getPrograms() {
   return devPublicRead([], async () => {
-  const rows = await prisma.program.findMany({
-    where: { status: "published" },
-    orderBy: { order: "asc" },
-  });
-  return rows.map((p) => ({
-    id: p.id,
-    status: p.status,
-    title: p.title,
-    description: p.description ?? undefined,
-    image: p.image ?? undefined,
-    order: p.order,
-  }));
+    const rows = await prisma.program.findMany({
+      where: { status: "published" },
+      orderBy: { order: "asc" },
+    });
+    return rows.map((p) => ({
+      id: p.id,
+      status: p.status,
+      title: p.title,
+      description: p.description ?? undefined,
+      image: p.image ?? undefined,
+      order: p.order,
+    }));
   });
 }
 
 export async function getProjects() {
   return devPublicRead([], async () => {
-  const rows = await prisma.project.findMany({
-    where: { status: "published" },
-    orderBy: { order: "asc" },
-  });
-  return rows.map((p) => ({
-    id: p.id,
-    status: p.status,
-    title: p.title,
-    description: p.description ?? undefined,
-    image: p.image ?? undefined,
-    order: p.order,
-  }));
+    const rows = await prisma.project.findMany({
+      where: { status: "published" },
+      orderBy: { order: "asc" },
+    });
+    return rows.map((p) => ({
+      id: p.id,
+      status: p.status,
+      title: p.title,
+      description: p.description ?? undefined,
+      image: p.image ?? undefined,
+      order: p.order,
+    }));
   });
 }
 
 export async function getPartners() {
   return devPublicRead([], async () => {
-  const rows = await prisma.partner.findMany({
-    where: { status: "published" },
-    orderBy: { order: "asc" },
-  });
-  return rows.map((p) => ({
-    id: p.id,
-    status: p.status,
-    name: p.name,
-    logo: p.logo ?? undefined,
-    url: p.url ?? undefined,
-    order: p.order,
-  }));
+    const rows = await prisma.partner.findMany({
+      where: { status: "published" },
+      orderBy: { order: "asc" },
+    });
+    return rows.map((p) => ({
+      id: p.id,
+      status: p.status,
+      name: p.name,
+      logo: p.logo ?? undefined,
+      url: p.url ?? undefined,
+      order: p.order,
+    }));
   });
 }
 
@@ -441,33 +475,35 @@ export async function getPartners() {
 
 export async function getPageContent(slug: string) {
   return devPublicRead(null, async () => {
-  const p = await prisma.pageContent.findFirst({
-    where: { slug, status: "published" },
-  });
-  if (!p) return null;
-  const heroTitle = p.heroTitle;
-  const heroSubtitle = p.heroSubtitle;
+    const p = await prisma.pageContent.findFirst({
+      where: { slug, status: "published" },
+    });
+    if (!p) return null;
+    const heroTitle = p.heroTitle;
+    const heroSubtitle = p.heroSubtitle;
     const fromDb =
-      p.contentJson != null && typeof p.contentJson === "object" && !Array.isArray(p.contentJson)
+      p.contentJson != null &&
+      typeof p.contentJson === "object" &&
+      !Array.isArray(p.contentJson)
         ? (p.contentJson as Record<string, unknown>)
         : {};
-  const contentJson: Record<string, unknown> = {
+    const contentJson: Record<string, unknown> = {
       ...fromDb,
-    title: p.title ?? heroTitle,
-    subtitle: heroSubtitle,
-    hero: { title: heroTitle, subtitle: heroSubtitle },
-    intro: p.intro,
-    description: p.description,
-    mission: p.mission,
-    strategicObjectives: p.objectivesTitle
-      ? {
-          title: p.objectivesTitle,
-          content: p.objectivesContent,
-          principles: p.objectivesPrinciples,
-          agenda2063: p.objectivesAgenda2063,
-        }
-      : undefined,
-  };
+      title: p.title ?? heroTitle,
+      subtitle: heroSubtitle,
+      hero: { title: heroTitle, subtitle: heroSubtitle },
+      intro: p.intro,
+      description: p.description,
+      mission: p.mission,
+      strategicObjectives: p.objectivesTitle
+        ? {
+            title: p.objectivesTitle,
+            content: p.objectivesContent,
+            principles: p.objectivesPrinciples,
+            agenda2063: p.objectivesAgenda2063,
+          }
+        : undefined,
+    };
     // Admin stores hero / section media IDs on `content_json`; keep them after column overlays.
     if (typeof fromDb.heroImage === "string" && fromDb.heroImage.trim()) {
       contentJson.heroImage = fromDb.heroImage.trim();
@@ -475,12 +511,12 @@ export async function getPageContent(slug: string) {
     if (typeof fromDb.sectionImage === "string" && fromDb.sectionImage.trim()) {
       contentJson.sectionImage = fromDb.sectionImage.trim();
     }
-  return {
-    id: p.id,
-    slug: p.slug,
-    title: p.title ?? undefined,
-    content_json: contentJson,
-  };
+    return {
+      id: p.id,
+      slug: p.slug,
+      title: p.title ?? undefined,
+      content_json: contentJson,
+    };
   });
 }
 
@@ -500,7 +536,9 @@ export function getContentFileUrl(path: string | undefined): string | null {
 }
 
 /** Resolve event/image ref to URL for sync use. Content layer uses paths (uploads/xxx or /uploads/xxx). */
-export function resolveImageUrlSync(ref: string | { id: string } | undefined): string | null {
+export function resolveImageUrlSync(
+  ref: string | { id: string } | undefined,
+): string | null {
   if (ref === undefined || ref === null) return null;
   const id =
     typeof ref === "object"
@@ -510,6 +548,7 @@ export function resolveImageUrlSync(ref: string | { id: string } | undefined): s
         : "";
   if (!id) return null;
   if (id.startsWith("http") || id.startsWith("/")) return id;
-  if (id.includes("/") || id.startsWith("uploads")) return id.startsWith("/") ? id : `/${id}`;
+  if (id.includes("/") || id.startsWith("uploads"))
+    return id.startsWith("/") ? id : `/${id}`;
   return null;
 }
