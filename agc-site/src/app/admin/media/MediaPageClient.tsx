@@ -6,11 +6,19 @@ import {
   Trash2,
   Check,
   ImagePlus,
-  FileText,
   Pencil,
   Save,
   X,
+  FileIcon,
+  File,
+  FileArchive,
 } from "lucide-react";
+import {
+  FaFileWord,
+  FaFileExcel,
+  FaFilePowerpoint,
+  FaFileAlt,
+} from "react-icons/fa";
 import { AdminPageHeader } from "../_components/AdminPageHeader";
 import { OrphanMediaPanel } from "../_components/OrphanMediaPanel";
 import {
@@ -265,28 +273,27 @@ export default function AdminMediaPageClient() {
     return /^(pdf|doc|docx|xls|xlsx|ppt|pptx|zip|txt|csv)$/.test(ext);
   };
 
-  const getDocumentIcon = (filename: string): string => {
+  const getDocumentIcon = (filename: string): React.ReactNode => {
     const ext = filename.split(".").pop()?.toLowerCase() || "";
     switch (ext) {
       case "pdf":
-        return "📄";
+        return <FileIcon />;
       case "doc":
       case "docx":
-        return "📝";
+        return <FaFileWord />;
       case "xls":
       case "xlsx":
-        return "📊";
+        return <FaFileExcel />;
       case "ppt":
       case "pptx":
-        return "🎨";
+        return <FaFilePowerpoint />;
       case "zip":
-        return "📦";
+        return <FileArchive />;
       case "csv":
-        return "📋";
       case "txt":
-        return "📃";
+        return <FaFileAlt />;
       default:
-        return "📁";
+        return <File />;
     }
   };
 
@@ -415,7 +422,7 @@ export default function AdminMediaPageClient() {
                         </span>
                       </div>
                     ) : isDocument(item.filename) ? (
-                      <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-slate-50">
+                      <div className="absolute inset-0 text-red-400 flex flex-col items-center justify-center gap-2 bg-slate-50">
                         <span className="text-5xl">
                           {getDocumentIcon(item.filename)}
                         </span>

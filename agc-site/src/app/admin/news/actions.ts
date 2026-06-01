@@ -5,17 +5,36 @@ import { redirect } from "next/navigation";
 import { Prisma } from "@prisma/client";
 
 function parseNewsDownloadResourcesFromForm(
-  formData: FormData
-): { ok: true; value: Prisma.InputJsonValue | null } | { ok: false; message: string } {
+  formData: FormData,
+):
+  | { ok: true; value: Prisma.InputJsonValue | null }
+  | { ok: false; message: string } {
   const raw = formData.get("downloadResourcesJson");
-  if (typeof raw !== "string") return { ok: true, value: null };
+  if (typeof raw !== "string") {
+    return { ok: true, value: null };
+  }
   const trimmed = raw.trim();
   const socialLinks = {
-    facebook: typeof formData.get("socialFacebook") === "string" ? String(formData.get("socialFacebook")).trim() : "",
-    x: typeof formData.get("socialX") === "string" ? String(formData.get("socialX")).trim() : "",
-    linkedin: typeof formData.get("socialLinkedin") === "string" ? String(formData.get("socialLinkedin")).trim() : "",
-    instagram: typeof formData.get("socialInstagram") === "string" ? String(formData.get("socialInstagram")).trim() : "",
-    email: typeof formData.get("socialEmail") === "string" ? String(formData.get("socialEmail")).trim() : "",
+    facebook:
+      typeof formData.get("socialFacebook") === "string"
+        ? String(formData.get("socialFacebook")).trim()
+        : "",
+    x:
+      typeof formData.get("socialX") === "string"
+        ? String(formData.get("socialX")).trim()
+        : "",
+    linkedin:
+      typeof formData.get("socialLinkedin") === "string"
+        ? String(formData.get("socialLinkedin")).trim()
+        : "",
+    instagram:
+      typeof formData.get("socialInstagram") === "string"
+        ? String(formData.get("socialInstagram")).trim()
+        : "",
+    email:
+      typeof formData.get("socialEmail") === "string"
+        ? String(formData.get("socialEmail")).trim()
+        : "",
   };
   const hasSocialLinks = Object.values(socialLinks).some(Boolean);
   if (trimmed === "" || trimmed === "[]") {
@@ -31,23 +50,36 @@ function parseNewsDownloadResourcesFromForm(
   try {
     const parsed = JSON.parse(trimmed) as unknown;
     if (!Array.isArray(parsed)) {
-      return { ok: false, message: "Document downloads must be a JSON array, e.g. [{ \"label\": \"…\", \"href\": \"/uploads/…\" }]." };
+      return {
+        ok: false,
+        message:
+          'Document downloads must be a JSON array, e.g. [{ "label": "…", "href": "/uploads/…" }].',
+      };
     }
     const cleaned: { label: string; href: string; description?: string }[] = [];
     for (const x of parsed) {
       if (!x || typeof x !== "object") continue;
       const o = x as Record<string, unknown>;
-      const label = typeof o.label === "string" ? o.label.trim().slice(0, 500) : "";
-      const href = typeof o.href === "string" ? o.href.trim().slice(0, 2000) : "";
+      const label =
+        typeof o.label === "string" ? o.label.trim().slice(0, 500) : "";
+      const href =
+        typeof o.href === "string" ? o.href.trim().slice(0, 2000) : "";
       if (!label || !href) continue;
-      const row: { label: string; href: string; description?: string } = { label, href };
+      const row: { label: string; href: string; description?: string } = {
+        label,
+        href,
+      };
       if (typeof o.description === "string" && o.description.trim()) {
         row.description = o.description.trim().slice(0, 2000);
       }
       cleaned.push(row);
     }
-    if (!cleaned.length && !hasSocialLinks) return { ok: true, value: null };
-    if (!hasSocialLinks) return { ok: true, value: cleaned as Prisma.InputJsonValue };
+    if (!cleaned.length && !hasSocialLinks) {
+      return { ok: true, value: null };
+    }
+    if (!hasSocialLinks) {
+      return { ok: true, value: cleaned as Prisma.InputJsonValue };
+    }
     return {
       ok: true,
       value: {
@@ -58,7 +90,8 @@ function parseNewsDownloadResourcesFromForm(
   } catch {
     return {
       ok: false,
-      message: "Document downloads must be valid JSON (array of objects with label and href).",
+      message:
+        "Document downloads must be valid JSON (array of objects with label and href).",
     };
   }
 }
@@ -81,7 +114,10 @@ function slugify(s: string): string {
     .replace(/^-|-$/g, "");
 }
 
-async function isNewsSlugTaken(slug: string, excludeId?: number): Promise<boolean> {
+async function isNewsSlugTaken(
+  slug: string,
+  excludeId?: number,
+): Promise<boolean> {
   const existing = await prisma.news.findFirst({
     where: {
       slug,
@@ -111,8 +147,15 @@ export async function createNews(formData: FormData) {
     excerpt: formData.get("excerpt") || undefined,
     content: formData.get("content") || undefined,
     author: formData.get("author") || undefined,
-    categories: formData.getAll("categories").filter((x): x is string => typeof x === "string"),
-    tags: formData.get("tags") ? (formData.get("tags") as string).split(",").map((s) => s.trim()).filter(Boolean) : [],
+    categories: formData
+      .getAll("categories")
+      .filter((x): x is string => typeof x === "string"),
+    tags: formData.get("tags")
+      ? (formData.get("tags") as string)
+          .split(",")
+          .map((s) => s.trim())
+          .filter(Boolean)
+      : [],
     socialFacebook: formData.get("socialFacebook") || undefined,
     socialX: formData.get("socialX") || undefined,
     socialLinkedin: formData.get("socialLinkedin") || undefined,
@@ -124,7 +167,9 @@ export async function createNews(formData: FormData) {
 
   const parsed = newsFormSchema.safeParse(raw);
   if (!parsed.success) {
-    redirect(`/admin/news/new?error=${encodeURIComponent(parsed.error.issues[0]?.message ?? "Invalid input")}`);
+    redirect(
+      `/admin/news/new?error=${encodeURIComponent(parsed.error.issues[0]?.message ?? "Invalid input")}`,
+    );
   }
 
   const dr = parseNewsDownloadResourcesFromForm(formData);
@@ -132,13 +177,28 @@ export async function createNews(formData: FormData) {
     redirect(`/admin/news/new?error=${encodeURIComponent(dr.message)}`);
   }
 
-  const { title, slug, image, excerpt, content, author, categories: rawCats, tags, status, datePublished } = parsed.data;
+  const {
+    title,
+    slug,
+    image,
+    excerpt,
+    content,
+    author,
+    categories: rawCats,
+    tags,
+    status,
+    datePublished,
+  } = parsed.data;
   const finalSlug = slug?.trim() || slugify(title);
   if (!finalSlug) {
-    redirect(`/admin/news/new?error=${encodeURIComponent("Please provide a valid slug.")}`);
+    redirect(
+      `/admin/news/new?error=${encodeURIComponent("Please provide a valid slug.")}`,
+    );
   }
   if (await isNewsSlugTaken(finalSlug)) {
-    redirect(`/admin/news/new?error=${encodeURIComponent("Slug already exists. Use a different slug.")}`);
+    redirect(
+      `/admin/news/new?error=${encodeURIComponent("Slug already exists. Use a different slug.")}`,
+    );
   }
   const categories = await filterNewsCategories(rawCats ?? []);
 
@@ -161,10 +221,14 @@ export async function createNews(formData: FormData) {
     });
   } catch (err) {
     if (isSlugUniqueConstraintError(err)) {
-      redirect(`/admin/news/new?error=${encodeURIComponent("Slug already exists. Use a different slug.")}`);
+      redirect(
+        `/admin/news/new?error=${encodeURIComponent("Slug already exists. Use a different slug.")}`,
+      );
     }
     console.error("createNews:", err);
-    redirect(`/admin/news/new?error=${encodeURIComponent(ADMIN_DB_ERROR_MESSAGE)}`);
+    redirect(
+      `/admin/news/new?error=${encodeURIComponent(ADMIN_DB_ERROR_MESSAGE)}`,
+    );
   }
 
   revalidatePath("/admin/news");
@@ -184,8 +248,15 @@ export async function updateNews(id: number, formData: FormData) {
     excerpt: formData.get("excerpt") || undefined,
     content: formData.get("content") || undefined,
     author: formData.get("author") || undefined,
-    categories: formData.getAll("categories").filter((x): x is string => typeof x === "string"),
-    tags: formData.get("tags") ? (formData.get("tags") as string).split(",").map((s) => s.trim()).filter(Boolean) : [],
+    categories: formData
+      .getAll("categories")
+      .filter((x): x is string => typeof x === "string"),
+    tags: formData.get("tags")
+      ? (formData.get("tags") as string)
+          .split(",")
+          .map((s) => s.trim())
+          .filter(Boolean)
+      : [],
     socialFacebook: formData.get("socialFacebook") || undefined,
     socialX: formData.get("socialX") || undefined,
     socialLinkedin: formData.get("socialLinkedin") || undefined,
@@ -197,7 +268,9 @@ export async function updateNews(id: number, formData: FormData) {
 
   const parsed = newsFormSchema.safeParse(raw);
   if (!parsed.success) {
-    redirect(`/admin/news/${id}/edit?error=${encodeURIComponent(parsed.error.issues[0]?.message ?? "Invalid input")}`);
+    redirect(
+      `/admin/news/${id}/edit?error=${encodeURIComponent(parsed.error.issues[0]?.message ?? "Invalid input")}`,
+    );
   }
 
   const dr = parseNewsDownloadResourcesFromForm(formData);
@@ -205,13 +278,28 @@ export async function updateNews(id: number, formData: FormData) {
     redirect(`/admin/news/${id}/edit?error=${encodeURIComponent(dr.message)}`);
   }
 
-  const { title, slug, image, excerpt, content, author, categories: rawCats, tags, status, datePublished } = parsed.data;
+  const {
+    title,
+    slug,
+    image,
+    excerpt,
+    content,
+    author,
+    categories: rawCats,
+    tags,
+    status,
+    datePublished,
+  } = parsed.data;
   const finalSlug = slug?.trim() || slugify(title);
   if (!finalSlug) {
-    redirect(`/admin/news/${id}/edit?error=${encodeURIComponent("Please provide a valid slug.")}`);
+    redirect(
+      `/admin/news/${id}/edit?error=${encodeURIComponent("Please provide a valid slug.")}`,
+    );
   }
   if (await isNewsSlugTaken(finalSlug, id)) {
-    redirect(`/admin/news/${id}/edit?error=${encodeURIComponent("Slug already exists. Use a different slug.")}`);
+    redirect(
+      `/admin/news/${id}/edit?error=${encodeURIComponent("Slug already exists. Use a different slug.")}`,
+    );
   }
   const categories = await filterNewsCategories(rawCats ?? []);
 
@@ -234,10 +322,14 @@ export async function updateNews(id: number, formData: FormData) {
     });
   } catch (err) {
     if (isSlugUniqueConstraintError(err)) {
-      redirect(`/admin/news/${id}/edit?error=${encodeURIComponent("Slug already exists. Use a different slug.")}`);
+      redirect(
+        `/admin/news/${id}/edit?error=${encodeURIComponent("Slug already exists. Use a different slug.")}`,
+      );
     }
     console.error("updateNews:", err);
-    redirect(`/admin/news/${id}/edit?error=${encodeURIComponent(ADMIN_DB_ERROR_MESSAGE)}`);
+    redirect(
+      `/admin/news/${id}/edit?error=${encodeURIComponent(ADMIN_DB_ERROR_MESSAGE)}`,
+    );
   }
 
   revalidatePath("/admin/news");

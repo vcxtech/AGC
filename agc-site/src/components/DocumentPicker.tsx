@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Upload, FileText, Trash2 } from "lucide-react";
+import { Upload, FileText, Trash2, FileSpreadsheet, File } from "lucide-react";
 import {
   MAX_MEDIA_UPLOAD_BYTES,
   formatMaxUploadBytes,
@@ -71,7 +71,6 @@ export function DocumentPicker({
           label,
           href: uploadedItem.url,
         };
-
         onDocumentsChange([...documents, newDoc]);
       }
     } catch (err) {
@@ -125,11 +124,12 @@ export function DocumentPicker({
 
   const getFileIcon = (href: string) => {
     const ext = href.split(".").pop()?.toLowerCase() || "";
-    if (ext === "pdf") return "🔴";
-    if (["doc", "docx"].includes(ext)) return "📄";
-    if (["xls", "xlsx"].includes(ext)) return "📊";
-    if (["ppt", "pptx"].includes(ext)) return "📽️";
-    return "📁";
+    if (["doc", "docx"].includes(ext)) return <FileText className="h-4 w-4" />;
+    if (["xls", "xlsx"].includes(ext))
+      return <FileSpreadsheet className="h-4 w-4" />;
+    if (["ppt", "pptx"].includes(ext))
+      return <FileSpreadsheet className="h-4 w-4" />;
+    return <File className="h-4 w-4" />;
   };
 
   return (
