@@ -48,6 +48,8 @@ export default async function EventsPage() {
   const content = merged as unknown as typeof eventsContent & {
     heroImage?: string;
   };
+  // console.log(content);
+
   const heroImage =
     (await resolveImageUrl(content.heroImage)) || placeholderImages.events;
   const { items: events, cmsDraftsOnly: eventsDraftsOnly } =
@@ -75,7 +77,7 @@ export default async function EventsPage() {
     <>
       <PageHero
         title={content.title ?? eventsContent.title}
-        subtitle={content.subtitle ?? eventsContent.subtitle}
+        subtitle={content.description ?? eventsContent.description}
         image={heroImage}
         imageAlt="Events"
         breadcrumbs={[{ label: bc.home, href: "/" }, { label: bc.events }]}

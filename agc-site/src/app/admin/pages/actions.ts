@@ -29,13 +29,13 @@ export async function updatePageContent(slug: string, formData: FormData) {
     contentJson: formData.get("contentJson") || undefined,
   };
 
-  console.log("[updatePageContent] slug:", slug);
-  console.log("[updatePageContent] mainTitle raw:", raw.mainTitle);
-  console.log(
-    "[updatePageContent] contentJson raw:",
-    raw.contentJson?.slice(0, 200),
-  );
-  console.log("[updatePageContent] ALL raw data keys:", Object.keys(raw));
+  // console.log("[updatePageContent] slug:", slug);
+  // console.log("[updatePageContent] mainTitle raw:", raw.mainTitle);
+  // console.log(
+  //   "[updatePageContent] contentJson raw:",
+  //   raw.contentJson?.slice(0, 200),
+  // );
+  // console.log("[updatePageContent] ALL raw data keys:", Object.keys(raw));
 
   const parsed = pageContentFormSchema.safeParse(raw);
   if (!parsed.success) {

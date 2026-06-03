@@ -399,7 +399,7 @@ export type OurWorkPageContent = typeof workContent;
 
 export const getInvolvedContent = {
   title: "Get Involved",
-  subtitle: "Make a Difference",
+  description: "Make a Difference",
   intro:
     "There are many ways to get involved with our work. Whether you're a researcher, policymaker, or concerned citizen, we welcome your participation.",
   bottomSection: {
@@ -567,7 +567,7 @@ export const contactContent = {
 
 export const eventsContent = {
   title: "Upcoming Events",
-  subtitle:
+  description:
     "Discover upcoming events, conferences, and workshops that advance governance excellence across Africa.",
   intro:
     "We convene high-level summits, policy dialogues, workshops, and roundtable discussions. These engagements serve as strategic platforms for policymakers, development partners, civil society, and the public to engage with our research, exchange ideas, and contribute to shaping governance outcomes across the continent.\n\nOur events are designed to foster evidence-based dialogue on critical issues including democratic governance, institutional reform, public policy, and Africa's economic transformation.\n\nOur events feature distinguished speakers and thought leaders from across Africa and beyond, bringing deep expertise and diverse perspectives to the conversations we host.",

@@ -48,6 +48,11 @@ const fieldVisibilityConfig: Record<
   applications: { showMainTitle: false },
   awpls: { showMainTitle: false, showDescription: false },
   aypf: { showMainTitle: false, showDescription: false },
+  events: { showMainTitle: false },
+  "get-involved": { showMainTitle: false },
+  "get-involved-join-us": { showMainTitle: false, showDescription: false },
+  "get-involved-partnership": { showDescription: false, showMainTitle: false },
+
   // "other-page": { showMainTitle: false, showDescription: false },
   // Default: all fields shown
 };

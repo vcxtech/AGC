@@ -60,7 +60,7 @@ export function OrphanMediaPanel({ onLibraryItemRemoved }: Props) {
     return /^(pdf|doc|docx|xls|xlsx|ppt|pptx|zip|txt|csv)$/.test(ext);
   };
 
-  console.log("ThumFailed", thumbFailed);
+  // console.log("ThumFailed", thumbFailed);
 
   const getDocumentIcon = (filename: string): React.ReactNode => {
     const ext = filename.split(".").pop()?.toLowerCase() || "";
