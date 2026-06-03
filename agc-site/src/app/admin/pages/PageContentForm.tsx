@@ -47,6 +47,7 @@ const fieldVisibilityConfig: Record<
   // Add more pages as needed
   applications: { showMainTitle: false },
   awpls: { showMainTitle: false, showDescription: false },
+  aypf: { showMainTitle: false, showDescription: false },
   // "other-page": { showMainTitle: false, showDescription: false },
   // Default: all fields shown
 };
@@ -1144,6 +1145,7 @@ export function PageContentForm({ item }: PageContentFormProps) {
                       >
                         <ImagePlus className="h-4 w-4" />
                       </button>
+                      j
                     </div>
                   </div>
                 ))}
@@ -4578,7 +4580,7 @@ export function PageContentForm({ item }: PageContentFormProps) {
               Hero image uses the shared field below. List fields: one item per
               line.
             </p>
-            <div className="grid gap-2 sm:grid-cols-2">
+            {/* <div className="grid gap-2 sm:grid-cols-2">
               <div>
                 <label className="block text-xs font-medium text-slate-600">
                   Breadcrumb label (last segment)
@@ -4641,8 +4643,8 @@ export function PageContentForm({ item }: PageContentFormProps) {
                   className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                 />
               </div>
-            </div>
-            <div>
+            </div> */}
+            {/* <div>
               <label className="block text-xs font-medium text-slate-600">
                 Lead paragraph
               </label>
@@ -4658,8 +4660,8 @@ export function PageContentForm({ item }: PageContentFormProps) {
                 rows={3}
                 className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
               />
-            </div>
-            <div>
+            </div> */}
+            {/* <div>
               <label className="block text-xs font-medium text-slate-600">
                 Launch paragraph
               </label>
@@ -4675,8 +4677,8 @@ export function PageContentForm({ item }: PageContentFormProps) {
                 rows={3}
                 className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
               />
-            </div>
-            <div>
+            </div> */}
+            {/* <div>
               <label className="block text-xs font-medium text-slate-600">
                 Theme (quoted)
               </label>
@@ -4707,7 +4709,7 @@ export function PageContentForm({ item }: PageContentFormProps) {
                 rows={2}
                 className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
               />
-            </div>
+            </div> */}
             <div className="rounded-md border border-border bg-white p-3">
               <p className="text-xs font-semibold uppercase tracking-wide text-slate-600">
                 AYPF Images
@@ -4754,7 +4756,7 @@ export function PageContentForm({ item }: PageContentFormProps) {
                 ))}
               </div>
             </div>
-            <div className="rounded-md border border-border bg-white p-3">
+            {/* <div className="rounded-md border border-border bg-white p-3">
               <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-600">
                 Purpose section
               </p>
@@ -5117,7 +5119,7 @@ export function PageContentForm({ item }: PageContentFormProps) {
                   />
                 </div>
               </div>
-            </div>
+            </div> */}
             <div className="rounded-md border border-border bg-white p-3">
               <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-600">
                 Main section text (new)
