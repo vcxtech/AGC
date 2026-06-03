@@ -15,6 +15,7 @@ export async function updatePageContent(slug: string, formData: FormData) {
   const raw = {
     slug: formData.get("slug"),
     title: formData.get("title") || undefined,
+    mainTitle: formData.get("mainTitle") || undefined,
     status: formData.get("status") || "published",
     heroSubtitle: formData.get("heroSubtitle") || undefined,
     heroTitle: formData.get("heroTitle") || undefined,
@@ -28,9 +29,23 @@ export async function updatePageContent(slug: string, formData: FormData) {
     contentJson: formData.get("contentJson") || undefined,
   };
 
+  console.log("[updatePageContent] slug:", slug);
+  console.log("[updatePageContent] mainTitle raw:", raw.mainTitle);
+  console.log(
+    "[updatePageContent] contentJson raw:",
+    raw.contentJson?.slice(0, 200),
+  );
+  console.log("[updatePageContent] ALL raw data keys:", Object.keys(raw));
+
   const parsed = pageContentFormSchema.safeParse(raw);
   if (!parsed.success) {
-    redirect(`/admin/pages/${encodeURIComponent(slug)}/edit?error=${encodeURIComponent(parsed.error.issues[0]?.message ?? "Invalid input")}`);
+    console.error(
+      "[updatePageContent] Validation failed:",
+      parsed.error.issues,
+    );
+    redirect(
+      `/admin/pages/${encodeURIComponent(slug)}/edit?error=${encodeURIComponent(parsed.error.issues[0]?.message ?? "Invalid input")}`,
+    );
   }
 
   const data = parsed.data;
@@ -41,16 +56,16 @@ export async function updatePageContent(slug: string, formData: FormData) {
       if (typeof json !== "object" || json === null || Array.isArray(json)) {
         redirect(
           `/admin/pages/${encodeURIComponent(slug)}/edit?error=${encodeURIComponent(
-            "Use one `{ … }` block for all fields here—not a list that starts with `[`."
-          )}`
+            "Use one `{ … }` block for all fields here—not a list that starts with `[`.",
+          )}`,
         );
       }
       parsedContentJson = json as Record<string, unknown>;
     } catch {
       redirect(
         `/admin/pages/${encodeURIComponent(slug)}/edit?error=${encodeURIComponent(
-          "We couldn’t read that text. Check brackets, commas, and quotes—or use the fields above instead."
-        )}`
+          "We couldn’t read that text. Check brackets, commas, and quotes—or use the fields above instead.",
+        )}`,
       );
     }
   }
@@ -61,6 +76,7 @@ export async function updatePageContent(slug: string, formData: FormData) {
       data: {
         slug: data.slug,
         title: data.title || null,
+        mainTitle: data.mainTitle || null,
         status: data.status,
         heroSubtitle: data.heroSubtitle || null,
         heroTitle: data.heroTitle || null,
@@ -77,8 +93,14 @@ export async function updatePageContent(slug: string, formData: FormData) {
       },
     });
   } catch (err) {
-    console.error("updatePageContent:", err);
-    redirect(`/admin/pages/${encodeURIComponent(slug)}/edit?error=${encodeURIComponent(ADMIN_DB_ERROR_MESSAGE)}`);
+    console.error("[updatePageContent] Database error:", err);
+    console.error(
+      "[updatePageContent] Error message:",
+      err instanceof Error ? err.message : "Unknown error",
+    );
+    redirect(
+      `/admin/pages/${encodeURIComponent(slug)}/edit?error=${encodeURIComponent(ADMIN_DB_ERROR_MESSAGE)}`,
+    );
   }
 
   revalidatePath("/admin/pages");

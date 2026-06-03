@@ -2,7 +2,14 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useFormStatus } from "react-dom";
-import { ArrowDown, ArrowUp, ChevronDown, ChevronRight, GripVertical, ImagePlus } from "lucide-react";
+import {
+  ArrowDown,
+  ArrowUp,
+  ChevronDown,
+  ChevronRight,
+  GripVertical,
+  ImagePlus,
+} from "lucide-react";
 import { ImagePicker, type MediaItem } from "@/components/ImagePicker";
 import { AdminFormStickyActions } from "../_components/AdminFormStickyActions";
 import { AdminFormPreviewLink } from "../_components/AdminFormPreviewLink";
@@ -15,11 +22,11 @@ type PickerTarget = null | "heroImage" | "sectionImage" | { nested: string[] };
 type PageContentFormProps = {
   item: {
     slug: string;
-    title: string | null;
-    status: string;
-    heroSubtitle: string | null;
     heroTitle: string | null;
-    intro: string | null;
+    status: string;
+    // heroSubtitle: string | null;
+    mainTitle: string | null;
+    // intro: string | null;
     description: string | null;
     mission: string | null;
     objectivesTitle: string | null;
@@ -29,6 +36,30 @@ type PageContentFormProps = {
     contentJson?: unknown;
   };
 };
+
+/** Configuration for which fields should appear for each page */
+const fieldVisibilityConfig: Record<
+  string,
+  { showMainTitle?: boolean; showDescription?: boolean }
+> = {
+  // Pages that don't need Main Title and Description
+  "app-summit": { showMainTitle: false, showDescription: false },
+  // Add more pages as needed
+  applications: { showMainTitle: false },
+  awpls: { showMainTitle: false, showDescription: false },
+  aypf: { showMainTitle: false, showDescription: false },
+  // "other-page": { showMainTitle: false, showDescription: false },
+  // Default: all fields shown
+};
+
+function getFieldVisibility(slug: string) {
+  return (
+    fieldVisibilityConfig[slug] || {
+      showMainTitle: true,
+      showDescription: true,
+    }
+  );
+}
 
 function SubmitButton() {
   const { pending } = useFormStatus();
@@ -44,23 +75,27 @@ function SubmitButton() {
 }
 
 export function PageContentForm({ item }: PageContentFormProps) {
+  const fieldVisibility = getFieldVisibility(item.slug);
   const showAboutExtendedFields = item.slug === "about";
   const showSubscribeFields = item.slug === "subscribe";
   const action = updatePageContent.bind(null, item.slug);
   const initialJson = useMemo(
     () => (item.contentJson ? JSON.stringify(item.contentJson, null, 2) : ""),
-    [item.contentJson]
+    [item.contentJson],
   );
   const draftStorageKey = useMemo(
     () => `agc:page-content:draft:${item.slug}:contentJson`,
-    [item.slug]
+    [item.slug],
   );
   /** Server and first client paint must match — restore local draft in useEffect only (avoids hydration mismatch). */
   const [jsonText, setJsonText] = useState(initialJson);
   const [pickerTarget, setPickerTarget] = useState<PickerTarget>(null);
   const [dragDayIdx, setDragDayIdx] = useState<number | null>(null);
   const [dragLegalIdx, setDragLegalIdx] = useState<number | null>(null);
-  const [dragSession, setDragSession] = useState<{ dayIdx: number; sessionIdx: number } | null>(null);
+  const [dragSession, setDragSession] = useState<{
+    dayIdx: number;
+    sessionIdx: number;
+  } | null>(null);
   const [collapsedDays, setCollapsedDays] = useState<number[]>([]);
   const [collapsedSections, setCollapsedSections] = useState<number[]>([]);
   const [draftRestored, setDraftRestored] = useState(false);
@@ -84,7 +119,10 @@ export function PageContentForm({ item }: PageContentFormProps) {
 
   const { parsedJson, jsonError } = useMemo(() => {
     if (!jsonText.trim()) {
-      return { parsedJson: {} as Record<string, unknown>, jsonError: null as string | null };
+      return {
+        parsedJson: {} as Record<string, unknown>,
+        jsonError: null as string | null,
+      };
     }
     try {
       const parsed = JSON.parse(jsonText);
@@ -92,24 +130,37 @@ export function PageContentForm({ item }: PageContentFormProps) {
         return {
           parsedJson: {} as Record<string, unknown>,
           jsonError:
-            "Use one `{ … }` block for all fields here—not a list that starts with `[`." as string | null,
+            "Use one `{ … }` block for all fields here—not a list that starts with `[`." as
+              | string
+              | null,
         };
       }
-      return { parsedJson: parsed as Record<string, unknown>, jsonError: null as string | null };
+      return {
+        parsedJson: parsed as Record<string, unknown>,
+        jsonError: null as string | null,
+      };
     } catch {
       return {
         parsedJson: {} as Record<string, unknown>,
         jsonError:
-          "We couldn’t read that text. Check brackets, commas, and quotes—or use the fields above instead." as string | null,
+          "We couldn’t read that text. Check brackets, commas, and quotes—or use the fields above instead." as
+            | string
+            | null,
       };
     }
   }, [jsonText]);
 
   const quickValues = {
-    heroImage: typeof parsedJson.heroImage === "string" ? parsedJson.heroImage : "",
-    sectionImage: typeof parsedJson.sectionImage === "string" ? parsedJson.sectionImage : "",
-    subtitle: typeof parsedJson.subtitle === "string" ? parsedJson.subtitle : "",
-    applyIntro: typeof parsedJson.applyIntro === "string" ? parsedJson.applyIntro : "",
+    heroImage:
+      typeof parsedJson.heroImage === "string" ? parsedJson.heroImage : "",
+    sectionImage:
+      typeof parsedJson.sectionImage === "string"
+        ? parsedJson.sectionImage
+        : "",
+    subtitle:
+      typeof parsedJson.subtitle === "string" ? parsedJson.subtitle : "",
+    applyIntro:
+      typeof parsedJson.applyIntro === "string" ? parsedJson.applyIntro : "",
   };
 
   function updateJsonObject(next: Record<string, unknown>) {
@@ -144,7 +195,11 @@ export function PageContentForm({ item }: PageContentFormProps) {
     for (let i = 0; i < path.length - 1; i++) {
       const p = path[i];
       const existing = cur[p];
-      if (!existing || typeof existing !== "object" || Array.isArray(existing)) {
+      if (
+        !existing ||
+        typeof existing !== "object" ||
+        Array.isArray(existing)
+      ) {
         cur[p] = {};
       }
       cur = cur[p] as Record<string, unknown>;
@@ -161,16 +216,28 @@ export function PageContentForm({ item }: PageContentFormProps) {
       if (!cur || typeof cur !== "object" || Array.isArray(cur)) return [];
       cur = (cur as Record<string, unknown>)[p];
     }
-    return Array.isArray(cur) ? (cur.filter((x): x is Record<string, unknown> => !!x && typeof x === "object" && !Array.isArray(x))) : [];
+    return Array.isArray(cur)
+      ? cur.filter(
+          (x): x is Record<string, unknown> =>
+            !!x && typeof x === "object" && !Array.isArray(x),
+        )
+      : [];
   }
 
-  function updateNestedArray(path: string[], updater: (arr: Record<string, unknown>[]) => Record<string, unknown>[]) {
+  function updateNestedArray(
+    path: string[],
+    updater: (arr: Record<string, unknown>[]) => Record<string, unknown>[],
+  ) {
     const next = structuredClone(parsedJson) as Record<string, unknown>;
     let cur: Record<string, unknown> = next;
     for (let i = 0; i < path.length - 1; i++) {
       const p = path[i];
       const existing = cur[p];
-      if (!existing || typeof existing !== "object" || Array.isArray(existing)) {
+      if (
+        !existing ||
+        typeof existing !== "object" ||
+        Array.isArray(existing)
+      ) {
         cur[p] = {};
       }
       cur = cur[p] as Record<string, unknown>;
@@ -178,7 +245,10 @@ export function PageContentForm({ item }: PageContentFormProps) {
     const leaf = path[path.length - 1];
     const existingLeaf = cur[leaf];
     const arr = Array.isArray(existingLeaf)
-      ? existingLeaf.filter((x): x is Record<string, unknown> => !!x && typeof x === "object" && !Array.isArray(x))
+      ? existingLeaf.filter(
+          (x): x is Record<string, unknown> =>
+            !!x && typeof x === "object" && !Array.isArray(x),
+        )
       : [];
     cur[leaf] = updater(arr);
     updateJsonObject(next);
@@ -187,7 +257,8 @@ export function PageContentForm({ item }: PageContentFormProps) {
   function reorderNestedArray(path: string[], from: number, to: number) {
     if (from === to) return;
     updateNestedArray(path, (arr) => {
-      if (from < 0 || to < 0 || from >= arr.length || to >= arr.length) return arr;
+      if (from < 0 || to < 0 || from >= arr.length || to >= arr.length)
+        return arr;
       const copy = [...arr];
       const [moved] = copy.splice(from, 1);
       copy.splice(to, 0, moved);
@@ -197,13 +268,13 @@ export function PageContentForm({ item }: PageContentFormProps) {
 
   function toggleCollapsedDay(index: number) {
     setCollapsedDays((prev) =>
-      prev.includes(index) ? prev.filter((x) => x !== index) : [...prev, index]
+      prev.includes(index) ? prev.filter((x) => x !== index) : [...prev, index],
     );
   }
 
   function toggleCollapsedSection(index: number) {
     setCollapsedSections((prev) =>
-      prev.includes(index) ? prev.filter((x) => x !== index) : [...prev, index]
+      prev.includes(index) ? prev.filter((x) => x !== index) : [...prev, index],
     );
   }
 
@@ -224,7 +295,9 @@ export function PageContentForm({ item }: PageContentFormProps) {
       if (!cur || typeof cur !== "object" || Array.isArray(cur)) return [];
       cur = (cur as Record<string, unknown>)[p];
     }
-    return Array.isArray(cur) ? cur.filter((x): x is string => typeof x === "string") : [];
+    return Array.isArray(cur)
+      ? cur.filter((x): x is string => typeof x === "string")
+      : [];
   }
 
   function updateNestedStringArray(path: string[], values: string[]) {
@@ -233,7 +306,11 @@ export function PageContentForm({ item }: PageContentFormProps) {
     for (let i = 0; i < path.length - 1; i++) {
       const p = path[i];
       const existing = cur[p];
-      if (!existing || typeof existing !== "object" || Array.isArray(existing)) {
+      if (
+        !existing ||
+        typeof existing !== "object" ||
+        Array.isArray(existing)
+      ) {
         cur[p] = {};
       }
       cur = cur[p] as Record<string, unknown>;
@@ -247,26 +324,48 @@ export function PageContentForm({ item }: PageContentFormProps) {
   const summitDays = getNestedArray(["agenda", "days"]);
   const ourWorkAdvisoryCards = getNestedArray(["advisory", "cards"]);
   const ourWorkPrograms = getNestedArray(["programs"]);
-  const ourWorkProjects = item.slug === "our-work-projects" || item.slug === "projects" ? getNestedArray(["cards"]) : [];
-  const advisoryItems = item.slug === "our-work-advisory" || item.slug === "advisory" ? getNestedArray(["cards"]) : [];
-  const researchItems = item.slug === "our-work-research" || item.slug === "research" ? getNestedArray(["cards"]) : [];
-  const trainingItems = item.slug === "our-work-training" || item.slug === "training" ? getNestedArray(["cards"]) : [];
+  const ourWorkProjects =
+    item.slug === "our-work-projects" || item.slug === "projects"
+      ? getNestedArray(["cards"])
+      : [];
+  const advisoryItems =
+    item.slug === "our-work-advisory" || item.slug === "advisory"
+      ? getNestedArray(["cards"])
+      : [];
+  const researchItems =
+    item.slug === "our-work-research" || item.slug === "research"
+      ? getNestedArray(["cards"])
+      : [];
+  const trainingItems =
+    item.slug === "our-work-training" || item.slug === "training"
+      ? getNestedArray(["cards"])
+      : [];
   const getInvolvedOpportunities = getNestedArray(["opportunities"]);
-  const getInvolvedEvents = getNestedArray(["bottomSection", "upcomingEvents", "events"]);
+  const getInvolvedEvents = getNestedArray([
+    "bottomSection",
+    "upcomingEvents",
+    "events",
+  ]);
   const subscribeTopicItems = Array.isArray(parsedJson.topics)
     ? (parsedJson.topics as Array<Record<string, unknown>>).filter(
-        (x): x is Record<string, unknown> => !!x && typeof x === "object" && !Array.isArray(x)
+        (x): x is Record<string, unknown> =>
+          !!x && typeof x === "object" && !Array.isArray(x),
       )
     : [];
 
   function updateProgram(index: number, key: string, value: string) {
     updateNestedArray(["programs"], (arr) =>
-      arr.map((program, i) => (i === index ? { ...program, [key]: value } : program))
+      arr.map((program, i) =>
+        i === index ? { ...program, [key]: value } : program,
+      ),
     );
   }
 
   function addProgram() {
-    updateNestedArray(["programs"], (arr) => [...arr, { title: "", description: "", backgroundImage: "" }]);
+    updateNestedArray(["programs"], (arr) => [
+      ...arr,
+      { title: "", description: "", backgroundImage: "" },
+    ]);
   }
 
   function removeProgram(index: number) {
@@ -285,11 +384,18 @@ export function PageContentForm({ item }: PageContentFormProps) {
 
   /* Projects list (our-work-projects) — stored as top-level `cards` */
   function updateProject(index: number, key: string, value: string) {
-    updateNestedArray(["cards"], (arr) => arr.map((project, i) => (i === index ? { ...project, [key]: value } : project)));
+    updateNestedArray(["cards"], (arr) =>
+      arr.map((project, i) =>
+        i === index ? { ...project, [key]: value } : project,
+      ),
+    );
   }
 
   function addProject() {
-    updateNestedArray(["cards"], (arr) => [...arr, { title: "", description: "", backgroundImage: "" }]);
+    updateNestedArray(["cards"], (arr) => [
+      ...arr,
+      { title: "", description: "", backgroundImage: "" },
+    ]);
   }
 
   function removeProject(index: number) {
@@ -308,11 +414,16 @@ export function PageContentForm({ item }: PageContentFormProps) {
 
   /* Advisory page items (our-work-advisory) — stored as top-level `cards` on that slug */
   function updateAdvisoryItem(index: number, key: string, value: string) {
-    updateNestedArray(["cards"], (arr) => arr.map((c, i) => (i === index ? { ...c, [key]: value } : c)));
+    updateNestedArray(["cards"], (arr) =>
+      arr.map((c, i) => (i === index ? { ...c, [key]: value } : c)),
+    );
   }
 
   function addAdvisoryItem() {
-    updateNestedArray(["cards"], (arr) => [...arr, { title: "", description: "", backgroundImage: "" }]);
+    updateNestedArray(["cards"], (arr) => [
+      ...arr,
+      { title: "", description: "", backgroundImage: "" },
+    ]);
   }
 
   function removeAdvisoryItem(index: number) {
@@ -330,11 +441,16 @@ export function PageContentForm({ item }: PageContentFormProps) {
   }
 
   function updateResearchItem(index: number, key: string, value: string) {
-    updateNestedArray(["cards"], (arr) => arr.map((c, i) => (i === index ? { ...c, [key]: value } : c)));
+    updateNestedArray(["cards"], (arr) =>
+      arr.map((c, i) => (i === index ? { ...c, [key]: value } : c)),
+    );
   }
 
   function addResearchItem() {
-    updateNestedArray(["cards"], (arr) => [...arr, { title: "", description: "", backgroundImage: "" }]);
+    updateNestedArray(["cards"], (arr) => [
+      ...arr,
+      { title: "", description: "", backgroundImage: "" },
+    ]);
   }
 
   function removeResearchItem(index: number) {
@@ -352,11 +468,16 @@ export function PageContentForm({ item }: PageContentFormProps) {
   }
 
   function updateTrainingItem(index: number, key: string, value: string) {
-    updateNestedArray(["cards"], (arr) => arr.map((c, i) => (i === index ? { ...c, [key]: value } : c)));
+    updateNestedArray(["cards"], (arr) =>
+      arr.map((c, i) => (i === index ? { ...c, [key]: value } : c)),
+    );
   }
 
   function addTrainingItem() {
-    updateNestedArray(["cards"], (arr) => [...arr, { title: "", description: "", backgroundImage: "" }]);
+    updateNestedArray(["cards"], (arr) => [
+      ...arr,
+      { title: "", description: "", backgroundImage: "" },
+    ]);
   }
 
   function removeTrainingItem(index: number) {
@@ -379,7 +500,8 @@ export function PageContentForm({ item }: PageContentFormProps) {
       pickerTarget !== "heroImage" &&
       pickerTarget !== "sectionImage" &&
       pickerTarget.nested.length === 1 &&
-      (pickerTarget.nested[0] === "focusSectionBgImage" || pickerTarget.nested[0] === "strategicPrioritiesBgImage")
+      (pickerTarget.nested[0] === "focusSectionBgImage" ||
+        pickerTarget.nested[0] === "strategicPrioritiesBgImage")
         ? media.url
         : media.id;
     if (pickerTarget === "heroImage" || pickerTarget === "sectionImage") {
@@ -392,7 +514,11 @@ export function PageContentForm({ item }: PageContentFormProps) {
         const idx = Number(path[1]);
         const leaf = path.slice(2).join(".");
         updateNestedArray([arrayKey], (arr) =>
-          arr.map((item, i) => (i === idx ? { ...(item as Record<string, unknown>), [leaf]: value } : item))
+          arr.map((item, i) =>
+            i === idx
+              ? { ...(item as Record<string, unknown>), [leaf]: value }
+              : item,
+          ),
         );
       } else {
         updateNestedString(path, value);
@@ -404,7 +530,12 @@ export function PageContentForm({ item }: PageContentFormProps) {
   return (
     <form action={action} className="space-y-6">
       <div>
-        <label htmlFor="slug" className="block text-sm font-medium text-slate-700">Slug *</label>
+        <label
+          htmlFor="slug"
+          className="block text-sm font-medium text-slate-700"
+        >
+          Slug *
+        </label>
         <input
           id="slug"
           name="slug"
@@ -413,21 +544,18 @@ export function PageContentForm({ item }: PageContentFormProps) {
           readOnly
           className="mt-1 w-full rounded-lg border border-border bg-slate-50 px-4 py-2 text-slate-600"
         />
-        <p className="mt-1 text-xs text-slate-500">Slug cannot be changed after creation.</p>
+        <p className="mt-1 text-xs text-slate-500">
+          Slug cannot be changed after creation.
+        </p>
       </div>
 
       <div>
-        <label htmlFor="title" className="block text-sm font-medium text-slate-700">Title</label>
-        <input
-          id="title"
-          name="title"
-          defaultValue={item.title ?? ""}
-          className="mt-1 w-full rounded-lg border border-border px-4 py-2 text-slate-900"
-        />
-      </div>
-
-      <div>
-        <label htmlFor="heroTitle" className="block text-sm font-medium text-slate-700">Hero Title</label>
+        <label
+          htmlFor="heroTitle"
+          className="block text-sm font-medium text-slate-700"
+        >
+          Hero Title
+        </label>
         <input
           id="heroTitle"
           name="heroTitle"
@@ -436,8 +564,30 @@ export function PageContentForm({ item }: PageContentFormProps) {
         />
       </div>
 
-      <div>
-        <label htmlFor="heroSubtitle" className="block text-sm font-medium text-slate-700">Hero Subtitle</label>
+      {fieldVisibility.showMainTitle !== false && (
+        <div>
+          <label
+            htmlFor="mainTitle"
+            className="block text-sm font-medium text-slate-700"
+          >
+            Main Title
+          </label>
+          <input
+            id="mainTitle"
+            name="mainTitle"
+            defaultValue={item.mainTitle ?? ""}
+            className="mt-1 w-full rounded-lg border border-border px-4 py-2 text-slate-900"
+          />
+        </div>
+      )}
+
+      {/* <div>
+        <label
+          htmlFor="heroSubtitle"
+          className="block text-sm font-medium text-slate-700"
+        >
+          Hero Subtitle
+        </label>
         <textarea
           id="heroSubtitle"
           name="heroSubtitle"
@@ -445,10 +595,15 @@ export function PageContentForm({ item }: PageContentFormProps) {
           rows={2}
           className="mt-1 w-full rounded-lg border border-border px-4 py-2 text-slate-900"
         />
-      </div>
+      </div> */}
 
-      <div>
-        <label htmlFor="intro" className="block text-sm font-medium text-slate-700">Intro</label>
+      {/* <div>
+        <label
+          htmlFor="intro"
+          className="block text-sm font-medium text-slate-700"
+        >
+          Intro
+        </label>
         <textarea
           id="intro"
           name="intro"
@@ -456,23 +611,35 @@ export function PageContentForm({ item }: PageContentFormProps) {
           rows={3}
           className="mt-1 w-full rounded-lg border border-border px-4 py-2 text-slate-900"
         />
-      </div>
+      </div> */}
 
-      <div>
-        <label htmlFor="description" className="block text-sm font-medium text-slate-700">Description</label>
-        <textarea
-          id="description"
-          name="description"
-          defaultValue={item.description ?? ""}
-          rows={4}
-          className="mt-1 w-full rounded-lg border border-border px-4 py-2 text-slate-900"
-        />
-      </div>
+      {fieldVisibility.showDescription !== false && (
+        <div>
+          <label
+            htmlFor="description"
+            className="block text-sm font-medium text-slate-700"
+          >
+            Description
+          </label>
+          <textarea
+            id="description"
+            name="description"
+            defaultValue={item.description ?? ""}
+            rows={4}
+            className="mt-1 w-full rounded-lg border border-border px-4 py-2 text-slate-900"
+          />
+        </div>
+      )}
 
       {showAboutExtendedFields ? (
         <>
           <div>
-            <label htmlFor="mission" className="block text-sm font-medium text-slate-700">Mission</label>
+            <label
+              htmlFor="mission"
+              className="block text-sm font-medium text-slate-700"
+            >
+              Mission
+            </label>
             <textarea
               id="mission"
               name="mission"
@@ -483,7 +650,12 @@ export function PageContentForm({ item }: PageContentFormProps) {
           </div>
 
           <div>
-            <label htmlFor="objectivesTitle" className="block text-sm font-medium text-slate-700">Objectives Title</label>
+            <label
+              htmlFor="objectivesTitle"
+              className="block text-sm font-medium text-slate-700"
+            >
+              Objectives Title
+            </label>
             <input
               id="objectivesTitle"
               name="objectivesTitle"
@@ -493,7 +665,12 @@ export function PageContentForm({ item }: PageContentFormProps) {
           </div>
 
           <div>
-            <label htmlFor="objectivesContent" className="block text-sm font-medium text-slate-700">Objectives Content</label>
+            <label
+              htmlFor="objectivesContent"
+              className="block text-sm font-medium text-slate-700"
+            >
+              Objectives Content
+            </label>
             <textarea
               id="objectivesContent"
               name="objectivesContent"
@@ -504,7 +681,12 @@ export function PageContentForm({ item }: PageContentFormProps) {
           </div>
 
           <div>
-            <label htmlFor="objectivesPrinciples" className="block text-sm font-medium text-slate-700">Objectives Principles</label>
+            <label
+              htmlFor="objectivesPrinciples"
+              className="block text-sm font-medium text-slate-700"
+            >
+              Objectives Principles
+            </label>
             <textarea
               id="objectivesPrinciples"
               name="objectivesPrinciples"
@@ -515,7 +697,12 @@ export function PageContentForm({ item }: PageContentFormProps) {
           </div>
 
           <div>
-            <label htmlFor="objectivesAgenda2063" className="block text-sm font-medium text-slate-700">Objectives Agenda 2063</label>
+            <label
+              htmlFor="objectivesAgenda2063"
+              className="block text-sm font-medium text-slate-700"
+            >
+              Objectives Agenda 2063
+            </label>
             <textarea
               id="objectivesAgenda2063"
               name="objectivesAgenda2063"
@@ -530,103 +717,172 @@ export function PageContentForm({ item }: PageContentFormProps) {
       {showSubscribeFields ? (
         <>
           <div className="rounded-xl border border-border bg-slate-50 p-4">
-            <p className="text-sm font-semibold uppercase tracking-wide text-slate-600">Subscribe page helper</p>
+            <p className="text-sm font-semibold uppercase tracking-wide text-slate-600">
+              Subscribe page helper
+            </p>
             <p className="mt-1 text-xs text-slate-500">
-              Edit the hero copy and the four topic cards shown on <code className="rounded bg-slate-100 px-0.5">/subscribe</code>.
+              Edit the hero copy and the four topic cards shown on{" "}
+              <code className="rounded bg-slate-100 px-0.5">/subscribe</code>.
             </p>
             <div className="mt-4 grid gap-4 sm:grid-cols-2">
-                <div className="sm:col-span-2">
-                  <label className="block text-sm font-medium text-slate-700">Hero image</label>
-                  <div className="mt-1 flex gap-2">
-                    <input
-                      type="text"
-                      value={quickValues.heroImage}
-                      onChange={(e) => updateJsonField("heroImage", e.target.value)}
-                      className="w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
-                      placeholder="media-... or /uploads/..."
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setPickerTarget("heroImage")}
-                      className="inline-flex shrink-0 items-center gap-1 rounded-md border border-border bg-white px-3 py-2 text-sm text-slate-700 hover:bg-slate-100"
-                      title="Pick from Media Library"
-                    >
-                      <ImagePlus className="h-4 w-4" />
-                      Library
-                    </button>
-                  </div>
-                  <p className="mt-1 text-xs text-slate-500">
-                    This image is shown on the live <code className="rounded bg-slate-100 px-0.5">/subscribe</code> hero.
-                  </p>
-                </div>
               <div className="sm:col-span-2">
-                <label className="block text-sm font-medium text-slate-700">Hero title</label>
+                <label className="block text-sm font-medium text-slate-700">
+                  Hero image
+                </label>
+                <div className="mt-1 flex gap-2">
+                  <input
+                    type="text"
+                    value={quickValues.heroImage}
+                    onChange={(e) =>
+                      updateJsonField("heroImage", e.target.value)
+                    }
+                    className="w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
+                    placeholder="media-... or /uploads/..."
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setPickerTarget("heroImage")}
+                    className="inline-flex shrink-0 items-center gap-1 rounded-md border border-border bg-white px-3 py-2 text-sm text-slate-700 hover:bg-slate-100"
+                    title="Pick from Media Library"
+                  >
+                    <ImagePlus className="h-4 w-4" />
+                    Library
+                  </button>
+                </div>
+                <p className="mt-1 text-xs text-slate-500">
+                  This image is shown on the live{" "}
+                  <code className="rounded bg-slate-100 px-0.5">
+                    /subscribe
+                  </code>{" "}
+                  hero.
+                </p>
+              </div>
+              <div className="sm:col-span-2">
+                <label className="block text-sm font-medium text-slate-700">
+                  Hero title
+                </label>
                 <input
                   type="text"
-                  value={typeof parsedJson.heroTitle === "string" ? parsedJson.heroTitle : ""}
+                  value={
+                    typeof parsedJson.heroTitle === "string"
+                      ? parsedJson.heroTitle
+                      : ""
+                  }
                   onChange={(e) => updateJsonField("heroTitle", e.target.value)}
                   className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                 />
               </div>
               <div className="sm:col-span-2">
-                <label className="block text-sm font-medium text-slate-700">Hero subtitle</label>
+                <label className="block text-sm font-medium text-slate-700">
+                  Hero subtitle
+                </label>
                 <textarea
-                  value={typeof parsedJson.heroSubtitle === "string" ? parsedJson.heroSubtitle : ""}
-                  onChange={(e) => updateJsonField("heroSubtitle", e.target.value)}
+                  value={
+                    typeof parsedJson.heroSubtitle === "string"
+                      ? parsedJson.heroSubtitle
+                      : ""
+                  }
+                  onChange={(e) =>
+                    updateJsonField("heroSubtitle", e.target.value)
+                  }
                   rows={3}
                   className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-700">Section eyebrow</label>
+                <label className="block text-sm font-medium text-slate-700">
+                  Section eyebrow
+                </label>
                 <input
                   type="text"
-                  value={typeof parsedJson.sectionEyebrow === "string" ? parsedJson.sectionEyebrow : ""}
-                  onChange={(e) => updateJsonField("sectionEyebrow", e.target.value)}
+                  value={
+                    typeof parsedJson.sectionEyebrow === "string"
+                      ? parsedJson.sectionEyebrow
+                      : ""
+                  }
+                  onChange={(e) =>
+                    updateJsonField("sectionEyebrow", e.target.value)
+                  }
                   className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-700">Section heading</label>
+                <label className="block text-sm font-medium text-slate-700">
+                  Section heading
+                </label>
                 <input
                   type="text"
-                  value={typeof parsedJson.sectionHeading === "string" ? parsedJson.sectionHeading : ""}
-                  onChange={(e) => updateJsonField("sectionHeading", e.target.value)}
+                  value={
+                    typeof parsedJson.sectionHeading === "string"
+                      ? parsedJson.sectionHeading
+                      : ""
+                  }
+                  onChange={(e) =>
+                    updateJsonField("sectionHeading", e.target.value)
+                  }
                   className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                 />
               </div>
               <div className="sm:col-span-2">
-                <label className="block text-sm font-medium text-slate-700">Intro paragraph</label>
+                <label className="block text-sm font-medium text-slate-700">
+                  Intro paragraph
+                </label>
                 <textarea
-                  value={typeof parsedJson.intro === "string" ? parsedJson.intro : ""}
+                  value={
+                    typeof parsedJson.intro === "string" ? parsedJson.intro : ""
+                  }
                   onChange={(e) => updateJsonField("intro", e.target.value)}
                   rows={3}
                   className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                 />
               </div>
               <div className="sm:col-span-2">
-                <label className="block text-sm font-medium text-slate-700">Required note</label>
+                <label className="block text-sm font-medium text-slate-700">
+                  Required note
+                </label>
                 <input
                   type="text"
-                  value={typeof parsedJson.requiredNote === "string" ? parsedJson.requiredNote : ""}
-                  onChange={(e) => updateJsonField("requiredNote", e.target.value)}
+                  value={
+                    typeof parsedJson.requiredNote === "string"
+                      ? parsedJson.requiredNote
+                      : ""
+                  }
+                  onChange={(e) =>
+                    updateJsonField("requiredNote", e.target.value)
+                  }
                   className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-700">Support eyebrow</label>
+                <label className="block text-sm font-medium text-slate-700">
+                  Support eyebrow
+                </label>
                 <input
                   type="text"
-                  value={typeof parsedJson.supportEyebrow === "string" ? parsedJson.supportEyebrow : ""}
-                  onChange={(e) => updateJsonField("supportEyebrow", e.target.value)}
+                  value={
+                    typeof parsedJson.supportEyebrow === "string"
+                      ? parsedJson.supportEyebrow
+                      : ""
+                  }
+                  onChange={(e) =>
+                    updateJsonField("supportEyebrow", e.target.value)
+                  }
                   className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                 />
               </div>
               <div className="sm:col-span-2">
-                <label className="block text-sm font-medium text-slate-700">Support body</label>
+                <label className="block text-sm font-medium text-slate-700">
+                  Support body
+                </label>
                 <textarea
-                  value={typeof parsedJson.supportBody === "string" ? parsedJson.supportBody : ""}
-                  onChange={(e) => updateJsonField("supportBody", e.target.value)}
+                  value={
+                    typeof parsedJson.supportBody === "string"
+                      ? parsedJson.supportBody
+                      : ""
+                  }
+                  onChange={(e) =>
+                    updateJsonField("supportBody", e.target.value)
+                  }
                   rows={3}
                   className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                 />
@@ -635,30 +891,59 @@ export function PageContentForm({ item }: PageContentFormProps) {
 
             <div className="mt-6 space-y-4">
               {Array.from({ length: 4 }).map((_, idx) => (
-                <div key={idx} className="rounded-lg border border-border bg-white p-3">
-                  <p className="text-xs font-semibold uppercase tracking-wide text-slate-600">Topic card {idx + 1}</p>
+                <div
+                  key={idx}
+                  className="rounded-lg border border-border bg-white p-3"
+                >
+                  <p className="text-xs font-semibold uppercase tracking-wide text-slate-600">
+                    Topic card {idx + 1}
+                  </p>
                   <div className="mt-3 grid gap-3">
                     <div>
-                      <label className="block text-xs font-medium text-slate-600">Title</label>
+                      <label className="block text-xs font-medium text-slate-600">
+                        Title
+                      </label>
                       <input
                         type="text"
-                        value={typeof subscribeTopicItems[idx]?.title === "string" ? String(subscribeTopicItems[idx].title) : ""}
+                        value={
+                          typeof subscribeTopicItems[idx]?.title === "string"
+                            ? String(subscribeTopicItems[idx].title)
+                            : ""
+                        }
                         onChange={(e) => {
                           const nextTopics = [...subscribeTopicItems];
-                          nextTopics[idx] = { ...(nextTopics[idx] ?? {}), title: e.target.value };
-                          updateJsonObject({ ...parsedJson, topics: nextTopics });
+                          nextTopics[idx] = {
+                            ...(nextTopics[idx] ?? {}),
+                            title: e.target.value,
+                          };
+                          updateJsonObject({
+                            ...parsedJson,
+                            topics: nextTopics,
+                          });
                         }}
                         className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-medium text-slate-600">Description</label>
+                      <label className="block text-xs font-medium text-slate-600">
+                        Description
+                      </label>
                       <textarea
-                        value={typeof subscribeTopicItems[idx]?.text === "string" ? String(subscribeTopicItems[idx].text) : ""}
+                        value={
+                          typeof subscribeTopicItems[idx]?.text === "string"
+                            ? String(subscribeTopicItems[idx].text)
+                            : ""
+                        }
                         onChange={(e) => {
                           const nextTopics = [...subscribeTopicItems];
-                          nextTopics[idx] = { ...(nextTopics[idx] ?? {}), text: e.target.value };
-                          updateJsonObject({ ...parsedJson, topics: nextTopics });
+                          nextTopics[idx] = {
+                            ...(nextTopics[idx] ?? {}),
+                            text: e.target.value,
+                          };
+                          updateJsonObject({
+                            ...parsedJson,
+                            topics: nextTopics,
+                          });
                         }}
                         rows={3}
                         className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
@@ -673,7 +958,12 @@ export function PageContentForm({ item }: PageContentFormProps) {
       ) : null}
 
       <div>
-        <label htmlFor="status" className="block text-sm font-medium text-slate-700">Status</label>
+        <label
+          htmlFor="status"
+          className="block text-sm font-medium text-slate-700"
+        >
+          Status
+        </label>
         <select
           id="status"
           name="status"
@@ -686,7 +976,10 @@ export function PageContentForm({ item }: PageContentFormProps) {
       </div>
 
       <div>
-        <label htmlFor="contentJson" className="block text-sm font-medium text-slate-700">
+        <label
+          htmlFor="contentJson"
+          className="block text-sm font-medium text-slate-700"
+        >
           Structured page data (advanced)
         </label>
         <div className="mb-2 flex flex-wrap items-center gap-2 text-xs text-slate-500">
@@ -696,7 +989,9 @@ export function PageContentForm({ item }: PageContentFormProps) {
             </span>
           ) : null}
           {lastSavedAt ? (
-            <span>Autosaved locally: {new Date(lastSavedAt).toLocaleTimeString()}</span>
+            <span>
+              Autosaved locally: {new Date(lastSavedAt).toLocaleTimeString()}
+            </span>
           ) : null}
           <button
             type="button"
@@ -708,31 +1003,49 @@ export function PageContentForm({ item }: PageContentFormProps) {
         </div>
         {item.slug.startsWith("our-work-") && (
           <div className="mb-3 grid gap-3 rounded-lg border border-border bg-slate-50 p-3">
-            <p className="text-xs font-semibold uppercase tracking-wide text-slate-600">Our Work helper</p>
+            <p className="text-xs font-semibold uppercase tracking-wide text-slate-600">
+              Our Work helper
+            </p>
             <div className="grid gap-3 sm:grid-cols-2">
               <div>
-                <label className="block text-xs font-medium text-slate-600">Section title</label>
+                <label className="block text-xs font-medium text-slate-600">
+                  Section title
+                </label>
                 <input
                   type="text"
-                  value={typeof parsedJson.title === "string" ? parsedJson.title : ""}
+                  value={
+                    typeof parsedJson.title === "string" ? parsedJson.title : ""
+                  }
                   onChange={(e) => updateJsonField("title", e.target.value)}
                   className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                 />
               </div>
               <div>
-                <label className="block text-xs font-medium text-slate-600">Section subtitle</label>
+                <label className="block text-xs font-medium text-slate-600">
+                  Section subtitle
+                </label>
                 <input
                   type="text"
-                  value={typeof parsedJson.subtitle === "string" ? parsedJson.subtitle : ""}
+                  value={
+                    typeof parsedJson.subtitle === "string"
+                      ? parsedJson.subtitle
+                      : ""
+                  }
                   onChange={(e) => updateJsonField("subtitle", e.target.value)}
                   className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                 />
               </div>
             </div>
             <div>
-              <label className="block text-xs font-medium text-slate-600">Section description</label>
+              <label className="block text-xs font-medium text-slate-600">
+                Section description
+              </label>
               <textarea
-                value={typeof parsedJson.description === "string" ? parsedJson.description : ""}
+                value={
+                  typeof parsedJson.description === "string"
+                    ? parsedJson.description
+                    : ""
+                }
                 onChange={(e) => updateJsonField("description", e.target.value)}
                 rows={3}
                 className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
@@ -742,38 +1055,58 @@ export function PageContentForm({ item }: PageContentFormProps) {
         )}
         {item.slug === "awpls" && (
           <div className="mb-3 grid gap-3 rounded-lg border border-border bg-slate-50 p-3">
-            <p className="text-xs font-semibold uppercase tracking-wide text-slate-600">AWPLS helper</p>
-            <div className="grid gap-3 sm:grid-cols-2">
+            <p className="text-xs font-semibold uppercase tracking-wide text-slate-600">
+              AWPLS helper
+            </p>
+            {/* <div className="grid gap-3 sm:grid-cols-2">
               <div>
-                <label className="block text-xs font-medium text-slate-600">Section title</label>
+                <label className="block text-xs font-medium text-slate-600">
+                  Section title
+                </label>
                 <input
                   type="text"
-                  value={typeof parsedJson.title === "string" ? parsedJson.title : ""}
+                  value={
+                    typeof parsedJson.title === "string" ? parsedJson.title : ""
+                  }
                   onChange={(e) => updateJsonField("title", e.target.value)}
                   className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                 />
               </div>
               <div>
-                <label className="block text-xs font-medium text-slate-600">Section subtitle</label>
+                <label className="block text-xs font-medium text-slate-600">
+                  Section subtitle
+                </label>
                 <input
                   type="text"
-                  value={typeof parsedJson.subtitle === "string" ? parsedJson.subtitle : ""}
+                  value={
+                    typeof parsedJson.subtitle === "string"
+                      ? parsedJson.subtitle
+                      : ""
+                  }
                   onChange={(e) => updateJsonField("subtitle", e.target.value)}
                   className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                 />
               </div>
-            </div>
-            <div>
-              <label className="block text-xs font-medium text-slate-600">Section description</label>
+            </div> */}
+            {/* <div>
+              <label className="block text-xs font-medium text-slate-600">
+                Section description
+              </label>
               <textarea
-                value={typeof parsedJson.description === "string" ? parsedJson.description : ""}
+                value={
+                  typeof parsedJson.description === "string"
+                    ? parsedJson.description
+                    : ""
+                }
                 onChange={(e) => updateJsonField("description", e.target.value)}
                 rows={3}
                 className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
               />
-            </div>
+            </div> */}
             <div className="rounded-md border border-border bg-white p-3">
-              <p className="text-xs font-semibold uppercase tracking-wide text-slate-600">AWPLS Images</p>
+              <p className="text-xs font-semibold uppercase tracking-wide text-slate-600">
+                AWPLS Images
+              </p>
               <div className="mt-2 grid gap-2 sm:grid-cols-2">
                 {[
                   { label: "Intro card image", key: "introImage" },
@@ -781,15 +1114,26 @@ export function PageContentForm({ item }: PageContentFormProps) {
                   { label: "Gallery image B", key: "sectionImageB" },
                   { label: "Gallery image C", key: "sectionImageC" },
                   { label: "Targets background image", key: "targetsBgImage" },
-                  { label: "Deliver section background image", key: "deliverBgImage" },
+                  {
+                    label: "Deliver section background image",
+                    key: "deliverBgImage",
+                  },
                 ].map((field) => (
                   <div key={field.key}>
-                    <label className="block text-xs font-medium text-slate-600">{field.label}</label>
+                    <label className="block text-xs font-medium text-slate-600">
+                      {field.label}
+                    </label>
                     <div className="mt-1 flex gap-2">
                       <input
                         type="text"
-                        value={typeof parsedJson[field.key] === "string" ? String(parsedJson[field.key]) : ""}
-                        onChange={(e) => updateJsonField(field.key, e.target.value)}
+                        value={
+                          typeof parsedJson[field.key] === "string"
+                            ? String(parsedJson[field.key])
+                            : ""
+                        }
+                        onChange={(e) =>
+                          updateJsonField(field.key, e.target.value)
+                        }
                         placeholder="media-... or /uploads/..."
                         className="w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                       />
@@ -801,36 +1145,63 @@ export function PageContentForm({ item }: PageContentFormProps) {
                       >
                         <ImagePlus className="h-4 w-4" />
                       </button>
+                      j
                     </div>
                   </div>
                 ))}
               </div>
             </div>
             <div className="rounded-md border border-border bg-white p-3">
-              <p className="text-xs font-semibold uppercase tracking-wide text-slate-600">Main section text</p>
+              <p className="text-xs font-semibold uppercase tracking-wide text-slate-600">
+                Main section text
+              </p>
               <div className="mt-2 grid gap-3 sm:grid-cols-2">
                 <div>
-                  <label className="block text-xs font-medium text-slate-600">Top eyebrow</label>
+                  <label className="block text-xs font-medium text-slate-600">
+                    Top eyebrow
+                  </label>
                   <input
                     type="text"
-                    value={typeof parsedJson.aboutEyebrow === "string" ? parsedJson.aboutEyebrow : ""}
-                    onChange={(e) => updateJsonField("aboutEyebrow", e.target.value)}
+                    value={
+                      typeof parsedJson.aboutEyebrow === "string"
+                        ? parsedJson.aboutEyebrow
+                        : ""
+                    }
+                    onChange={(e) =>
+                      updateJsonField("aboutEyebrow", e.target.value)
+                    }
                     className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                   />
                 </div>
                 <div className="sm:col-span-2">
-                  <label className="block text-xs font-medium text-slate-600">Top heading</label>
+                  <label className="block text-xs font-medium text-slate-600">
+                    Top heading
+                  </label>
                   <input
                     type="text"
-                    value={typeof parsedJson.aboutHeading === "string" ? parsedJson.aboutHeading : ""}
-                    onChange={(e) => updateJsonField("aboutHeading", e.target.value)}
+                    value={
+                      typeof parsedJson.aboutHeading === "string"
+                        ? parsedJson.aboutHeading
+                        : ""
+                    }
+                    onChange={(e) =>
+                      updateJsonField("aboutHeading", e.target.value)
+                    }
                     className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                   />
                 </div>
                 <div className="sm:col-span-2">
-                  <label className="block text-xs font-medium text-slate-600">Top paragraphs (one per line)</label>
+                  <label className="block text-xs font-medium text-slate-600">
+                    Top paragraphs (one per line)
+                  </label>
                   <textarea
-                    value={Array.isArray(parsedJson.aboutParagraphs) ? parsedJson.aboutParagraphs.filter((x) => typeof x === "string").join("\n") : ""}
+                    value={
+                      Array.isArray(parsedJson.aboutParagraphs)
+                        ? parsedJson.aboutParagraphs
+                            .filter((x) => typeof x === "string")
+                            .join("\n")
+                        : ""
+                    }
                     onChange={(e) =>
                       updateJsonObject({
                         ...parsedJson,
@@ -845,28 +1216,52 @@ export function PageContentForm({ item }: PageContentFormProps) {
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-slate-600">Register card heading</label>
+                  <label className="block text-xs font-medium text-slate-600">
+                    Register card heading
+                  </label>
                   <input
                     type="text"
-                    value={typeof parsedJson.registerCardHeading === "string" ? parsedJson.registerCardHeading : ""}
-                    onChange={(e) => updateJsonField("registerCardHeading", e.target.value)}
+                    value={
+                      typeof parsedJson.registerCardHeading === "string"
+                        ? parsedJson.registerCardHeading
+                        : ""
+                    }
+                    onChange={(e) =>
+                      updateJsonField("registerCardHeading", e.target.value)
+                    }
                     className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-slate-600">Register card CTA label</label>
+                  <label className="block text-xs font-medium text-slate-600">
+                    Register card CTA label
+                  </label>
                   <input
                     type="text"
-                    value={typeof parsedJson.registerCardCtaLabel === "string" ? parsedJson.registerCardCtaLabel : ""}
-                    onChange={(e) => updateJsonField("registerCardCtaLabel", e.target.value)}
+                    value={
+                      typeof parsedJson.registerCardCtaLabel === "string"
+                        ? parsedJson.registerCardCtaLabel
+                        : ""
+                    }
+                    onChange={(e) =>
+                      updateJsonField("registerCardCtaLabel", e.target.value)
+                    }
                     className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                   />
                 </div>
                 <div className="sm:col-span-2">
-                  <label className="block text-xs font-medium text-slate-600">Register card body</label>
+                  <label className="block text-xs font-medium text-slate-600">
+                    Register card body
+                  </label>
                   <textarea
-                    value={typeof parsedJson.registerCardBody === "string" ? parsedJson.registerCardBody : ""}
-                    onChange={(e) => updateJsonField("registerCardBody", e.target.value)}
+                    value={
+                      typeof parsedJson.registerCardBody === "string"
+                        ? parsedJson.registerCardBody
+                        : ""
+                    }
+                    onChange={(e) =>
+                      updateJsonField("registerCardBody", e.target.value)
+                    }
                     rows={2}
                     className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                   />
@@ -874,31 +1269,68 @@ export function PageContentForm({ item }: PageContentFormProps) {
               </div>
             </div>
             <div className="rounded-md border border-border bg-white p-3">
-              <p className="text-xs font-semibold uppercase tracking-wide text-slate-600">What AWPLS is</p>
+              <p className="text-xs font-semibold uppercase tracking-wide text-slate-600">
+                What AWPLS is
+              </p>
               <div className="mt-2 grid gap-3">
-                <label className="block text-xs font-medium text-slate-600">Section heading</label>
+                <label className="block text-xs font-medium text-slate-600">
+                  Section heading
+                </label>
                 <input
                   type="text"
-                  value={typeof parsedJson.whatIsHeading === "string" ? parsedJson.whatIsHeading : ""}
-                  onChange={(e) => updateJsonField("whatIsHeading", e.target.value)}
+                  value={
+                    typeof parsedJson.whatIsHeading === "string"
+                      ? parsedJson.whatIsHeading
+                      : ""
+                  }
+                  onChange={(e) =>
+                    updateJsonField("whatIsHeading", e.target.value)
+                  }
                   className="w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                 />
               </div>
               <div className="mt-3 grid gap-3 sm:grid-cols-2">
                 {Array.from({ length: 5 }).map((_, idx) => (
-                  <div key={idx} className={`rounded-md border border-border p-3 ${idx === 4 ? "sm:col-span-2" : ""}`}>
-                    <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">Card {idx + 1}</p>
-                    <label className="mt-2 block text-xs font-medium text-slate-600">Title</label>
+                  <div
+                    key={idx}
+                    className={`rounded-md border border-border p-3 ${idx === 4 ? "sm:col-span-2" : ""}`}
+                  >
+                    <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">
+                      Card {idx + 1}
+                    </p>
+                    <label className="mt-2 block text-xs font-medium text-slate-600">
+                      Title
+                    </label>
                     <input
                       type="text"
-                      value={getNestedString(["whatIsCards", String(idx), "title"])}
-                      onChange={(e) => updateNestedString(["whatIsCards", String(idx), "title"], e.target.value)}
+                      value={getNestedString([
+                        "whatIsCards",
+                        String(idx),
+                        "title",
+                      ])}
+                      onChange={(e) =>
+                        updateNestedString(
+                          ["whatIsCards", String(idx), "title"],
+                          e.target.value,
+                        )
+                      }
                       className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                     />
-                    <label className="mt-2 block text-xs font-medium text-slate-600">Description</label>
+                    <label className="mt-2 block text-xs font-medium text-slate-600">
+                      Description
+                    </label>
                     <textarea
-                      value={getNestedString(["whatIsCards", String(idx), "body"])}
-                      onChange={(e) => updateNestedString(["whatIsCards", String(idx), "body"], e.target.value)}
+                      value={getNestedString([
+                        "whatIsCards",
+                        String(idx),
+                        "body",
+                      ])}
+                      onChange={(e) =>
+                        updateNestedString(
+                          ["whatIsCards", String(idx), "body"],
+                          e.target.value,
+                        )
+                      }
                       rows={3}
                       className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                     />
@@ -907,18 +1339,36 @@ export function PageContentForm({ item }: PageContentFormProps) {
               </div>
             </div>
             <div className="rounded-md border border-border bg-white p-3">
-              <p className="text-xs font-semibold uppercase tracking-wide text-slate-600">Targets and 2026 content</p>
+              <p className="text-xs font-semibold uppercase tracking-wide text-slate-600">
+                Targets and 2026 content
+              </p>
               <div className="mt-2 grid gap-3">
-                <label className="block text-xs font-medium text-slate-600">Targets heading</label>
+                <label className="block text-xs font-medium text-slate-600">
+                  Targets heading
+                </label>
                 <input
                   type="text"
-                  value={typeof parsedJson.targetsHeading === "string" ? parsedJson.targetsHeading : ""}
-                  onChange={(e) => updateJsonField("targetsHeading", e.target.value)}
+                  value={
+                    typeof parsedJson.targetsHeading === "string"
+                      ? parsedJson.targetsHeading
+                      : ""
+                  }
+                  onChange={(e) =>
+                    updateJsonField("targetsHeading", e.target.value)
+                  }
                   className="w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                 />
-                <label className="block text-xs font-medium text-slate-600">Targets points (one per line)</label>
+                <label className="block text-xs font-medium text-slate-600">
+                  Targets points (one per line)
+                </label>
                 <textarea
-                  value={Array.isArray(parsedJson.targetsPoints) ? parsedJson.targetsPoints.filter((x) => typeof x === "string").join("\n") : ""}
+                  value={
+                    Array.isArray(parsedJson.targetsPoints)
+                      ? parsedJson.targetsPoints
+                          .filter((x) => typeof x === "string")
+                          .join("\n")
+                      : ""
+                  }
                   onChange={(e) =>
                     updateJsonObject({
                       ...parsedJson,
@@ -931,16 +1381,32 @@ export function PageContentForm({ item }: PageContentFormProps) {
                   rows={4}
                   className="w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                 />
-                <label className="block text-xs font-medium text-slate-600">About 2026 heading</label>
+                <label className="block text-xs font-medium text-slate-600">
+                  About 2026 heading
+                </label>
                 <input
                   type="text"
-                  value={typeof parsedJson.summit2026Heading === "string" ? parsedJson.summit2026Heading : ""}
-                  onChange={(e) => updateJsonField("summit2026Heading", e.target.value)}
+                  value={
+                    typeof parsedJson.summit2026Heading === "string"
+                      ? parsedJson.summit2026Heading
+                      : ""
+                  }
+                  onChange={(e) =>
+                    updateJsonField("summit2026Heading", e.target.value)
+                  }
                   className="w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                 />
-                <label className="block text-xs font-medium text-slate-600">About 2026 paragraphs (one per line)</label>
+                <label className="block text-xs font-medium text-slate-600">
+                  About 2026 paragraphs (one per line)
+                </label>
                 <textarea
-                  value={Array.isArray(parsedJson.summit2026Paragraphs) ? parsedJson.summit2026Paragraphs.filter((x) => typeof x === "string").join("\n") : ""}
+                  value={
+                    Array.isArray(parsedJson.summit2026Paragraphs)
+                      ? parsedJson.summit2026Paragraphs
+                          .filter((x) => typeof x === "string")
+                          .join("\n")
+                      : ""
+                  }
                   onChange={(e) =>
                     updateJsonObject({
                       ...parsedJson,
@@ -956,18 +1422,36 @@ export function PageContentForm({ item }: PageContentFormProps) {
               </div>
             </div>
             <div className="rounded-md border border-border bg-white p-3">
-              <p className="text-xs font-semibold uppercase tracking-wide text-slate-600">Deliverables and final CTA</p>
+              <p className="text-xs font-semibold uppercase tracking-wide text-slate-600">
+                Deliverables and final CTA
+              </p>
               <div className="mt-2 grid gap-3">
-                <label className="block text-xs font-medium text-slate-600">Deliverables heading</label>
+                <label className="block text-xs font-medium text-slate-600">
+                  Deliverables heading
+                </label>
                 <input
                   type="text"
-                  value={typeof parsedJson.deliverHeading === "string" ? parsedJson.deliverHeading : ""}
-                  onChange={(e) => updateJsonField("deliverHeading", e.target.value)}
+                  value={
+                    typeof parsedJson.deliverHeading === "string"
+                      ? parsedJson.deliverHeading
+                      : ""
+                  }
+                  onChange={(e) =>
+                    updateJsonField("deliverHeading", e.target.value)
+                  }
                   className="w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                 />
-                <label className="block text-xs font-medium text-slate-600">Deliverables points (one per line)</label>
+                <label className="block text-xs font-medium text-slate-600">
+                  Deliverables points (one per line)
+                </label>
                 <textarea
-                  value={Array.isArray(parsedJson.deliverPoints) ? parsedJson.deliverPoints.filter((x) => typeof x === "string").join("\n") : ""}
+                  value={
+                    Array.isArray(parsedJson.deliverPoints)
+                      ? parsedJson.deliverPoints
+                          .filter((x) => typeof x === "string")
+                          .join("\n")
+                      : ""
+                  }
                   onChange={(e) =>
                     updateJsonObject({
                       ...parsedJson,
@@ -980,37 +1464,69 @@ export function PageContentForm({ item }: PageContentFormProps) {
                   rows={6}
                   className="w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                 />
-                <label className="block text-xs font-medium text-slate-600">Deliver closing paragraph</label>
+                <label className="block text-xs font-medium text-slate-600">
+                  Deliver closing paragraph
+                </label>
                 <textarea
-                  value={typeof parsedJson.deliverClosingParagraph === "string" ? parsedJson.deliverClosingParagraph : ""}
-                  onChange={(e) => updateJsonField("deliverClosingParagraph", e.target.value)}
+                  value={
+                    typeof parsedJson.deliverClosingParagraph === "string"
+                      ? parsedJson.deliverClosingParagraph
+                      : ""
+                  }
+                  onChange={(e) =>
+                    updateJsonField("deliverClosingParagraph", e.target.value)
+                  }
                   rows={2}
                   className="w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                 />
                 <div className="grid gap-3 sm:grid-cols-2">
                   <div>
-                    <label className="block text-xs font-medium text-slate-600">Final CTA heading</label>
+                    <label className="block text-xs font-medium text-slate-600">
+                      Final CTA heading
+                    </label>
                     <input
                       type="text"
-                      value={typeof parsedJson.finalCtaHeading === "string" ? parsedJson.finalCtaHeading : ""}
-                      onChange={(e) => updateJsonField("finalCtaHeading", e.target.value)}
+                      value={
+                        typeof parsedJson.finalCtaHeading === "string"
+                          ? parsedJson.finalCtaHeading
+                          : ""
+                      }
+                      onChange={(e) =>
+                        updateJsonField("finalCtaHeading", e.target.value)
+                      }
                       className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-medium text-slate-600">Final CTA button label</label>
+                    <label className="block text-xs font-medium text-slate-600">
+                      Final CTA button label
+                    </label>
                     <input
                       type="text"
-                      value={typeof parsedJson.finalCtaButtonLabel === "string" ? parsedJson.finalCtaButtonLabel : ""}
-                      onChange={(e) => updateJsonField("finalCtaButtonLabel", e.target.value)}
+                      value={
+                        typeof parsedJson.finalCtaButtonLabel === "string"
+                          ? parsedJson.finalCtaButtonLabel
+                          : ""
+                      }
+                      onChange={(e) =>
+                        updateJsonField("finalCtaButtonLabel", e.target.value)
+                      }
                       className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                     />
                   </div>
                 </div>
-                <label className="block text-xs font-medium text-slate-600">Final CTA body</label>
+                <label className="block text-xs font-medium text-slate-600">
+                  Final CTA body
+                </label>
                 <textarea
-                  value={typeof parsedJson.finalCtaBody === "string" ? parsedJson.finalCtaBody : ""}
-                  onChange={(e) => updateJsonField("finalCtaBody", e.target.value)}
+                  value={
+                    typeof parsedJson.finalCtaBody === "string"
+                      ? parsedJson.finalCtaBody
+                      : ""
+                  }
+                  onChange={(e) =>
+                    updateJsonField("finalCtaBody", e.target.value)
+                  }
                   rows={2}
                   className="w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                 />
@@ -1020,15 +1536,26 @@ export function PageContentForm({ item }: PageContentFormProps) {
         )}
         {item.slug === "about" && (
           <div className="mb-3 grid gap-3 rounded-lg border border-border bg-slate-50 p-3">
-            <p className="text-xs font-semibold uppercase tracking-wide text-slate-600">About page helper</p>
+            <p className="text-xs font-semibold uppercase tracking-wide text-slate-600">
+              About page helper
+            </p>
             <p className="text-xs text-slate-500">
-              For hero, mission and team tabs use <strong>Admin → About settings</strong>. Use fields here for lead
+              For hero, mission and team tabs use{" "}
+              <strong>Admin → About settings</strong>. Use fields here for lead
               paragraphs, delivery cards, and partnerships copy/images.
             </p>
             <div>
-              <label className="block text-xs font-medium text-slate-600">Lead paragraphs (one per line)</label>
+              <label className="block text-xs font-medium text-slate-600">
+                Lead paragraphs (one per line)
+              </label>
               <textarea
-                value={Array.isArray(parsedJson.leadParagraphs) ? parsedJson.leadParagraphs.filter((x) => typeof x === "string").join("\n") : ""}
+                value={
+                  Array.isArray(parsedJson.leadParagraphs)
+                    ? parsedJson.leadParagraphs
+                        .filter((x) => typeof x === "string")
+                        .join("\n")
+                    : ""
+                }
                 onChange={(e) =>
                   updateJsonObject({
                     ...parsedJson,
@@ -1043,39 +1570,80 @@ export function PageContentForm({ item }: PageContentFormProps) {
               />
             </div>
             <div>
-              <label className="block text-xs font-medium text-slate-600">Partnerships and network text</label>
+              <label className="block text-xs font-medium text-slate-600">
+                Partnerships and network text
+              </label>
               <textarea
-                value={typeof parsedJson.partnershipsText === "string" ? parsedJson.partnershipsText : ""}
-                onChange={(e) => updateJsonField("partnershipsText", e.target.value)}
+                value={
+                  typeof parsedJson.partnershipsText === "string"
+                    ? parsedJson.partnershipsText
+                    : ""
+                }
+                onChange={(e) =>
+                  updateJsonField("partnershipsText", e.target.value)
+                }
                 rows={4}
                 className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
               />
             </div>
             <div className="rounded-md border border-border bg-white p-3">
-              <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-600">Delivery cards (4)</p>
+              <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-600">
+                Delivery cards (4)
+              </p>
               <div className="space-y-3">
                 {Array.from({ length: 4 }).map((_, index) => (
-                  <div key={index} className="rounded-md border border-border p-3">
-                    <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">Card {index + 1}</p>
+                  <div
+                    key={index}
+                    className="rounded-md border border-border p-3"
+                  >
+                    <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">
+                      Card {index + 1}
+                    </p>
                     <div className="mt-2 grid gap-2 sm:grid-cols-2">
                       <input
                         type="text"
-                        value={getNestedString(["deliveryPoints", String(index), "title"])}
-                        onChange={(e) => updateNestedString(["deliveryPoints", String(index), "title"], e.target.value)}
+                        value={getNestedString([
+                          "deliveryPoints",
+                          String(index),
+                          "title",
+                        ])}
+                        onChange={(e) =>
+                          updateNestedString(
+                            ["deliveryPoints", String(index), "title"],
+                            e.target.value,
+                          )
+                        }
                         placeholder="Title"
                         className="rounded-md border border-border bg-white px-3 py-2 text-sm"
                       />
                       <div className="flex gap-2">
                         <input
                           type="text"
-                          value={getNestedString(["deliveryPoints", String(index), "image"])}
-                          onChange={(e) => updateNestedString(["deliveryPoints", String(index), "image"], e.target.value)}
+                          value={getNestedString([
+                            "deliveryPoints",
+                            String(index),
+                            "image",
+                          ])}
+                          onChange={(e) =>
+                            updateNestedString(
+                              ["deliveryPoints", String(index), "image"],
+                              e.target.value,
+                            )
+                          }
                           placeholder="Card image (media-id/url/path)"
                           className="w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                         />
                         <button
                           type="button"
-                          onClick={() => setPickerTarget({ nested: ["deliveryPoints", String(index), "image"] })}
+                          onClick={() =>
+                            setPickerTarget({
+                              nested: [
+                                "deliveryPoints",
+                                String(index),
+                                "image",
+                              ],
+                            })
+                          }
                           className="inline-flex items-center gap-1 rounded-md border border-border bg-white px-3 py-2 text-sm text-slate-700 hover:bg-slate-100"
                           title="Pick from Media Library"
                         >
@@ -1084,8 +1652,17 @@ export function PageContentForm({ item }: PageContentFormProps) {
                       </div>
                     </div>
                     <textarea
-                      value={getNestedString(["deliveryPoints", String(index), "body"])}
-                      onChange={(e) => updateNestedString(["deliveryPoints", String(index), "body"], e.target.value)}
+                      value={getNestedString([
+                        "deliveryPoints",
+                        String(index),
+                        "body",
+                      ])}
+                      onChange={(e) =>
+                        updateNestedString(
+                          ["deliveryPoints", String(index), "body"],
+                          e.target.value,
+                        )
+                      }
                       rows={3}
                       placeholder="Card description"
                       className="mt-2 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
@@ -1098,44 +1675,64 @@ export function PageContentForm({ item }: PageContentFormProps) {
         )}
         {item.slug === "our-work" && (
           <div className="mb-3 grid gap-3 rounded-lg border border-border bg-slate-50 p-3">
-            <p className="text-xs font-semibold uppercase tracking-wide text-slate-600">Our Work main page helper</p>
+            <p className="text-xs font-semibold uppercase tracking-wide text-slate-600">
+              Our Work main page helper
+            </p>
             <div className="rounded-md border border-border bg-white p-3">
-              <p className="text-xs font-semibold uppercase tracking-wide text-slate-600">Hero and section labels</p>
+              <p className="text-xs font-semibold uppercase tracking-wide text-slate-600">
+                Hero and section labels
+              </p>
               <div className="mt-3 grid gap-3 sm:grid-cols-2">
                 <div>
-                  <label className="block text-xs font-medium text-slate-600">Hero title</label>
+                  <label className="block text-xs font-medium text-slate-600">
+                    Hero title
+                  </label>
                   <input
                     type="text"
                     value={getNestedString(["hero", "title"])}
-                    onChange={(e) => updateNestedString(["hero", "title"], e.target.value)}
+                    onChange={(e) =>
+                      updateNestedString(["hero", "title"], e.target.value)
+                    }
                     className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-slate-600">Hero subtitle</label>
+                  <label className="block text-xs font-medium text-slate-600">
+                    Hero subtitle
+                  </label>
                   <input
                     type="text"
                     value={getNestedString(["hero", "subtitle"])}
-                    onChange={(e) => updateNestedString(["hero", "subtitle"], e.target.value)}
+                    onChange={(e) =>
+                      updateNestedString(["hero", "subtitle"], e.target.value)
+                    }
                     className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-slate-600">Approach eyebrow</label>
+                  <label className="block text-xs font-medium text-slate-600">
+                    Approach eyebrow
+                  </label>
                   <input
                     type="text"
                     value={getNestedString(["approachEyebrow"])}
-                    onChange={(e) => updateNestedString(["approachEyebrow"], e.target.value)}
+                    onChange={(e) =>
+                      updateNestedString(["approachEyebrow"], e.target.value)
+                    }
                     placeholder="How we work"
                     className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-slate-600">Work areas eyebrow</label>
+                  <label className="block text-xs font-medium text-slate-600">
+                    Work areas eyebrow
+                  </label>
                   <input
                     type="text"
                     value={getNestedString(["workAreasEyebrow"])}
-                    onChange={(e) => updateNestedString(["workAreasEyebrow"], e.target.value)}
+                    onChange={(e) =>
+                      updateNestedString(["workAreasEyebrow"], e.target.value)
+                    }
                     placeholder="Programmes & projects"
                     className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                   />
@@ -1144,63 +1741,99 @@ export function PageContentForm({ item }: PageContentFormProps) {
             </div>
 
             <div className="rounded-md border border-border bg-white p-3">
-              <p className="text-xs font-semibold uppercase tracking-wide text-slate-600">Work area tabs and intros</p>
+              <p className="text-xs font-semibold uppercase tracking-wide text-slate-600">
+                Work area tabs and intros
+              </p>
               <p className="mt-1 text-[11px] text-slate-500">
-                Set the tab labels and the paragraph shown under each tab on <code className="rounded bg-slate-100 px-0.5">/our-work</code>.
+                Set the tab labels and the paragraph shown under each tab on{" "}
+                <code className="rounded bg-slate-100 px-0.5">/our-work</code>.
               </p>
               <div className="mt-3 grid gap-3 sm:grid-cols-3">
                 <div>
-                  <label className="block text-xs font-medium text-slate-600">Tab label: Programs</label>
+                  <label className="block text-xs font-medium text-slate-600">
+                    Tab label: Programs
+                  </label>
                   <input
                     type="text"
                     value={getNestedString(["tabs", "programs"])}
-                    onChange={(e) => updateNestedString(["tabs", "programs"], e.target.value)}
+                    onChange={(e) =>
+                      updateNestedString(["tabs", "programs"], e.target.value)
+                    }
                     className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-slate-600">Tab label: Projects</label>
+                  <label className="block text-xs font-medium text-slate-600">
+                    Tab label: Projects
+                  </label>
                   <input
                     type="text"
                     value={getNestedString(["tabs", "projects"])}
-                    onChange={(e) => updateNestedString(["tabs", "projects"], e.target.value)}
+                    onChange={(e) =>
+                      updateNestedString(["tabs", "projects"], e.target.value)
+                    }
                     className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-slate-600">Tab label: Advisory</label>
+                  <label className="block text-xs font-medium text-slate-600">
+                    Tab label: Advisory
+                  </label>
                   <input
                     type="text"
                     value={getNestedString(["tabs", "advisory"])}
-                    onChange={(e) => updateNestedString(["tabs", "advisory"], e.target.value)}
+                    onChange={(e) =>
+                      updateNestedString(["tabs", "advisory"], e.target.value)
+                    }
                     className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                   />
                 </div>
               </div>
               <div className="mt-3 grid gap-3 sm:grid-cols-3">
                 <div>
-                  <label className="block text-xs font-medium text-slate-600">Programs intro text</label>
+                  <label className="block text-xs font-medium text-slate-600">
+                    Programs intro text
+                  </label>
                   <textarea
                     value={getNestedString(["programs", "description"])}
-                    onChange={(e) => updateNestedString(["programs", "description"], e.target.value)}
+                    onChange={(e) =>
+                      updateNestedString(
+                        ["programs", "description"],
+                        e.target.value,
+                      )
+                    }
                     rows={4}
                     className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-slate-600">Projects intro text</label>
+                  <label className="block text-xs font-medium text-slate-600">
+                    Projects intro text
+                  </label>
                   <textarea
                     value={getNestedString(["projects", "description"])}
-                    onChange={(e) => updateNestedString(["projects", "description"], e.target.value)}
+                    onChange={(e) =>
+                      updateNestedString(
+                        ["projects", "description"],
+                        e.target.value,
+                      )
+                    }
                     rows={4}
                     className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-slate-600">Advisory intro text</label>
+                  <label className="block text-xs font-medium text-slate-600">
+                    Advisory intro text
+                  </label>
                   <textarea
                     value={getNestedString(["advisory", "description"])}
-                    onChange={(e) => updateNestedString(["advisory", "description"], e.target.value)}
+                    onChange={(e) =>
+                      updateNestedString(
+                        ["advisory", "description"],
+                        e.target.value,
+                      )
+                    }
                     rows={4}
                     className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                   />
@@ -1209,28 +1842,38 @@ export function PageContentForm({ item }: PageContentFormProps) {
             </div>
 
             <div className="rounded-md border border-border bg-white p-3">
-              <p className="text-xs font-semibold uppercase tracking-wide text-slate-600">Approach section</p>
+              <p className="text-xs font-semibold uppercase tracking-wide text-slate-600">
+                Approach section
+              </p>
               <div className="mt-3 grid gap-3">
                 <div>
-                  <label className="block text-xs font-medium text-slate-600">Approach title</label>
+                  <label className="block text-xs font-medium text-slate-600">
+                    Approach title
+                  </label>
                   <input
                     type="text"
                     value={getNestedString(["approach", "title"])}
-                    onChange={(e) => updateNestedString(["approach", "title"], e.target.value)}
+                    onChange={(e) =>
+                      updateNestedString(["approach", "title"], e.target.value)
+                    }
                     className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-slate-600">Approach intro paragraphs (one per line)</label>
+                  <label className="block text-xs font-medium text-slate-600">
+                    Approach intro paragraphs (one per line)
+                  </label>
                   <textarea
-                    value={getNestedStringArray(["approachIntroParagraphs"]).join("\n")}
+                    value={getNestedStringArray([
+                      "approachIntroParagraphs",
+                    ]).join("\n")}
                     onChange={(e) =>
                       updateNestedStringArray(
                         ["approachIntroParagraphs"],
                         e.target.value
                           .split("\n")
                           .map((line) => line.trim())
-                          .filter(Boolean)
+                          .filter(Boolean),
                       )
                     }
                     rows={6}
@@ -1239,25 +1882,37 @@ export function PageContentForm({ item }: PageContentFormProps) {
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-slate-600">Objectives lead text</label>
+                  <label className="block text-xs font-medium text-slate-600">
+                    Objectives lead text
+                  </label>
                   <input
                     type="text"
                     value={getNestedString(["approach", "objectivesLead"])}
-                    onChange={(e) => updateNestedString(["approach", "objectivesLead"], e.target.value)}
+                    onChange={(e) =>
+                      updateNestedString(
+                        ["approach", "objectivesLead"],
+                        e.target.value,
+                      )
+                    }
                     className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-slate-600">Objectives points (one per line)</label>
+                  <label className="block text-xs font-medium text-slate-600">
+                    Objectives points (one per line)
+                  </label>
                   <textarea
-                    value={getNestedStringArray(["approach", "objectives"]).join("\n")}
+                    value={getNestedStringArray([
+                      "approach",
+                      "objectives",
+                    ]).join("\n")}
                     onChange={(e) =>
                       updateNestedStringArray(
                         ["approach", "objectives"],
                         e.target.value
                           .split("\n")
                           .map((line) => line.trim())
-                          .filter(Boolean)
+                          .filter(Boolean),
                       )
                     }
                     rows={7}
@@ -1266,18 +1921,29 @@ export function PageContentForm({ item }: PageContentFormProps) {
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-slate-600">Objectives block background image</label>
+                  <label className="block text-xs font-medium text-slate-600">
+                    Objectives block background image
+                  </label>
                   <div className="mt-1 flex gap-2">
                     <input
                       type="text"
                       value={getNestedString(["approachObjectivesBgImage"])}
-                      onChange={(e) => updateNestedString(["approachObjectivesBgImage"], e.target.value)}
+                      onChange={(e) =>
+                        updateNestedString(
+                          ["approachObjectivesBgImage"],
+                          e.target.value,
+                        )
+                      }
                       placeholder="media-... or /uploads/..."
                       className="w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                     />
                     <button
                       type="button"
-                      onClick={() => setPickerTarget({ nested: ["approachObjectivesBgImage"] })}
+                      onClick={() =>
+                        setPickerTarget({
+                          nested: ["approachObjectivesBgImage"],
+                        })
+                      }
                       className="inline-flex items-center gap-1 rounded-md border border-border bg-white px-3 py-2 text-sm text-slate-700 hover:bg-slate-100"
                       title="Pick from Media Library"
                     >
@@ -1289,10 +1955,17 @@ export function PageContentForm({ item }: PageContentFormProps) {
             </div>
             <div className="rounded-md border border-border bg-white p-3">
               <div className="mb-2 flex items-center justify-between">
-                <p className="text-xs font-semibold uppercase tracking-wide text-slate-600">Advisory cards</p>
+                <p className="text-xs font-semibold uppercase tracking-wide text-slate-600">
+                  Advisory cards
+                </p>
                 <button
                   type="button"
-                  onClick={() => updateNestedArray(["advisory", "cards"], (arr) => [...arr, { title: "", description: "" }])}
+                  onClick={() =>
+                    updateNestedArray(["advisory", "cards"], (arr) => [
+                      ...arr,
+                      { title: "", description: "" },
+                    ])
+                  }
                   className="rounded-md border border-border px-2 py-1 text-xs text-slate-700 hover:bg-slate-50"
                 >
                   + Add card
@@ -1300,13 +1973,18 @@ export function PageContentForm({ item }: PageContentFormProps) {
               </div>
               <div className="space-y-2">
                 {ourWorkAdvisoryCards.map((card, idx) => (
-                  <div key={idx} className="rounded-md border border-border p-3">
+                  <div
+                    key={idx}
+                    className="rounded-md border border-border p-3"
+                  >
                     <div className="grid gap-2 sm:grid-cols-2">
                       <input
                         value={typeof card.title === "string" ? card.title : ""}
                         onChange={(e) =>
                           updateNestedArray(["advisory", "cards"], (arr) =>
-                            arr.map((c, i) => (i === idx ? { ...c, title: e.target.value } : c))
+                            arr.map((c, i) =>
+                              i === idx ? { ...c, title: e.target.value } : c,
+                            ),
                           )
                         }
                         placeholder="Card title"
@@ -1314,17 +1992,29 @@ export function PageContentForm({ item }: PageContentFormProps) {
                       />
                       <button
                         type="button"
-                        onClick={() => updateNestedArray(["advisory", "cards"], (arr) => arr.filter((_, i) => i !== idx))}
+                        onClick={() =>
+                          updateNestedArray(["advisory", "cards"], (arr) =>
+                            arr.filter((_, i) => i !== idx),
+                          )
+                        }
                         className="justify-self-end rounded-md border border-red-200 px-2 py-1 text-xs text-red-700 hover:bg-red-50"
                       >
                         Remove
                       </button>
                     </div>
                     <textarea
-                      value={typeof card.description === "string" ? card.description : ""}
+                      value={
+                        typeof card.description === "string"
+                          ? card.description
+                          : ""
+                      }
                       onChange={(e) =>
                         updateNestedArray(["advisory", "cards"], (arr) =>
-                          arr.map((c, i) => (i === idx ? { ...c, description: e.target.value } : c))
+                          arr.map((c, i) =>
+                            i === idx
+                              ? { ...c, description: e.target.value }
+                              : c,
+                          ),
                         )
                       }
                       rows={3}
@@ -1339,13 +2029,25 @@ export function PageContentForm({ item }: PageContentFormProps) {
         )}
         {(item.slug === "our-work-programs" || item.slug === "programs") && (
           <div className="mb-3 grid gap-3 rounded-lg border border-border bg-slate-50 p-3">
-            <p className="text-xs font-semibold uppercase tracking-wide text-slate-600">Programs page helper</p>
+            <p className="text-xs font-semibold uppercase tracking-wide text-slate-600">
+              Programs page helper
+            </p>
             <p className="text-[11px] text-slate-500">
-              Edit the carousel items shown on <code className="rounded bg-slate-100 px-0.5">/our-work/programs</code>.
-              Leave <code className="rounded bg-slate-100 px-0.5">backgroundImage</code> blank to use the default image fallback.
+              Edit the carousel items shown on{" "}
+              <code className="rounded bg-slate-100 px-0.5">
+                /our-work/programs
+              </code>
+              . Leave{" "}
+              <code className="rounded bg-slate-100 px-0.5">
+                backgroundImage
+              </code>{" "}
+              blank to use the default image fallback.
             </p>
             <div className="flex items-center justify-between gap-3">
-              <p className="text-[11px] text-slate-500">Use the arrows to reorder items. These values are saved into the page content JSON.</p>
+              <p className="text-[11px] text-slate-500">
+                Use the arrows to reorder items. These values are saved into the
+                page content JSON.
+              </p>
               <button
                 type="button"
                 onClick={addProgram}
@@ -1356,12 +2058,19 @@ export function PageContentForm({ item }: PageContentFormProps) {
             </div>
             <div className="space-y-3">
               {ourWorkPrograms.length === 0 ? (
-                <p className="text-sm text-slate-500">No program items yet. Add the first one above.</p>
+                <p className="text-sm text-slate-500">
+                  No program items yet. Add the first one above.
+                </p>
               ) : (
                 ourWorkPrograms.map((program, index) => (
-                  <div key={index} className="rounded-md border border-border bg-white p-3 shadow-sm">
+                  <div
+                    key={index}
+                    className="rounded-md border border-border bg-white p-3 shadow-sm"
+                  >
                     <div className="flex flex-wrap items-center gap-2">
-                      <p className="text-xs font-semibold uppercase tracking-wide text-slate-600">Item {index + 1}</p>
+                      <p className="text-xs font-semibold uppercase tracking-wide text-slate-600">
+                        Item {index + 1}
+                      </p>
                       <div className="ml-auto flex items-center gap-1">
                         <button
                           type="button"
@@ -1390,36 +2099,72 @@ export function PageContentForm({ item }: PageContentFormProps) {
                     </div>
                     <div className="mt-3 grid gap-3">
                       <div>
-                        <label className="block text-xs font-medium text-slate-600">Title</label>
+                        <label className="block text-xs font-medium text-slate-600">
+                          Title
+                        </label>
                         <input
                           type="text"
-                          value={typeof program.title === "string" ? program.title : ""}
-                          onChange={(e) => updateProgram(index, "title", e.target.value)}
+                          value={
+                            typeof program.title === "string"
+                              ? program.title
+                              : ""
+                          }
+                          onChange={(e) =>
+                            updateProgram(index, "title", e.target.value)
+                          }
                           className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                         />
                       </div>
                       <div>
-                        <label className="block text-xs font-medium text-slate-600">Description</label>
+                        <label className="block text-xs font-medium text-slate-600">
+                          Description
+                        </label>
                         <textarea
-                          value={typeof program.description === "string" ? program.description : ""}
-                          onChange={(e) => updateProgram(index, "description", e.target.value)}
+                          value={
+                            typeof program.description === "string"
+                              ? program.description
+                              : ""
+                          }
+                          onChange={(e) =>
+                            updateProgram(index, "description", e.target.value)
+                          }
                           rows={4}
                           className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                         />
                       </div>
                       <div>
-                        <label className="block text-xs font-medium text-slate-600">Background image</label>
+                        <label className="block text-xs font-medium text-slate-600">
+                          Background image
+                        </label>
                         <div className="mt-1 flex gap-2">
                           <input
                             type="text"
-                            value={typeof program.backgroundImage === "string" ? program.backgroundImage : ""}
-                            onChange={(e) => updateProgram(index, "backgroundImage", e.target.value)}
+                            value={
+                              typeof program.backgroundImage === "string"
+                                ? program.backgroundImage
+                                : ""
+                            }
+                            onChange={(e) =>
+                              updateProgram(
+                                index,
+                                "backgroundImage",
+                                e.target.value,
+                              )
+                            }
                             className="w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                             placeholder="media id, image URL, or /uploads/..."
                           />
                           <button
                             type="button"
-                            onClick={() => setPickerTarget({ nested: ["programs", String(index), "backgroundImage"] })}
+                            onClick={() =>
+                              setPickerTarget({
+                                nested: [
+                                  "programs",
+                                  String(index),
+                                  "backgroundImage",
+                                ],
+                              })
+                            }
                             className="inline-flex items-center rounded-md border border-border bg-white px-2 py-1 text-sm text-slate-700 hover:bg-slate-100"
                             title="Pick from Media Library"
                           >
@@ -1436,13 +2181,25 @@ export function PageContentForm({ item }: PageContentFormProps) {
         )}
         {(item.slug === "our-work-projects" || item.slug === "projects") && (
           <div className="mb-3 grid gap-3 rounded-lg border border-border bg-slate-50 p-3">
-            <p className="text-xs font-semibold uppercase tracking-wide text-slate-600">Projects page helper</p>
+            <p className="text-xs font-semibold uppercase tracking-wide text-slate-600">
+              Projects page helper
+            </p>
             <p className="text-[11px] text-slate-500">
-              Edit the carousel items shown on <code className="rounded bg-slate-100 px-0.5">/our-work/projects</code>.
-              Leave <code className="rounded bg-slate-100 px-0.5">backgroundImage</code> blank to use the default image fallback.
+              Edit the carousel items shown on{" "}
+              <code className="rounded bg-slate-100 px-0.5">
+                /our-work/projects
+              </code>
+              . Leave{" "}
+              <code className="rounded bg-slate-100 px-0.5">
+                backgroundImage
+              </code>{" "}
+              blank to use the default image fallback.
             </p>
             <div className="flex items-center justify-between gap-3">
-              <p className="text-[11px] text-slate-500">Use the arrows to reorder items. These values are saved into the page content JSON.</p>
+              <p className="text-[11px] text-slate-500">
+                Use the arrows to reorder items. These values are saved into the
+                page content JSON.
+              </p>
               <button
                 type="button"
                 onClick={addProject}
@@ -1453,12 +2210,19 @@ export function PageContentForm({ item }: PageContentFormProps) {
             </div>
             <div className="space-y-3">
               {ourWorkProjects.length === 0 ? (
-                <p className="text-sm text-slate-500">No project items yet. Add the first one above.</p>
+                <p className="text-sm text-slate-500">
+                  No project items yet. Add the first one above.
+                </p>
               ) : (
                 ourWorkProjects.map((project, index) => (
-                  <div key={index} className="rounded-md border border-border bg-white p-3 shadow-sm">
+                  <div
+                    key={index}
+                    className="rounded-md border border-border bg-white p-3 shadow-sm"
+                  >
                     <div className="flex flex-wrap items-center gap-2">
-                      <p className="text-xs font-semibold uppercase tracking-wide text-slate-600">Item {index + 1}</p>
+                      <p className="text-xs font-semibold uppercase tracking-wide text-slate-600">
+                        Item {index + 1}
+                      </p>
                       <div className="ml-auto flex items-center gap-1">
                         <button
                           type="button"
@@ -1487,36 +2251,72 @@ export function PageContentForm({ item }: PageContentFormProps) {
                     </div>
                     <div className="mt-3 grid gap-3">
                       <div>
-                        <label className="block text-xs font-medium text-slate-600">Title</label>
+                        <label className="block text-xs font-medium text-slate-600">
+                          Title
+                        </label>
                         <input
                           type="text"
-                          value={typeof project.title === "string" ? project.title : ""}
-                          onChange={(e) => updateProject(index, "title", e.target.value)}
+                          value={
+                            typeof project.title === "string"
+                              ? project.title
+                              : ""
+                          }
+                          onChange={(e) =>
+                            updateProject(index, "title", e.target.value)
+                          }
                           className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                         />
                       </div>
                       <div>
-                        <label className="block text-xs font-medium text-slate-600">Description</label>
+                        <label className="block text-xs font-medium text-slate-600">
+                          Description
+                        </label>
                         <textarea
-                          value={typeof project.description === "string" ? project.description : ""}
-                          onChange={(e) => updateProject(index, "description", e.target.value)}
+                          value={
+                            typeof project.description === "string"
+                              ? project.description
+                              : ""
+                          }
+                          onChange={(e) =>
+                            updateProject(index, "description", e.target.value)
+                          }
                           rows={4}
                           className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                         />
                       </div>
                       <div>
-                        <label className="block text-xs font-medium text-slate-600">Background image</label>
+                        <label className="block text-xs font-medium text-slate-600">
+                          Background image
+                        </label>
                         <div className="mt-1 flex gap-2">
                           <input
                             type="text"
-                            value={typeof project.backgroundImage === "string" ? project.backgroundImage : ""}
-                            onChange={(e) => updateProject(index, "backgroundImage", e.target.value)}
+                            value={
+                              typeof project.backgroundImage === "string"
+                                ? project.backgroundImage
+                                : ""
+                            }
+                            onChange={(e) =>
+                              updateProject(
+                                index,
+                                "backgroundImage",
+                                e.target.value,
+                              )
+                            }
                             className="w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                             placeholder="media id, image URL, or /uploads/..."
                           />
                           <button
                             type="button"
-                            onClick={() => setPickerTarget({ nested: ["cards", String(index), "backgroundImage"] })}
+                            onClick={() =>
+                              setPickerTarget({
+                                nested: [
+                                  "cards",
+                                  String(index),
+                                  "backgroundImage",
+                                ],
+                              })
+                            }
                             className="inline-flex items-center rounded-md border border-border bg-white px-2 py-1 text-sm text-slate-700 hover:bg-slate-100"
                             title="Pick from Media Library"
                           >
@@ -1533,12 +2333,21 @@ export function PageContentForm({ item }: PageContentFormProps) {
         )}
         {(item.slug === "our-work-advisory" || item.slug === "advisory") && (
           <div className="mb-3 grid gap-3 rounded-lg border border-border bg-slate-50 p-3">
-            <p className="text-xs font-semibold uppercase tracking-wide text-slate-600">Advisory page helper</p>
+            <p className="text-xs font-semibold uppercase tracking-wide text-slate-600">
+              Advisory page helper
+            </p>
             <p className="text-[11px] text-slate-500">
-              Edit the carousel items shown on <code className="rounded bg-slate-100 px-0.5">/our-work/advisory</code>.
+              Edit the carousel items shown on{" "}
+              <code className="rounded bg-slate-100 px-0.5">
+                /our-work/advisory
+              </code>
+              .
             </p>
             <div className="flex items-center justify-between gap-3">
-              <p className="text-[11px] text-slate-500">Use the arrows to reorder items. These values are saved into the page content JSON.</p>
+              <p className="text-[11px] text-slate-500">
+                Use the arrows to reorder items. These values are saved into the
+                page content JSON.
+              </p>
               <button
                 type="button"
                 onClick={addAdvisoryItem}
@@ -1549,12 +2358,19 @@ export function PageContentForm({ item }: PageContentFormProps) {
             </div>
             <div className="space-y-3">
               {advisoryItems.length === 0 ? (
-                <p className="text-sm text-slate-500">No advisory items yet. Add the first one above.</p>
+                <p className="text-sm text-slate-500">
+                  No advisory items yet. Add the first one above.
+                </p>
               ) : (
                 advisoryItems.map((item, index) => (
-                  <div key={index} className="rounded-md border border-border bg-white p-3 shadow-sm">
+                  <div
+                    key={index}
+                    className="rounded-md border border-border bg-white p-3 shadow-sm"
+                  >
                     <div className="flex flex-wrap items-center gap-2">
-                      <p className="text-xs font-semibold uppercase tracking-wide text-slate-600">Item {index + 1}</p>
+                      <p className="text-xs font-semibold uppercase tracking-wide text-slate-600">
+                        Item {index + 1}
+                      </p>
                       <div className="ml-auto flex items-center gap-1">
                         <button
                           type="button"
@@ -1583,36 +2399,74 @@ export function PageContentForm({ item }: PageContentFormProps) {
                     </div>
                     <div className="mt-3 grid gap-3">
                       <div>
-                        <label className="block text-xs font-medium text-slate-600">Title</label>
+                        <label className="block text-xs font-medium text-slate-600">
+                          Title
+                        </label>
                         <input
                           type="text"
-                          value={typeof item.title === "string" ? item.title : ""}
-                          onChange={(e) => updateAdvisoryItem(index, "title", e.target.value)}
+                          value={
+                            typeof item.title === "string" ? item.title : ""
+                          }
+                          onChange={(e) =>
+                            updateAdvisoryItem(index, "title", e.target.value)
+                          }
                           className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                         />
                       </div>
                       <div>
-                        <label className="block text-xs font-medium text-slate-600">Description</label>
+                        <label className="block text-xs font-medium text-slate-600">
+                          Description
+                        </label>
                         <textarea
-                          value={typeof item.description === "string" ? item.description : ""}
-                          onChange={(e) => updateAdvisoryItem(index, "description", e.target.value)}
+                          value={
+                            typeof item.description === "string"
+                              ? item.description
+                              : ""
+                          }
+                          onChange={(e) =>
+                            updateAdvisoryItem(
+                              index,
+                              "description",
+                              e.target.value,
+                            )
+                          }
                           rows={4}
                           className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                         />
                       </div>
                       <div>
-                        <label className="block text-xs font-medium text-slate-600">Background image</label>
+                        <label className="block text-xs font-medium text-slate-600">
+                          Background image
+                        </label>
                         <div className="mt-1 flex gap-2">
                           <input
                             type="text"
-                            value={typeof item.backgroundImage === "string" ? item.backgroundImage : ""}
-                            onChange={(e) => updateAdvisoryItem(index, "backgroundImage", e.target.value)}
+                            value={
+                              typeof item.backgroundImage === "string"
+                                ? item.backgroundImage
+                                : ""
+                            }
+                            onChange={(e) =>
+                              updateAdvisoryItem(
+                                index,
+                                "backgroundImage",
+                                e.target.value,
+                              )
+                            }
                             className="w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                             placeholder="media id, image URL, or /uploads/..."
                           />
                           <button
                             type="button"
-                            onClick={() => setPickerTarget({ nested: ["cards", String(index), "backgroundImage"] })}
+                            onClick={() =>
+                              setPickerTarget({
+                                nested: [
+                                  "cards",
+                                  String(index),
+                                  "backgroundImage",
+                                ],
+                              })
+                            }
                             className="inline-flex items-center rounded-md border border-border bg-white px-2 py-1 text-sm text-slate-700 hover:bg-slate-100"
                             title="Pick from Media Library"
                           >
@@ -1629,12 +2483,21 @@ export function PageContentForm({ item }: PageContentFormProps) {
         )}
         {(item.slug === "our-work-research" || item.slug === "research") && (
           <div className="mb-3 grid gap-3 rounded-lg border border-border bg-slate-50 p-3">
-            <p className="text-xs font-semibold uppercase tracking-wide text-slate-600">Research page helper</p>
+            <p className="text-xs font-semibold uppercase tracking-wide text-slate-600">
+              Research page helper
+            </p>
             <p className="text-[11px] text-slate-500">
-              Edit the carousel items shown on <code className="rounded bg-slate-100 px-0.5">/our-work/research</code>.
+              Edit the carousel items shown on{" "}
+              <code className="rounded bg-slate-100 px-0.5">
+                /our-work/research
+              </code>
+              .
             </p>
             <div className="flex items-center justify-between gap-3">
-              <p className="text-[11px] text-slate-500">Use the arrows to reorder cards. These values are saved into the page content JSON.</p>
+              <p className="text-[11px] text-slate-500">
+                Use the arrows to reorder cards. These values are saved into the
+                page content JSON.
+              </p>
               <button
                 type="button"
                 onClick={addResearchItem}
@@ -1645,12 +2508,19 @@ export function PageContentForm({ item }: PageContentFormProps) {
             </div>
             <div className="space-y-3">
               {researchItems.length === 0 ? (
-                <p className="text-sm text-slate-500">No research cards yet. Add the first one above.</p>
+                <p className="text-sm text-slate-500">
+                  No research cards yet. Add the first one above.
+                </p>
               ) : (
                 researchItems.map((item, index) => (
-                  <div key={index} className="rounded-md border border-border bg-white p-3 shadow-sm">
+                  <div
+                    key={index}
+                    className="rounded-md border border-border bg-white p-3 shadow-sm"
+                  >
                     <div className="flex flex-wrap items-center gap-2">
-                      <p className="text-xs font-semibold uppercase tracking-wide text-slate-600">Card {index + 1}</p>
+                      <p className="text-xs font-semibold uppercase tracking-wide text-slate-600">
+                        Card {index + 1}
+                      </p>
                       <div className="ml-auto flex items-center gap-1">
                         <button
                           type="button"
@@ -1679,36 +2549,74 @@ export function PageContentForm({ item }: PageContentFormProps) {
                     </div>
                     <div className="mt-3 grid gap-3">
                       <div>
-                        <label className="block text-xs font-medium text-slate-600">Title</label>
+                        <label className="block text-xs font-medium text-slate-600">
+                          Title
+                        </label>
                         <input
                           type="text"
-                          value={typeof item.title === "string" ? item.title : ""}
-                          onChange={(e) => updateResearchItem(index, "title", e.target.value)}
+                          value={
+                            typeof item.title === "string" ? item.title : ""
+                          }
+                          onChange={(e) =>
+                            updateResearchItem(index, "title", e.target.value)
+                          }
                           className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                         />
                       </div>
                       <div>
-                        <label className="block text-xs font-medium text-slate-600">Description</label>
+                        <label className="block text-xs font-medium text-slate-600">
+                          Description
+                        </label>
                         <textarea
-                          value={typeof item.description === "string" ? item.description : ""}
-                          onChange={(e) => updateResearchItem(index, "description", e.target.value)}
+                          value={
+                            typeof item.description === "string"
+                              ? item.description
+                              : ""
+                          }
+                          onChange={(e) =>
+                            updateResearchItem(
+                              index,
+                              "description",
+                              e.target.value,
+                            )
+                          }
                           rows={4}
                           className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                         />
                       </div>
                       <div>
-                        <label className="block text-xs font-medium text-slate-600">Background image</label>
+                        <label className="block text-xs font-medium text-slate-600">
+                          Background image
+                        </label>
                         <div className="mt-1 flex gap-2">
                           <input
                             type="text"
-                            value={typeof item.backgroundImage === "string" ? item.backgroundImage : ""}
-                            onChange={(e) => updateResearchItem(index, "backgroundImage", e.target.value)}
+                            value={
+                              typeof item.backgroundImage === "string"
+                                ? item.backgroundImage
+                                : ""
+                            }
+                            onChange={(e) =>
+                              updateResearchItem(
+                                index,
+                                "backgroundImage",
+                                e.target.value,
+                              )
+                            }
                             className="w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                             placeholder="media id, image URL, or /uploads/..."
                           />
                           <button
                             type="button"
-                            onClick={() => setPickerTarget({ nested: ["cards", String(index), "backgroundImage"] })}
+                            onClick={() =>
+                              setPickerTarget({
+                                nested: [
+                                  "cards",
+                                  String(index),
+                                  "backgroundImage",
+                                ],
+                              })
+                            }
                             className="inline-flex items-center rounded-md border border-border bg-white px-2 py-1 text-sm text-slate-700 hover:bg-slate-100"
                             title="Pick from Media Library"
                           >
@@ -1725,12 +2633,21 @@ export function PageContentForm({ item }: PageContentFormProps) {
         )}
         {(item.slug === "our-work-training" || item.slug === "training") && (
           <div className="mb-3 grid gap-3 rounded-lg border border-border bg-slate-50 p-3">
-            <p className="text-xs font-semibold uppercase tracking-wide text-slate-600">Training page helper</p>
+            <p className="text-xs font-semibold uppercase tracking-wide text-slate-600">
+              Training page helper
+            </p>
             <p className="text-[11px] text-slate-500">
-              Edit the carousel items shown on <code className="rounded bg-slate-100 px-0.5">/our-work/training</code>.
+              Edit the carousel items shown on{" "}
+              <code className="rounded bg-slate-100 px-0.5">
+                /our-work/training
+              </code>
+              .
             </p>
             <div className="flex items-center justify-between gap-3">
-              <p className="text-[11px] text-slate-500">Use the arrows to reorder cards. These values are saved into the page content JSON.</p>
+              <p className="text-[11px] text-slate-500">
+                Use the arrows to reorder cards. These values are saved into the
+                page content JSON.
+              </p>
               <button
                 type="button"
                 onClick={addTrainingItem}
@@ -1741,12 +2658,19 @@ export function PageContentForm({ item }: PageContentFormProps) {
             </div>
             <div className="space-y-3">
               {trainingItems.length === 0 ? (
-                <p className="text-sm text-slate-500">No training cards yet. Add the first one above.</p>
+                <p className="text-sm text-slate-500">
+                  No training cards yet. Add the first one above.
+                </p>
               ) : (
                 trainingItems.map((item, index) => (
-                  <div key={index} className="rounded-md border border-border bg-white p-3 shadow-sm">
+                  <div
+                    key={index}
+                    className="rounded-md border border-border bg-white p-3 shadow-sm"
+                  >
                     <div className="flex flex-wrap items-center gap-2">
-                      <p className="text-xs font-semibold uppercase tracking-wide text-slate-600">Card {index + 1}</p>
+                      <p className="text-xs font-semibold uppercase tracking-wide text-slate-600">
+                        Card {index + 1}
+                      </p>
                       <div className="ml-auto flex items-center gap-1">
                         <button
                           type="button"
@@ -1775,36 +2699,74 @@ export function PageContentForm({ item }: PageContentFormProps) {
                     </div>
                     <div className="mt-3 grid gap-3">
                       <div>
-                        <label className="block text-xs font-medium text-slate-600">Title</label>
+                        <label className="block text-xs font-medium text-slate-600">
+                          Title
+                        </label>
                         <input
                           type="text"
-                          value={typeof item.title === "string" ? item.title : ""}
-                          onChange={(e) => updateTrainingItem(index, "title", e.target.value)}
+                          value={
+                            typeof item.title === "string" ? item.title : ""
+                          }
+                          onChange={(e) =>
+                            updateTrainingItem(index, "title", e.target.value)
+                          }
                           className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                         />
                       </div>
                       <div>
-                        <label className="block text-xs font-medium text-slate-600">Description</label>
+                        <label className="block text-xs font-medium text-slate-600">
+                          Description
+                        </label>
                         <textarea
-                          value={typeof item.description === "string" ? item.description : ""}
-                          onChange={(e) => updateTrainingItem(index, "description", e.target.value)}
+                          value={
+                            typeof item.description === "string"
+                              ? item.description
+                              : ""
+                          }
+                          onChange={(e) =>
+                            updateTrainingItem(
+                              index,
+                              "description",
+                              e.target.value,
+                            )
+                          }
                           rows={4}
                           className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                         />
                       </div>
                       <div>
-                        <label className="block text-xs font-medium text-slate-600">Background image</label>
+                        <label className="block text-xs font-medium text-slate-600">
+                          Background image
+                        </label>
                         <div className="mt-1 flex gap-2">
                           <input
                             type="text"
-                            value={typeof item.backgroundImage === "string" ? item.backgroundImage : ""}
-                            onChange={(e) => updateTrainingItem(index, "backgroundImage", e.target.value)}
+                            value={
+                              typeof item.backgroundImage === "string"
+                                ? item.backgroundImage
+                                : ""
+                            }
+                            onChange={(e) =>
+                              updateTrainingItem(
+                                index,
+                                "backgroundImage",
+                                e.target.value,
+                              )
+                            }
                             className="w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                             placeholder="media id, image URL, or /uploads/..."
                           />
                           <button
                             type="button"
-                            onClick={() => setPickerTarget({ nested: ["cards", String(index), "backgroundImage"] })}
+                            onClick={() =>
+                              setPickerTarget({
+                                nested: [
+                                  "cards",
+                                  String(index),
+                                  "backgroundImage",
+                                ],
+                              })
+                            }
                             className="inline-flex items-center rounded-md border border-border bg-white px-2 py-1 text-sm text-slate-700 hover:bg-slate-100"
                             title="Pick from Media Library"
                           >
@@ -1821,117 +2783,173 @@ export function PageContentForm({ item }: PageContentFormProps) {
         )}
         {item.slug === "site-settings" && (
           <div className="mb-3 grid gap-3 rounded-lg border border-border bg-slate-50 p-3">
-            <p className="text-xs font-semibold uppercase tracking-wide text-slate-600">Global site settings</p>
+            <p className="text-xs font-semibold uppercase tracking-wide text-slate-600">
+              Global site settings
+            </p>
             <div className="grid gap-3 sm:grid-cols-2">
               <div>
-                <label className="block text-xs font-medium text-slate-600">Site name</label>
+                <label className="block text-xs font-medium text-slate-600">
+                  Site name
+                </label>
                 <input
                   type="text"
-                  value={typeof parsedJson.name === "string" ? parsedJson.name : ""}
+                  value={
+                    typeof parsedJson.name === "string" ? parsedJson.name : ""
+                  }
                   onChange={(e) => updateJsonField("name", e.target.value)}
                   className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                 />
               </div>
               <div>
-                <label className="block text-xs font-medium text-slate-600">Phone</label>
+                <label className="block text-xs font-medium text-slate-600">
+                  Phone
+                </label>
                 <input
                   type="text"
-                  value={typeof parsedJson.phone === "string" ? parsedJson.phone : ""}
+                  value={
+                    typeof parsedJson.phone === "string" ? parsedJson.phone : ""
+                  }
                   onChange={(e) => updateJsonField("phone", e.target.value)}
                   className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                 />
               </div>
             </div>
             <div>
-              <label className="block text-xs font-medium text-slate-600">Tagline</label>
+              <label className="block text-xs font-medium text-slate-600">
+                Tagline
+              </label>
               <textarea
-                value={typeof parsedJson.tagline === "string" ? parsedJson.tagline : ""}
+                value={
+                  typeof parsedJson.tagline === "string"
+                    ? parsedJson.tagline
+                    : ""
+                }
                 onChange={(e) => updateJsonField("tagline", e.target.value)}
                 rows={2}
                 className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
               />
             </div>
             <div>
-              <label className="block text-xs font-medium text-slate-600">Address</label>
+              <label className="block text-xs font-medium text-slate-600">
+                Address
+              </label>
               <input
                 type="text"
-                value={typeof parsedJson.address === "string" ? parsedJson.address : ""}
+                value={
+                  typeof parsedJson.address === "string"
+                    ? parsedJson.address
+                    : ""
+                }
                 onChange={(e) => updateJsonField("address", e.target.value)}
                 className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
               />
             </div>
             <div>
-              <label className="block text-xs font-medium text-slate-600">Office hours</label>
+              <label className="block text-xs font-medium text-slate-600">
+                Office hours
+              </label>
               <input
                 type="text"
-                value={typeof parsedJson.officeHours === "string" ? parsedJson.officeHours : ""}
+                value={
+                  typeof parsedJson.officeHours === "string"
+                    ? parsedJson.officeHours
+                    : ""
+                }
                 onChange={(e) => updateJsonField("officeHours", e.target.value)}
                 className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
               />
             </div>
             <div className="grid gap-3 sm:grid-cols-3">
               <div>
-                <label className="block text-xs font-medium text-slate-600">Programs email</label>
+                <label className="block text-xs font-medium text-slate-600">
+                  Programs email
+                </label>
                 <input
                   type="email"
                   value={getNestedString(["email", "programs"])}
-                  onChange={(e) => updateNestedString(["email", "programs"], e.target.value)}
+                  onChange={(e) =>
+                    updateNestedString(["email", "programs"], e.target.value)
+                  }
                   className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                 />
               </div>
               <div>
-                <label className="block text-xs font-medium text-slate-600">Media email</label>
+                <label className="block text-xs font-medium text-slate-600">
+                  Media email
+                </label>
                 <input
                   type="email"
                   value={getNestedString(["email", "media"])}
-                  onChange={(e) => updateNestedString(["email", "media"], e.target.value)}
+                  onChange={(e) =>
+                    updateNestedString(["email", "media"], e.target.value)
+                  }
                   className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                 />
               </div>
               <div>
-                <label className="block text-xs font-medium text-slate-600">Info email</label>
+                <label className="block text-xs font-medium text-slate-600">
+                  Info email
+                </label>
                 <input
                   type="email"
                   value={getNestedString(["email", "info"])}
-                  onChange={(e) => updateNestedString(["email", "info"], e.target.value)}
+                  onChange={(e) =>
+                    updateNestedString(["email", "info"], e.target.value)
+                  }
                   className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                 />
               </div>
             </div>
             <div className="grid gap-3 sm:grid-cols-2">
               <div>
-                <label className="block text-xs font-medium text-slate-600">LinkedIn</label>
+                <label className="block text-xs font-medium text-slate-600">
+                  LinkedIn
+                </label>
                 <input
                   type="url"
                   value={getNestedString(["social", "linkedin"])}
-                  onChange={(e) => updateNestedString(["social", "linkedin"], e.target.value)}
+                  onChange={(e) =>
+                    updateNestedString(["social", "linkedin"], e.target.value)
+                  }
                   className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                 />
               </div>
               <div>
-                <label className="block text-xs font-medium text-slate-600">Twitter/X</label>
+                <label className="block text-xs font-medium text-slate-600">
+                  Twitter/X
+                </label>
                 <input
                   type="url"
                   value={getNestedString(["social", "twitter"])}
-                  onChange={(e) => updateNestedString(["social", "twitter"], e.target.value)}
+                  onChange={(e) =>
+                    updateNestedString(["social", "twitter"], e.target.value)
+                  }
                   className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                 />
               </div>
               <div>
-                <label className="block text-xs font-medium text-slate-600">Instagram</label>
+                <label className="block text-xs font-medium text-slate-600">
+                  Instagram
+                </label>
                 <input
                   type="url"
                   value={getNestedString(["social", "instagram"])}
-                  onChange={(e) => updateNestedString(["social", "instagram"], e.target.value)}
+                  onChange={(e) =>
+                    updateNestedString(["social", "instagram"], e.target.value)
+                  }
                   className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                 />
               </div>
               <div>
-                <label className="block text-xs font-medium text-slate-600">Facebook</label>
+                <label className="block text-xs font-medium text-slate-600">
+                  Facebook
+                </label>
                 <input
                   type="url"
                   value={getNestedString(["social", "facebook"])}
-                  onChange={(e) => updateNestedString(["social", "facebook"], e.target.value)}
+                  onChange={(e) =>
+                    updateNestedString(["social", "facebook"], e.target.value)
+                  }
                   className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                 />
               </div>
@@ -1940,50 +2958,89 @@ export function PageContentForm({ item }: PageContentFormProps) {
         )}
         {item.slug === "get-involved" && (
           <div className="mb-3 grid gap-3 rounded-lg border border-border bg-slate-50 p-3">
-            <p className="text-xs font-semibold uppercase tracking-wide text-slate-600">Get Involved helper</p>
+            <p className="text-xs font-semibold uppercase tracking-wide text-slate-600">
+              Get Involved helper
+            </p>
             <div>
-              <label className="block text-xs font-medium text-slate-600">Page intro</label>
+              <label className="block text-xs font-medium text-slate-600">
+                Page intro
+              </label>
               <textarea
-                value={typeof parsedJson.intro === "string" ? parsedJson.intro : ""}
+                value={
+                  typeof parsedJson.intro === "string" ? parsedJson.intro : ""
+                }
                 onChange={(e) => updateJsonField("intro", e.target.value)}
                 rows={3}
                 className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
               />
             </div>
             <p className="text-xs text-slate-500">
-              Detail pages (<code>/get-involved/join-us</code>, <code>/get-involved/partnership</code>,{" "}
-              <code>/get-involved/volunteer</code>) are now edited in their own entries under{" "}
-              <strong>Admin → Page Content</strong>.
+              Detail pages (<code>/get-involved/join-us</code>,{" "}
+              <code>/get-involved/partnership</code>,{" "}
+              <code>/get-involved/volunteer</code>) are now edited in their own
+              entries under <strong>Admin → Page Content</strong>.
             </p>
             <div className="grid gap-3 sm:grid-cols-2">
               <div>
-                <label className="block text-xs font-medium text-slate-600">Get In Touch title</label>
+                <label className="block text-xs font-medium text-slate-600">
+                  Get In Touch title
+                </label>
                 <input
                   type="text"
-                  value={getNestedString(["bottomSection", "getInTouch", "title"])}
-                  onChange={(e) => updateNestedString(["bottomSection", "getInTouch", "title"], e.target.value)}
+                  value={getNestedString([
+                    "bottomSection",
+                    "getInTouch",
+                    "title",
+                  ])}
+                  onChange={(e) =>
+                    updateNestedString(
+                      ["bottomSection", "getInTouch", "title"],
+                      e.target.value,
+                    )
+                  }
                   className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                 />
               </div>
               <div>
-                <label className="block text-xs font-medium text-slate-600">Upcoming Events title</label>
+                <label className="block text-xs font-medium text-slate-600">
+                  Upcoming Events title
+                </label>
                 <input
                   type="text"
-                  value={getNestedString(["bottomSection", "upcomingEvents", "title"])}
-                  onChange={(e) => updateNestedString(["bottomSection", "upcomingEvents", "title"], e.target.value)}
+                  value={getNestedString([
+                    "bottomSection",
+                    "upcomingEvents",
+                    "title",
+                  ])}
+                  onChange={(e) =>
+                    updateNestedString(
+                      ["bottomSection", "upcomingEvents", "title"],
+                      e.target.value,
+                    )
+                  }
                   className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                 />
               </div>
             </div>
             <div className="rounded-md border border-border bg-white p-3">
               <div className="mb-2 flex items-center justify-between">
-                <p className="text-xs font-semibold uppercase tracking-wide text-slate-600">Opportunities</p>
+                <p className="text-xs font-semibold uppercase tracking-wide text-slate-600">
+                  Opportunities
+                </p>
                 <button
                   type="button"
                   onClick={() =>
                     updateNestedArray(["opportunities"], (arr) => [
                       ...arr,
-                      { id: `item-${arr.length + 1}`, title: "", description: "", items: [], cta: "", href: "", pageHref: "" },
+                      {
+                        id: `item-${arr.length + 1}`,
+                        title: "",
+                        description: "",
+                        items: [],
+                        cta: "",
+                        href: "",
+                        pageHref: "",
+                      },
                     ])
                   }
                   className="rounded-md border border-border px-2 py-1 text-xs text-slate-700 hover:bg-slate-50"
@@ -1993,13 +3050,18 @@ export function PageContentForm({ item }: PageContentFormProps) {
               </div>
               <div className="space-y-2">
                 {getInvolvedOpportunities.map((opp, idx) => (
-                  <div key={idx} className="rounded-md border border-border p-3">
+                  <div
+                    key={idx}
+                    className="rounded-md border border-border p-3"
+                  >
                     <div className="grid gap-2 sm:grid-cols-3">
                       <input
                         value={typeof opp.id === "string" ? opp.id : ""}
                         onChange={(e) =>
                           updateNestedArray(["opportunities"], (arr) =>
-                            arr.map((o, i) => (i === idx ? { ...o, id: e.target.value } : o))
+                            arr.map((o, i) =>
+                              i === idx ? { ...o, id: e.target.value } : o,
+                            ),
                           )
                         }
                         placeholder="id"
@@ -2009,7 +3071,9 @@ export function PageContentForm({ item }: PageContentFormProps) {
                         value={typeof opp.title === "string" ? opp.title : ""}
                         onChange={(e) =>
                           updateNestedArray(["opportunities"], (arr) =>
-                            arr.map((o, i) => (i === idx ? { ...o, title: e.target.value } : o))
+                            arr.map((o, i) =>
+                              i === idx ? { ...o, title: e.target.value } : o,
+                            ),
                           )
                         }
                         placeholder="title"
@@ -2017,17 +3081,29 @@ export function PageContentForm({ item }: PageContentFormProps) {
                       />
                       <button
                         type="button"
-                        onClick={() => updateNestedArray(["opportunities"], (arr) => arr.filter((_, i) => i !== idx))}
+                        onClick={() =>
+                          updateNestedArray(["opportunities"], (arr) =>
+                            arr.filter((_, i) => i !== idx),
+                          )
+                        }
                         className="justify-self-end rounded-md border border-red-200 px-2 py-1 text-xs text-red-700 hover:bg-red-50"
                       >
                         Remove
                       </button>
                     </div>
                     <textarea
-                      value={typeof opp.description === "string" ? opp.description : ""}
+                      value={
+                        typeof opp.description === "string"
+                          ? opp.description
+                          : ""
+                      }
                       onChange={(e) =>
                         updateNestedArray(["opportunities"], (arr) =>
-                          arr.map((o, i) => (i === idx ? { ...o, description: e.target.value } : o))
+                          arr.map((o, i) =>
+                            i === idx
+                              ? { ...o, description: e.target.value }
+                              : o,
+                          ),
                         )
                       }
                       rows={2}
@@ -2039,7 +3115,9 @@ export function PageContentForm({ item }: PageContentFormProps) {
                         value={typeof opp.cta === "string" ? opp.cta : ""}
                         onChange={(e) =>
                           updateNestedArray(["opportunities"], (arr) =>
-                            arr.map((o, i) => (i === idx ? { ...o, cta: e.target.value } : o))
+                            arr.map((o, i) =>
+                              i === idx ? { ...o, cta: e.target.value } : o,
+                            ),
                           )
                         }
                         placeholder="CTA label"
@@ -2049,17 +3127,25 @@ export function PageContentForm({ item }: PageContentFormProps) {
                         value={typeof opp.href === "string" ? opp.href : ""}
                         onChange={(e) =>
                           updateNestedArray(["opportunities"], (arr) =>
-                            arr.map((o, i) => (i === idx ? { ...o, href: e.target.value } : o))
+                            arr.map((o, i) =>
+                              i === idx ? { ...o, href: e.target.value } : o,
+                            ),
                           )
                         }
                         placeholder="CTA href"
                         className="rounded-md border border-border px-2 py-1 text-xs"
                       />
                       <input
-                        value={typeof opp.pageHref === "string" ? opp.pageHref : ""}
+                        value={
+                          typeof opp.pageHref === "string" ? opp.pageHref : ""
+                        }
                         onChange={(e) =>
                           updateNestedArray(["opportunities"], (arr) =>
-                            arr.map((o, i) => (i === idx ? { ...o, pageHref: e.target.value } : o))
+                            arr.map((o, i) =>
+                              i === idx
+                                ? { ...o, pageHref: e.target.value }
+                                : o,
+                            ),
                           )
                         }
                         placeholder="Detail page href"
@@ -2072,14 +3158,24 @@ export function PageContentForm({ item }: PageContentFormProps) {
             </div>
             <div className="rounded-md border border-border bg-white p-3">
               <div className="mb-2 flex items-center justify-between">
-                <p className="text-xs font-semibold uppercase tracking-wide text-slate-600">Upcoming events list</p>
+                <p className="text-xs font-semibold uppercase tracking-wide text-slate-600">
+                  Upcoming events list
+                </p>
                 <button
                   type="button"
                   onClick={() =>
-                    updateNestedArray(["bottomSection", "upcomingEvents", "events"], (arr) => [
-                      ...arr,
-                      { startDate: "", endDate: "", label: "", registerHref: "/events" },
-                    ])
+                    updateNestedArray(
+                      ["bottomSection", "upcomingEvents", "events"],
+                      (arr) => [
+                        ...arr,
+                        {
+                          startDate: "",
+                          endDate: "",
+                          label: "",
+                          registerHref: "/events",
+                        },
+                      ],
+                    )
                   }
                   className="rounded-md border border-border px-2 py-1 text-xs text-slate-700 hover:bg-slate-50"
                 >
@@ -2088,12 +3184,23 @@ export function PageContentForm({ item }: PageContentFormProps) {
               </div>
               <div className="space-y-2">
                 {getInvolvedEvents.map((evt, idx) => (
-                  <div key={idx} className="grid gap-2 rounded-md border border-border p-3 sm:grid-cols-4">
+                  <div
+                    key={idx}
+                    className="grid gap-2 rounded-md border border-border p-3 sm:grid-cols-4"
+                  >
                     <input
-                      value={typeof evt.startDate === "string" ? evt.startDate : ""}
+                      value={
+                        typeof evt.startDate === "string" ? evt.startDate : ""
+                      }
                       onChange={(e) =>
-                        updateNestedArray(["bottomSection", "upcomingEvents", "events"], (arr) =>
-                          arr.map((x, i) => (i === idx ? { ...x, startDate: e.target.value } : x))
+                        updateNestedArray(
+                          ["bottomSection", "upcomingEvents", "events"],
+                          (arr) =>
+                            arr.map((x, i) =>
+                              i === idx
+                                ? { ...x, startDate: e.target.value }
+                                : x,
+                            ),
                         )
                       }
                       placeholder="Start date"
@@ -2102,8 +3209,12 @@ export function PageContentForm({ item }: PageContentFormProps) {
                     <input
                       value={typeof evt.endDate === "string" ? evt.endDate : ""}
                       onChange={(e) =>
-                        updateNestedArray(["bottomSection", "upcomingEvents", "events"], (arr) =>
-                          arr.map((x, i) => (i === idx ? { ...x, endDate: e.target.value } : x))
+                        updateNestedArray(
+                          ["bottomSection", "upcomingEvents", "events"],
+                          (arr) =>
+                            arr.map((x, i) =>
+                              i === idx ? { ...x, endDate: e.target.value } : x,
+                            ),
                         )
                       }
                       placeholder="End date"
@@ -2112,8 +3223,12 @@ export function PageContentForm({ item }: PageContentFormProps) {
                     <input
                       value={typeof evt.label === "string" ? evt.label : ""}
                       onChange={(e) =>
-                        updateNestedArray(["bottomSection", "upcomingEvents", "events"], (arr) =>
-                          arr.map((x, i) => (i === idx ? { ...x, label: e.target.value } : x))
+                        updateNestedArray(
+                          ["bottomSection", "upcomingEvents", "events"],
+                          (arr) =>
+                            arr.map((x, i) =>
+                              i === idx ? { ...x, label: e.target.value } : x,
+                            ),
                         )
                       }
                       placeholder="Label"
@@ -2121,10 +3236,20 @@ export function PageContentForm({ item }: PageContentFormProps) {
                     />
                     <div className="flex gap-2">
                       <input
-                        value={typeof evt.registerHref === "string" ? evt.registerHref : ""}
+                        value={
+                          typeof evt.registerHref === "string"
+                            ? evt.registerHref
+                            : ""
+                        }
                         onChange={(e) =>
-                          updateNestedArray(["bottomSection", "upcomingEvents", "events"], (arr) =>
-                            arr.map((x, i) => (i === idx ? { ...x, registerHref: e.target.value } : x))
+                          updateNestedArray(
+                            ["bottomSection", "upcomingEvents", "events"],
+                            (arr) =>
+                              arr.map((x, i) =>
+                                i === idx
+                                  ? { ...x, registerHref: e.target.value }
+                                  : x,
+                              ),
                           )
                         }
                         placeholder="Register href"
@@ -2133,7 +3258,10 @@ export function PageContentForm({ item }: PageContentFormProps) {
                       <button
                         type="button"
                         onClick={() =>
-                          updateNestedArray(["bottomSection", "upcomingEvents", "events"], (arr) => arr.filter((_, i) => i !== idx))
+                          updateNestedArray(
+                            ["bottomSection", "upcomingEvents", "events"],
+                            (arr) => arr.filter((_, i) => i !== idx),
+                          )
                         }
                         className="rounded-md border border-red-200 px-2 py-1 text-xs text-red-700 hover:bg-red-50"
                       >
@@ -2148,7 +3276,9 @@ export function PageContentForm({ item }: PageContentFormProps) {
         )}
         {item.slug === "get-involved-join-us" && (
           <div className="mb-3 grid gap-3 rounded-lg border border-border bg-slate-50 p-3">
-            <p className="text-xs font-semibold uppercase tracking-wide text-slate-600">Work with us page helper</p>
+            <p className="text-xs font-semibold uppercase tracking-wide text-slate-600">
+              Work with us page helper
+            </p>
             <div className="grid gap-2 sm:grid-cols-2">
               {(
                 [
@@ -2167,10 +3297,16 @@ export function PageContentForm({ item }: PageContentFormProps) {
                 ] as const
               ).map(([key, label]) => (
                 <div key={key}>
-                  <label className="block text-xs font-medium text-slate-600">{label}</label>
+                  <label className="block text-xs font-medium text-slate-600">
+                    {label}
+                  </label>
                   <input
                     type="text"
-                    value={typeof parsedJson[key] === "string" ? String(parsedJson[key]) : ""}
+                    value={
+                      typeof parsedJson[key] === "string"
+                        ? String(parsedJson[key])
+                        : ""
+                    }
                     onChange={(e) => updateJsonField(key, e.target.value)}
                     className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                   />
@@ -2188,9 +3324,15 @@ export function PageContentForm({ item }: PageContentFormProps) {
                 ] as const
               ).map(([key, label]) => (
                 <div key={key}>
-                  <label className="block text-xs font-medium text-slate-600">{label}</label>
+                  <label className="block text-xs font-medium text-slate-600">
+                    {label}
+                  </label>
                   <textarea
-                    value={typeof parsedJson[key] === "string" ? String(parsedJson[key]) : ""}
+                    value={
+                      typeof parsedJson[key] === "string"
+                        ? String(parsedJson[key])
+                        : ""
+                    }
                     onChange={(e) => updateJsonField(key, e.target.value)}
                     rows={3}
                     className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
@@ -2199,7 +3341,9 @@ export function PageContentForm({ item }: PageContentFormProps) {
               ))}
             </div>
             <div>
-              <label className="block text-xs font-medium text-slate-600">Opportunities list (one per line)</label>
+              <label className="block text-xs font-medium text-slate-600">
+                Opportunities list (one per line)
+              </label>
               <textarea
                 value={getNestedStringArray(["items"]).join("\n")}
                 onChange={(e) =>
@@ -2208,7 +3352,7 @@ export function PageContentForm({ item }: PageContentFormProps) {
                     e.target.value
                       .split("\n")
                       .map((line) => line.trim())
-                      .filter(Boolean)
+                      .filter(Boolean),
                   )
                 }
                 rows={5}
@@ -2216,15 +3360,23 @@ export function PageContentForm({ item }: PageContentFormProps) {
               />
             </div>
             <div className="rounded-md border border-border bg-white p-3">
-              <label className="block text-xs font-medium text-slate-600">Right-side panel image</label>
+              <label className="block text-xs font-medium text-slate-600">
+                Right-side panel image
+              </label>
               <p className="mt-0.5 text-[11px] text-slate-500">
                 Optional. If empty, the hero image is used.
               </p>
               <div className="mt-1 flex gap-2">
                 <input
                   type="text"
-                  value={typeof parsedJson.panelImage === "string" ? String(parsedJson.panelImage) : ""}
-                  onChange={(e) => updateJsonField("panelImage", e.target.value)}
+                  value={
+                    typeof parsedJson.panelImage === "string"
+                      ? String(parsedJson.panelImage)
+                      : ""
+                  }
+                  onChange={(e) =>
+                    updateJsonField("panelImage", e.target.value)
+                  }
                   placeholder="media-... or /uploads/..."
                   className="w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                 />
@@ -2242,9 +3394,15 @@ export function PageContentForm({ item }: PageContentFormProps) {
         )}
         {item.slug === "get-involved-partnership" && (
           <div className="mb-3 grid gap-3 rounded-lg border border-border bg-slate-50 p-3">
-            <p className="text-xs font-semibold uppercase tracking-wide text-slate-600">Partnerships page helper</p>
+            <p className="text-xs font-semibold uppercase tracking-wide text-slate-600">
+              Partnerships page helper
+            </p>
             <p className="text-[11px] text-slate-500">
-              Standalone page editor for <code className="rounded bg-slate-100 px-0.5">/get-involved/partnership</code>.
+              Standalone page editor for{" "}
+              <code className="rounded bg-slate-100 px-0.5">
+                /get-involved/partnership
+              </code>
+              .
             </p>
             <div className="grid gap-2 sm:grid-cols-2">
               {(
@@ -2263,10 +3421,16 @@ export function PageContentForm({ item }: PageContentFormProps) {
                 ] as const
               ).map(([key, label]) => (
                 <div key={key}>
-                  <label className="block text-xs font-medium text-slate-600">{label}</label>
+                  <label className="block text-xs font-medium text-slate-600">
+                    {label}
+                  </label>
                   <input
                     type="text"
-                    value={typeof parsedJson[key] === "string" ? String(parsedJson[key]) : ""}
+                    value={
+                      typeof parsedJson[key] === "string"
+                        ? String(parsedJson[key])
+                        : ""
+                    }
                     onChange={(e) => updateJsonField(key, e.target.value)}
                     className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                   />
@@ -2282,9 +3446,15 @@ export function PageContentForm({ item }: PageContentFormProps) {
                 ] as const
               ).map(([key, label]) => (
                 <div key={key}>
-                  <label className="block text-xs font-medium text-slate-600">{label}</label>
+                  <label className="block text-xs font-medium text-slate-600">
+                    {label}
+                  </label>
                   <textarea
-                    value={typeof parsedJson[key] === "string" ? String(parsedJson[key]) : ""}
+                    value={
+                      typeof parsedJson[key] === "string"
+                        ? String(parsedJson[key])
+                        : ""
+                    }
                     onChange={(e) => updateJsonField(key, e.target.value)}
                     rows={3}
                     className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
@@ -2294,11 +3464,21 @@ export function PageContentForm({ item }: PageContentFormProps) {
             </div>
             <div className="rounded-md border border-border bg-white p-3">
               <div className="mb-2 flex items-center justify-between">
-                <p className="text-xs font-semibold uppercase tracking-wide text-slate-600">Partnership pillars carousel cards</p>
+                <p className="text-xs font-semibold uppercase tracking-wide text-slate-600">
+                  Partnership pillars carousel cards
+                </p>
                 <button
                   type="button"
                   onClick={() =>
-                    updateNestedArray(["cards"], (arr) => [...arr, { id: arr.length + 1, title: "", description: "", backgroundImage: "" }])
+                    updateNestedArray(["cards"], (arr) => [
+                      ...arr,
+                      {
+                        id: arr.length + 1,
+                        title: "",
+                        description: "",
+                        backgroundImage: "",
+                      },
+                    ])
                   }
                   className="rounded-md border border-border px-2 py-1 text-xs text-slate-700 hover:bg-slate-50"
                 >
@@ -2307,26 +3487,49 @@ export function PageContentForm({ item }: PageContentFormProps) {
               </div>
               <div className="space-y-2">
                 {getNestedArray(["cards"]).map((card, idx) => (
-                  <div key={idx} className="rounded-md border border-border p-3">
+                  <div
+                    key={idx}
+                    className="rounded-md border border-border p-3"
+                  >
                     <div className="grid gap-2 sm:grid-cols-2">
                       <input
                         value={typeof card.title === "string" ? card.title : ""}
-                        onChange={(e) => updateNestedArray(["cards"], (arr) => arr.map((x, i) => (i === idx ? { ...x, title: e.target.value } : x)))}
+                        onChange={(e) =>
+                          updateNestedArray(["cards"], (arr) =>
+                            arr.map((x, i) =>
+                              i === idx ? { ...x, title: e.target.value } : x,
+                            ),
+                          )
+                        }
                         placeholder="Pillar title (e.g., Strategic institutional partnerships)"
                         className="rounded-md border border-border px-2 py-1.5 text-xs"
                       />
                       <div className="flex gap-2">
                         <input
-                          value={typeof card.backgroundImage === "string" ? card.backgroundImage : ""}
+                          value={
+                            typeof card.backgroundImage === "string"
+                              ? card.backgroundImage
+                              : ""
+                          }
                           onChange={(e) =>
-                            updateNestedArray(["cards"], (arr) => arr.map((x, i) => (i === idx ? { ...x, backgroundImage: e.target.value } : x)))
+                            updateNestedArray(["cards"], (arr) =>
+                              arr.map((x, i) =>
+                                i === idx
+                                  ? { ...x, backgroundImage: e.target.value }
+                                  : x,
+                              ),
+                            )
                           }
                           placeholder="Background image"
                           className="w-full rounded-md border border-border px-2 py-1.5 text-xs"
                         />
                         <button
                           type="button"
-                          onClick={() => setPickerTarget({ nested: ["cards", String(idx), "backgroundImage"] })}
+                          onClick={() =>
+                            setPickerTarget({
+                              nested: ["cards", String(idx), "backgroundImage"],
+                            })
+                          }
                           className="inline-flex items-center gap-1 rounded-md border border-border bg-white px-2 py-1.5 text-xs text-slate-700 hover:bg-slate-100"
                           title="Pick from Media Library"
                         >
@@ -2335,9 +3538,19 @@ export function PageContentForm({ item }: PageContentFormProps) {
                       </div>
                     </div>
                     <textarea
-                      value={typeof card.description === "string" ? card.description : ""}
+                      value={
+                        typeof card.description === "string"
+                          ? card.description
+                          : ""
+                      }
                       onChange={(e) =>
-                        updateNestedArray(["cards"], (arr) => arr.map((x, i) => (i === idx ? { ...x, description: e.target.value } : x)))
+                        updateNestedArray(["cards"], (arr) =>
+                          arr.map((x, i) =>
+                            i === idx
+                              ? { ...x, description: e.target.value }
+                              : x,
+                          ),
+                        )
                       }
                       rows={3}
                       placeholder="Pillar description"
@@ -2351,7 +3564,9 @@ export function PageContentForm({ item }: PageContentFormProps) {
         )}
         {item.slug === "get-involved-volunteer" && (
           <div className="mb-3 grid gap-3 rounded-lg border border-border bg-slate-50 p-3">
-            <p className="text-xs font-semibold uppercase tracking-wide text-slate-600">Volunteer page helper</p>
+            <p className="text-xs font-semibold uppercase tracking-wide text-slate-600">
+              Volunteer page helper
+            </p>
             <div className="grid gap-2 sm:grid-cols-2">
               {(
                 [
@@ -2371,10 +3586,16 @@ export function PageContentForm({ item }: PageContentFormProps) {
                 ] as const
               ).map(([key, label]) => (
                 <div key={key}>
-                  <label className="block text-xs font-medium text-slate-600">{label}</label>
+                  <label className="block text-xs font-medium text-slate-600">
+                    {label}
+                  </label>
                   <input
                     type="text"
-                    value={typeof parsedJson[key] === "string" ? String(parsedJson[key]) : ""}
+                    value={
+                      typeof parsedJson[key] === "string"
+                        ? String(parsedJson[key])
+                        : ""
+                    }
                     onChange={(e) => updateJsonField(key, e.target.value)}
                     className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                   />
@@ -2390,9 +3611,15 @@ export function PageContentForm({ item }: PageContentFormProps) {
                 ] as const
               ).map(([key, label]) => (
                 <div key={key}>
-                  <label className="block text-xs font-medium text-slate-600">{label}</label>
+                  <label className="block text-xs font-medium text-slate-600">
+                    {label}
+                  </label>
                   <textarea
-                    value={typeof parsedJson[key] === "string" ? String(parsedJson[key]) : ""}
+                    value={
+                      typeof parsedJson[key] === "string"
+                        ? String(parsedJson[key])
+                        : ""
+                    }
                     onChange={(e) => updateJsonField(key, e.target.value)}
                     rows={3}
                     className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
@@ -2401,7 +3628,9 @@ export function PageContentForm({ item }: PageContentFormProps) {
               ))}
             </div>
             <div>
-              <label className="block text-xs font-medium text-slate-600">Ways to contribute list (one per line)</label>
+              <label className="block text-xs font-medium text-slate-600">
+                Ways to contribute list (one per line)
+              </label>
               <textarea
                 value={getNestedStringArray(["items"]).join("\n")}
                 onChange={(e) =>
@@ -2410,7 +3639,7 @@ export function PageContentForm({ item }: PageContentFormProps) {
                     e.target.value
                       .split("\n")
                       .map((line) => line.trim())
-                      .filter(Boolean)
+                      .filter(Boolean),
                   )
                 }
                 rows={5}
@@ -2418,21 +3647,31 @@ export function PageContentForm({ item }: PageContentFormProps) {
               />
             </div>
             <div className="rounded-md border border-border bg-white p-3">
-              <label className="block text-xs font-medium text-slate-600">Right-side impact panel image</label>
+              <label className="block text-xs font-medium text-slate-600">
+                Right-side impact panel image
+              </label>
               <p className="mt-0.5 text-[11px] text-slate-500">
                 Optional. If empty, the hero image is used.
               </p>
               <div className="mt-1 flex gap-2">
                 <input
                   type="text"
-                  value={typeof parsedJson.impactPanelImage === "string" ? String(parsedJson.impactPanelImage) : ""}
-                  onChange={(e) => updateJsonField("impactPanelImage", e.target.value)}
+                  value={
+                    typeof parsedJson.impactPanelImage === "string"
+                      ? String(parsedJson.impactPanelImage)
+                      : ""
+                  }
+                  onChange={(e) =>
+                    updateJsonField("impactPanelImage", e.target.value)
+                  }
                   placeholder="media-... or /uploads/..."
                   className="w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                 />
                 <button
                   type="button"
-                  onClick={() => setPickerTarget({ nested: ["impactPanelImage"] })}
+                  onClick={() =>
+                    setPickerTarget({ nested: ["impactPanelImage"] })
+                  }
                   className="inline-flex items-center gap-1 rounded-md border border-border bg-white px-3 py-2 text-sm text-slate-700 hover:bg-slate-100"
                   title="Pick from Media Library"
                 >
@@ -2445,269 +3684,455 @@ export function PageContentForm({ item }: PageContentFormProps) {
         {item.slug === "events" && (
           <div className="mb-3 grid gap-4">
             <div className="rounded-lg border border-border bg-slate-50 p-4">
-              <p className="text-xs font-semibold uppercase tracking-wide text-slate-700">Main listing (/events)</p>
+              <p className="text-xs font-semibold uppercase tracking-wide text-slate-700">
+                Main listing (/events)
+              </p>
               <p className="mt-1 text-xs text-slate-600">
-                Body copy above the filters uses the <strong className="font-medium text-slate-800">Intro</strong> field at
-                the top of this form (stored as{" "}
-                <code className="rounded bg-white px-1 ring-1 ring-border">intro</code> in page JSON). Blank lines create
-                separate paragraphs. Category tabs read labels from{" "}
-                <code className="rounded bg-white px-1 ring-1 ring-border">eventCategoryFilters</code>; matching uses the
-                event’s Category / event type strings (e.g. <code className="text-[0.65rem]">summit</code>,{" "}
-                <code className="text-[0.65rem]">webinar</code>, <code className="text-[0.65rem]">roundtable</code>
+                Body copy above the filters uses the{" "}
+                <strong className="font-medium text-slate-800">Intro</strong>{" "}
+                field at the top of this form (stored as{" "}
+                <code className="rounded bg-white px-1 ring-1 ring-border">
+                  intro
+                </code>{" "}
+                in page JSON). Blank lines create separate paragraphs. Category
+                tabs read labels from{" "}
+                <code className="rounded bg-white px-1 ring-1 ring-border">
+                  eventCategoryFilters
+                </code>
+                ; matching uses the event’s Category / event type strings (e.g.{" "}
+                <code className="text-[0.65rem]">summit</code>,{" "}
+                <code className="text-[0.65rem]">webinar</code>,{" "}
+                <code className="text-[0.65rem]">roundtable</code>
                 ).
               </p>
             </div>
             <div className="rounded-lg border border-border bg-slate-50 p-4">
-            <p className="text-xs font-semibold uppercase tracking-wide text-slate-700">
-              Past events archive (public /events/past)
-            </p>
-            <p className="text-xs text-slate-600">
-              Copy for the archive filters, search, and list UI. Stored in{" "}
-              <code className="rounded bg-white px-1 ring-1 ring-border">content_json.pastArchive</code> and the
-              empty-state line in{" "}
-              <code className="rounded bg-white px-1 ring-1 ring-border">content_json.gridEmpty.past</code>. The
-              route hero uses the main Hero fields on this page when set.
-            </p>
-            <div className="grid gap-3 sm:grid-cols-2">
-              {(
-                [
-                  ["title", "In-page archive heading"],
-                  ["subtitle", "In-page archive intro"],
-                  ["searchPlaceholder", "Search placeholder"],
-                  ["filterBy", "Filter section title"],
-                  ["eventCheckboxLabel", "Event checkbox label"],
-                  ["topicLabel", "Topic filter (dropdown label)"],
-                  ["regionLabel", "Region filter (dropdown label)"],
-                  ["listFilterPlaceholder", "Placeholder: topic/region list filter"],
-                  ["dateHeading", "Date filter heading"],
-                  ["dateAll", "Date option: All dates"],
-                  ["date30d", "Date option: Past 30 days"],
-                  ["date6m", "Date option: Past 6 months"],
-                  ["date1y", "Date option: Last year"],
-                  ["resultsFoundSuffix", "Suffix after result count"],
-                  ["showMore", "“Show more” button label"],
-                  ["resultsAtATime", "Pagination helper (e.g. results at a time)"],
-                ] as const
-              ).map(([key, label]) => (
-                <div key={key}>
-                  <label className="block text-xs font-medium text-slate-600">{label}</label>
-                  <input
-                    type="text"
-                    value={getNestedString(["pastArchive", key])}
-                    onChange={(e) => updateNestedString(["pastArchive", key], e.target.value)}
+              <p className="text-xs font-semibold uppercase tracking-wide text-slate-700">
+                Past events archive (public /events/past)
+              </p>
+              <p className="text-xs text-slate-600">
+                Copy for the archive filters, search, and list UI. Stored in{" "}
+                <code className="rounded bg-white px-1 ring-1 ring-border">
+                  content_json.pastArchive
+                </code>{" "}
+                and the empty-state line in{" "}
+                <code className="rounded bg-white px-1 ring-1 ring-border">
+                  content_json.gridEmpty.past
+                </code>
+                . The route hero uses the main Hero fields on this page when
+                set.
+              </p>
+              <div className="grid gap-3 sm:grid-cols-2">
+                {(
+                  [
+                    ["title", "In-page archive heading"],
+                    ["subtitle", "In-page archive intro"],
+                    ["searchPlaceholder", "Search placeholder"],
+                    ["filterBy", "Filter section title"],
+                    ["eventCheckboxLabel", "Event checkbox label"],
+                    ["topicLabel", "Topic filter (dropdown label)"],
+                    ["regionLabel", "Region filter (dropdown label)"],
+                    [
+                      "listFilterPlaceholder",
+                      "Placeholder: topic/region list filter",
+                    ],
+                    ["dateHeading", "Date filter heading"],
+                    ["dateAll", "Date option: All dates"],
+                    ["date30d", "Date option: Past 30 days"],
+                    ["date6m", "Date option: Past 6 months"],
+                    ["date1y", "Date option: Last year"],
+                    ["resultsFoundSuffix", "Suffix after result count"],
+                    ["showMore", "“Show more” button label"],
+                    [
+                      "resultsAtATime",
+                      "Pagination helper (e.g. results at a time)",
+                    ],
+                  ] as const
+                ).map(([key, label]) => (
+                  <div key={key}>
+                    <label className="block text-xs font-medium text-slate-600">
+                      {label}
+                    </label>
+                    <input
+                      type="text"
+                      value={getNestedString(["pastArchive", key])}
+                      onChange={(e) =>
+                        updateNestedString(["pastArchive", key], e.target.value)
+                      }
+                      className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
+                    />
+                  </div>
+                ))}
+              </div>
+              <div className="grid gap-3 sm:grid-cols-2">
+                <div>
+                  <label className="block text-xs font-medium text-slate-600">
+                    Topic empty state
+                  </label>
+                  <textarea
+                    value={getNestedString(["pastArchive", "topicEmpty"])}
+                    onChange={(e) =>
+                      updateNestedString(
+                        ["pastArchive", "topicEmpty"],
+                        e.target.value,
+                      )
+                    }
+                    rows={2}
                     className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                   />
                 </div>
-              ))}
-            </div>
-            <div className="grid gap-3 sm:grid-cols-2">
-              <div>
-                <label className="block text-xs font-medium text-slate-600">Topic empty state</label>
-                <textarea
-                  value={getNestedString(["pastArchive", "topicEmpty"])}
-                  onChange={(e) => updateNestedString(["pastArchive", "topicEmpty"], e.target.value)}
-                  rows={2}
-                  className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
-                />
+                <div>
+                  <label className="block text-xs font-medium text-slate-600">
+                    Region modal empty state (no location/venue on events)
+                  </label>
+                  <textarea
+                    value={getNestedString(["pastArchive", "filterComingSoon"])}
+                    onChange={(e) =>
+                      updateNestedString(
+                        ["pastArchive", "filterComingSoon"],
+                        e.target.value,
+                      )
+                    }
+                    rows={2}
+                    className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
+                  />
+                </div>
               </div>
               <div>
                 <label className="block text-xs font-medium text-slate-600">
-                  Region modal empty state (no location/venue on events)
+                  Empty results (no matching past events)
                 </label>
                 <textarea
-                  value={getNestedString(["pastArchive", "filterComingSoon"])}
-                  onChange={(e) => updateNestedString(["pastArchive", "filterComingSoon"], e.target.value)}
-                  rows={2}
+                  value={getNestedString(["gridEmpty", "past"])}
+                  onChange={(e) =>
+                    updateNestedString(["gridEmpty", "past"], e.target.value)
+                  }
+                  rows={3}
                   className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                 />
               </div>
-            </div>
-            <div>
-              <label className="block text-xs font-medium text-slate-600">Empty results (no matching past events)</label>
-              <textarea
-                value={getNestedString(["gridEmpty", "past"])}
-                onChange={(e) => updateNestedString(["gridEmpty", "past"], e.target.value)}
-                rows={3}
-                className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
-              />
-            </div>
             </div>
           </div>
         )}
         {item.slug === "app-summit" && (
           <div className="mb-3 grid gap-3 rounded-lg border border-border bg-slate-50 p-3">
-            <p className="text-xs font-semibold uppercase tracking-wide text-slate-600">APP Summit helper</p>
+            <p className="text-xs font-semibold uppercase tracking-wide text-slate-600">
+              APP Summit helper
+            </p>
             <label className="flex cursor-pointer items-start gap-3 rounded-md border border-border bg-white p-3 text-sm text-slate-800">
               <input
                 type="checkbox"
                 className="mt-0.5 h-4 w-4 shrink-0 rounded border-border"
                 checked={parsedJson.programmeAgendaVisible !== false}
-                onChange={(e) => updateJsonFieldBoolean("programmeAgendaVisible", e.target.checked)}
+                onChange={(e) =>
+                  updateJsonFieldBoolean(
+                    "programmeAgendaVisible",
+                    e.target.checked,
+                  )
+                }
               />
               <span>
-                <span className="font-medium text-slate-900">Show Programme / APPS agenda</span>
+                <span className="font-medium text-slate-900">
+                  Show Programme / APPS agenda
+                </span>
                 <span className="mt-1 block text-xs font-normal text-slate-600">
-                  Uncheck to hide the day tabs and schedule block on the public site. The rest of the APP Summit page
-                  stays visible.
+                  Uncheck to hide the day tabs and schedule block on the public
+                  site. The rest of the APP Summit page stays visible.
                 </span>
               </span>
             </label>
             <div className="grid gap-2 sm:grid-cols-2">
               <div>
-                <label className="block text-xs font-medium text-slate-600">About section eyebrow</label>
+                <label className="block text-xs font-medium text-slate-600">
+                  About section eyebrow
+                </label>
                 <input
                   type="text"
-                  value={typeof parsedJson.aboutSectionEyebrow === "string" ? parsedJson.aboutSectionEyebrow : ""}
-                  onChange={(e) => updateJsonField("aboutSectionEyebrow", e.target.value)}
+                  value={
+                    typeof parsedJson.aboutSectionEyebrow === "string"
+                      ? parsedJson.aboutSectionEyebrow
+                      : ""
+                  }
+                  onChange={(e) =>
+                    updateJsonField("aboutSectionEyebrow", e.target.value)
+                  }
                   className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                 />
               </div>
               <div>
-                <label className="block text-xs font-medium text-slate-600">About section heading</label>
+                <label className="block text-xs font-medium text-slate-600">
+                  About section heading
+                </label>
                 <input
                   type="text"
-                  value={typeof parsedJson.aboutSectionHeading === "string" ? parsedJson.aboutSectionHeading : ""}
-                  onChange={(e) => updateJsonField("aboutSectionHeading", e.target.value)}
+                  value={
+                    typeof parsedJson.aboutSectionHeading === "string"
+                      ? parsedJson.aboutSectionHeading
+                      : ""
+                  }
+                  onChange={(e) =>
+                    updateJsonField("aboutSectionHeading", e.target.value)
+                  }
                   className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                 />
               </div>
               <div>
-                <label className="block text-xs font-medium text-slate-600">Label: Date (detail row)</label>
+                <label className="block text-xs font-medium text-slate-600">
+                  Label: Date (detail row)
+                </label>
                 <input
                   type="text"
-                  value={typeof parsedJson.detailLabelDate === "string" ? parsedJson.detailLabelDate : ""}
-                  onChange={(e) => updateJsonField("detailLabelDate", e.target.value)}
+                  value={
+                    typeof parsedJson.detailLabelDate === "string"
+                      ? parsedJson.detailLabelDate
+                      : ""
+                  }
+                  onChange={(e) =>
+                    updateJsonField("detailLabelDate", e.target.value)
+                  }
                   className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                 />
               </div>
               <div>
-                <label className="block text-xs font-medium text-slate-600">Label: Location</label>
+                <label className="block text-xs font-medium text-slate-600">
+                  Label: Location
+                </label>
                 <input
                   type="text"
-                  value={typeof parsedJson.detailLabelLocation === "string" ? parsedJson.detailLabelLocation : ""}
-                  onChange={(e) => updateJsonField("detailLabelLocation", e.target.value)}
+                  value={
+                    typeof parsedJson.detailLabelLocation === "string"
+                      ? parsedJson.detailLabelLocation
+                      : ""
+                  }
+                  onChange={(e) =>
+                    updateJsonField("detailLabelLocation", e.target.value)
+                  }
                   className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                 />
               </div>
               <div>
-                <label className="block text-xs font-medium text-slate-600">Label: Participants</label>
+                <label className="block text-xs font-medium text-slate-600">
+                  Label: Participants
+                </label>
                 <input
                   type="text"
-                  value={typeof parsedJson.detailLabelParticipants === "string" ? parsedJson.detailLabelParticipants : ""}
-                  onChange={(e) => updateJsonField("detailLabelParticipants", e.target.value)}
+                  value={
+                    typeof parsedJson.detailLabelParticipants === "string"
+                      ? parsedJson.detailLabelParticipants
+                      : ""
+                  }
+                  onChange={(e) =>
+                    updateJsonField("detailLabelParticipants", e.target.value)
+                  }
                   className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                 />
               </div>
               <div>
-                <label className="block text-xs font-medium text-slate-600">Programme section eyebrow</label>
+                <label className="block text-xs font-medium text-slate-600">
+                  Programme section eyebrow
+                </label>
                 <input
                   type="text"
-                  value={typeof parsedJson.programmeEyebrow === "string" ? parsedJson.programmeEyebrow : ""}
-                  onChange={(e) => updateJsonField("programmeEyebrow", e.target.value)}
+                  value={
+                    typeof parsedJson.programmeEyebrow === "string"
+                      ? parsedJson.programmeEyebrow
+                      : ""
+                  }
+                  onChange={(e) =>
+                    updateJsonField("programmeEyebrow", e.target.value)
+                  }
                   className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                 />
               </div>
               <div>
-                <label className="block text-xs font-medium text-slate-600">Day tab prefix</label>
+                <label className="block text-xs font-medium text-slate-600">
+                  Day tab prefix
+                </label>
                 <input
                   type="text"
-                  value={typeof parsedJson.dayTabPrefix === "string" ? parsedJson.dayTabPrefix : ""}
-                  onChange={(e) => updateJsonField("dayTabPrefix", e.target.value)}
+                  value={
+                    typeof parsedJson.dayTabPrefix === "string"
+                      ? parsedJson.dayTabPrefix
+                      : ""
+                  }
+                  onChange={(e) =>
+                    updateJsonField("dayTabPrefix", e.target.value)
+                  }
                   className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                   placeholder="e.g. Day (space after if needed)"
                 />
               </div>
               <div>
-                <label className="block text-xs font-medium text-slate-600">Contact section CTA label</label>
+                <label className="block text-xs font-medium text-slate-600">
+                  Contact section CTA label
+                </label>
                 <input
                   type="text"
-                  value={typeof parsedJson.contactSectionCtaLabel === "string" ? parsedJson.contactSectionCtaLabel : ""}
-                  onChange={(e) => updateJsonField("contactSectionCtaLabel", e.target.value)}
+                  value={
+                    typeof parsedJson.contactSectionCtaLabel === "string"
+                      ? parsedJson.contactSectionCtaLabel
+                      : ""
+                  }
+                  onChange={(e) =>
+                    updateJsonField("contactSectionCtaLabel", e.target.value)
+                  }
                   className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                 />
               </div>
               <div>
-                <label className="block text-xs font-medium text-slate-600">Hero image alt text</label>
+                <label className="block text-xs font-medium text-slate-600">
+                  Hero image alt text
+                </label>
                 <input
                   type="text"
-                  value={typeof parsedJson.heroImageAlt === "string" ? parsedJson.heroImageAlt : ""}
-                  onChange={(e) => updateJsonField("heroImageAlt", e.target.value)}
+                  value={
+                    typeof parsedJson.heroImageAlt === "string"
+                      ? parsedJson.heroImageAlt
+                      : ""
+                  }
+                  onChange={(e) =>
+                    updateJsonField("heroImageAlt", e.target.value)
+                  }
                   className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                 />
               </div>
               <div>
-                <label className="block text-xs font-medium text-slate-600">Highlights heading</label>
+                <label className="block text-xs font-medium text-slate-600">
+                  Highlights heading
+                </label>
                 <input
                   type="text"
-                  value={typeof parsedJson.highlightsHeading === "string" ? parsedJson.highlightsHeading : ""}
-                  onChange={(e) => updateJsonField("highlightsHeading", e.target.value)}
+                  value={
+                    typeof parsedJson.highlightsHeading === "string"
+                      ? parsedJson.highlightsHeading
+                      : ""
+                  }
+                  onChange={(e) =>
+                    updateJsonField("highlightsHeading", e.target.value)
+                  }
                   className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                 />
               </div>
               <div>
-                <label className="block text-xs font-medium text-slate-600">Key focus heading</label>
+                <label className="block text-xs font-medium text-slate-600">
+                  Key focus heading
+                </label>
                 <input
                   type="text"
-                  value={typeof parsedJson.focusSectionHeading === "string" ? parsedJson.focusSectionHeading : ""}
-                  onChange={(e) => updateJsonField("focusSectionHeading", e.target.value)}
+                  value={
+                    typeof parsedJson.focusSectionHeading === "string"
+                      ? parsedJson.focusSectionHeading
+                      : ""
+                  }
+                  onChange={(e) =>
+                    updateJsonField("focusSectionHeading", e.target.value)
+                  }
                   className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                 />
               </div>
               <div>
-                <label className="block text-xs font-medium text-slate-600">APPS 2026 heading</label>
+                <label className="block text-xs font-medium text-slate-600">
+                  APPS 2026 heading
+                </label>
                 <input
                   type="text"
-                  value={typeof parsedJson.summit2026Heading === "string" ? parsedJson.summit2026Heading : ""}
-                  onChange={(e) => updateJsonField("summit2026Heading", e.target.value)}
+                  value={
+                    typeof parsedJson.summit2026Heading === "string"
+                      ? parsedJson.summit2026Heading
+                      : ""
+                  }
+                  onChange={(e) =>
+                    updateJsonField("summit2026Heading", e.target.value)
+                  }
                   className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                 />
               </div>
               <div>
-                <label className="block text-xs font-medium text-slate-600">Expected outcomes heading</label>
+                <label className="block text-xs font-medium text-slate-600">
+                  Expected outcomes heading
+                </label>
                 <input
                   type="text"
-                  value={typeof parsedJson.outcomesHeading === "string" ? parsedJson.outcomesHeading : ""}
-                  onChange={(e) => updateJsonField("outcomesHeading", e.target.value)}
+                  value={
+                    typeof parsedJson.outcomesHeading === "string"
+                      ? parsedJson.outcomesHeading
+                      : ""
+                  }
+                  onChange={(e) =>
+                    updateJsonField("outcomesHeading", e.target.value)
+                  }
                   className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                 />
               </div>
               <div>
-                <label className="block text-xs font-medium text-slate-600">Structure heading</label>
+                <label className="block text-xs font-medium text-slate-600">
+                  Structure heading
+                </label>
                 <input
                   type="text"
-                  value={typeof parsedJson.structureHeading === "string" ? parsedJson.structureHeading : ""}
-                  onChange={(e) => updateJsonField("structureHeading", e.target.value)}
+                  value={
+                    typeof parsedJson.structureHeading === "string"
+                      ? parsedJson.structureHeading
+                      : ""
+                  }
+                  onChange={(e) =>
+                    updateJsonField("structureHeading", e.target.value)
+                  }
                   className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                 />
               </div>
               <div>
-                <label className="block text-xs font-medium text-slate-600">Sponsorship heading</label>
+                <label className="block text-xs font-medium text-slate-600">
+                  Sponsorship heading
+                </label>
                 <input
                   type="text"
-                  value={typeof parsedJson.sponsorshipHeading === "string" ? parsedJson.sponsorshipHeading : ""}
-                  onChange={(e) => updateJsonField("sponsorshipHeading", e.target.value)}
+                  value={
+                    typeof parsedJson.sponsorshipHeading === "string"
+                      ? parsedJson.sponsorshipHeading
+                      : ""
+                  }
+                  onChange={(e) =>
+                    updateJsonField("sponsorshipHeading", e.target.value)
+                  }
                   className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                 />
               </div>
             </div>
             <div className="rounded-md border border-border bg-white p-3">
-              <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-600">APP Summit Images</p>
+              <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-600">
+                APP Summit Images
+              </p>
               <div className="grid gap-2 sm:grid-cols-2">
                 {[
-                  { label: "Key focus background image", key: "keyFocusBgImage" },
-                  { label: "Sponsorship background image", key: "sponsorshipBgImage" },
+                  {
+                    label: "Key focus background image",
+                    key: "keyFocusBgImage",
+                  },
+                  {
+                    label: "Sponsorship background image",
+                    key: "sponsorshipBgImage",
+                  },
                   ...Array.from({ length: 10 }).map((_, i) => ({
                     label: `Highlights image ${i + 1}`,
                     key: `highlightsImage${i + 1}`,
                   })),
                 ].map((field) => (
                   <div key={field.key}>
-                    <label className="block text-xs font-medium text-slate-600">{field.label}</label>
+                    <label className="block text-xs font-medium text-slate-600">
+                      {field.label}
+                    </label>
                     <div className="mt-1 flex gap-2">
                       <input
                         type="text"
-                        value={typeof parsedJson[field.key] === "string" ? String(parsedJson[field.key]) : ""}
-                        onChange={(e) => updateJsonField(field.key, e.target.value)}
+                        value={
+                          typeof parsedJson[field.key] === "string"
+                            ? String(parsedJson[field.key])
+                            : ""
+                        }
+                        onChange={(e) =>
+                          updateJsonField(field.key, e.target.value)
+                        }
                         placeholder="media-... or /uploads/..."
                         className="w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                       />
@@ -2726,9 +4151,17 @@ export function PageContentForm({ item }: PageContentFormProps) {
             </div>
             <div className="grid gap-3 sm:grid-cols-2">
               <div>
-                <label className="block text-xs font-medium text-slate-600">Key focus areas (one per line)</label>
+                <label className="block text-xs font-medium text-slate-600">
+                  Key focus areas (one per line)
+                </label>
                 <textarea
-                  value={Array.isArray(parsedJson.keyFocusAreas) ? parsedJson.keyFocusAreas.filter((x) => typeof x === "string").join("\n") : ""}
+                  value={
+                    Array.isArray(parsedJson.keyFocusAreas)
+                      ? parsedJson.keyFocusAreas
+                          .filter((x) => typeof x === "string")
+                          .join("\n")
+                      : ""
+                  }
                   onChange={(e) =>
                     updateJsonObject({
                       ...parsedJson,
@@ -2743,9 +4176,17 @@ export function PageContentForm({ item }: PageContentFormProps) {
                 />
               </div>
               <div>
-                <label className="block text-xs font-medium text-slate-600">Expected outcomes (one per line)</label>
+                <label className="block text-xs font-medium text-slate-600">
+                  Expected outcomes (one per line)
+                </label>
                 <textarea
-                  value={Array.isArray(parsedJson.expectedOutcomes) ? parsedJson.expectedOutcomes.filter((x) => typeof x === "string").join("\n") : ""}
+                  value={
+                    Array.isArray(parsedJson.expectedOutcomes)
+                      ? parsedJson.expectedOutcomes
+                          .filter((x) => typeof x === "string")
+                          .join("\n")
+                      : ""
+                  }
                   onChange={(e) =>
                     updateJsonObject({
                       ...parsedJson,
@@ -2761,9 +4202,17 @@ export function PageContentForm({ item }: PageContentFormProps) {
               </div>
             </div>
             <div>
-              <label className="block text-xs font-medium text-slate-600">Sponsorship points (one per line)</label>
+              <label className="block text-xs font-medium text-slate-600">
+                Sponsorship points (one per line)
+              </label>
               <textarea
-                value={Array.isArray(parsedJson.sponsorshipPoints) ? parsedJson.sponsorshipPoints.filter((x) => typeof x === "string").join("\n") : ""}
+                value={
+                  Array.isArray(parsedJson.sponsorshipPoints)
+                    ? parsedJson.sponsorshipPoints
+                        .filter((x) => typeof x === "string")
+                        .join("\n")
+                    : ""
+                }
                 onChange={(e) =>
                   updateJsonObject({
                     ...parsedJson,
@@ -2778,18 +4227,30 @@ export function PageContentForm({ item }: PageContentFormProps) {
               />
             </div>
             <div>
-              <label className="block text-xs font-medium text-slate-600">About intro (APPS vision & aims)</label>
+              <label className="block text-xs font-medium text-slate-600">
+                About intro (APPS vision & aims)
+              </label>
               <textarea
-                value={typeof parsedJson.intro === "string" ? parsedJson.intro : ""}
+                value={
+                  typeof parsedJson.intro === "string" ? parsedJson.intro : ""
+                }
                 onChange={(e) => updateJsonField("intro", e.target.value)}
                 rows={4}
                 className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
               />
             </div>
             <div>
-              <label className="block text-xs font-medium text-slate-600">About section paragraphs (one per line)</label>
+              <label className="block text-xs font-medium text-slate-600">
+                About section paragraphs (one per line)
+              </label>
               <textarea
-                value={Array.isArray(parsedJson.aboutParagraphs) ? parsedJson.aboutParagraphs.filter((x) => typeof x === "string").join("\n") : ""}
+                value={
+                  Array.isArray(parsedJson.aboutParagraphs)
+                    ? parsedJson.aboutParagraphs
+                        .filter((x) => typeof x === "string")
+                        .join("\n")
+                    : ""
+                }
                 onChange={(e) =>
                   updateJsonObject({
                     ...parsedJson,
@@ -2805,18 +4266,34 @@ export function PageContentForm({ item }: PageContentFormProps) {
               />
             </div>
             <div>
-              <label className="block text-xs font-medium text-slate-600">Inaugural edition paragraph</label>
+              <label className="block text-xs font-medium text-slate-600">
+                Inaugural edition paragraph
+              </label>
               <textarea
-                value={typeof parsedJson.inauguralParagraph === "string" ? parsedJson.inauguralParagraph : ""}
-                onChange={(e) => updateJsonField("inauguralParagraph", e.target.value)}
+                value={
+                  typeof parsedJson.inauguralParagraph === "string"
+                    ? parsedJson.inauguralParagraph
+                    : ""
+                }
+                onChange={(e) =>
+                  updateJsonField("inauguralParagraph", e.target.value)
+                }
                 rows={4}
                 className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
               />
             </div>
             <div>
-              <label className="block text-xs font-medium text-slate-600">APPS 2026 section paragraphs (one per line)</label>
+              <label className="block text-xs font-medium text-slate-600">
+                APPS 2026 section paragraphs (one per line)
+              </label>
               <textarea
-                value={Array.isArray(parsedJson.summit2026Paragraphs) ? parsedJson.summit2026Paragraphs.filter((x) => typeof x === "string").join("\n") : ""}
+                value={
+                  Array.isArray(parsedJson.summit2026Paragraphs)
+                    ? parsedJson.summit2026Paragraphs
+                        .filter((x) => typeof x === "string")
+                        .join("\n")
+                    : ""
+                }
                 onChange={(e) =>
                   updateJsonObject({
                     ...parsedJson,
@@ -2833,90 +4310,165 @@ export function PageContentForm({ item }: PageContentFormProps) {
             </div>
             <div className="grid gap-3 sm:grid-cols-3">
               <div>
-                <label className="block text-xs font-medium text-slate-600">Date</label>
+                <label className="block text-xs font-medium text-slate-600">
+                  Date
+                </label>
                 <input
                   type="text"
                   value={getNestedString(["details", "date"])}
-                  onChange={(e) => updateNestedString(["details", "date"], e.target.value)}
+                  onChange={(e) =>
+                    updateNestedString(["details", "date"], e.target.value)
+                  }
                   className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                 />
               </div>
               <div>
-                <label className="block text-xs font-medium text-slate-600">Location</label>
+                <label className="block text-xs font-medium text-slate-600">
+                  Location
+                </label>
                 <input
                   type="text"
                   value={getNestedString(["details", "location"])}
-                  onChange={(e) => updateNestedString(["details", "location"], e.target.value)}
+                  onChange={(e) =>
+                    updateNestedString(["details", "location"], e.target.value)
+                  }
                   className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                 />
               </div>
               <div>
-                <label className="block text-xs font-medium text-slate-600">Participants</label>
+                <label className="block text-xs font-medium text-slate-600">
+                  Participants
+                </label>
                 <input
                   type="text"
                   value={getNestedString(["details", "participants"])}
-                  onChange={(e) => updateNestedString(["details", "participants"], e.target.value)}
+                  onChange={(e) =>
+                    updateNestedString(
+                      ["details", "participants"],
+                      e.target.value,
+                    )
+                  }
                   className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                 />
               </div>
             </div>
             <div className="grid gap-3 sm:grid-cols-2">
               <div>
-                <label className="block text-xs font-medium text-slate-600">Registration CTA label</label>
+                <label className="block text-xs font-medium text-slate-600">
+                  Registration CTA label
+                </label>
                 <input
                   type="text"
                   value={getNestedString(["registration", "cta"])}
-                  onChange={(e) => updateNestedString(["registration", "cta"], e.target.value)}
+                  onChange={(e) =>
+                    updateNestedString(["registration", "cta"], e.target.value)
+                  }
                   className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                 />
               </div>
               <div>
-                <label className="block text-xs font-medium text-slate-600">Registration CTA href</label>
+                <label className="block text-xs font-medium text-slate-600">
+                  Registration CTA href
+                </label>
                 <input
                   type="text"
                   value={getNestedString(["registration", "href"])}
-                  onChange={(e) => updateNestedString(["registration", "href"], e.target.value)}
+                  onChange={(e) =>
+                    updateNestedString(["registration", "href"], e.target.value)
+                  }
                   className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                 />
               </div>
             </div>
             <div>
-              <label className="block text-xs font-medium text-slate-600">Contact note</label>
+              <label className="block text-xs font-medium text-slate-600">
+                Contact note
+              </label>
               <textarea
-                value={typeof parsedJson.contactNote === "string" ? parsedJson.contactNote : ""}
+                value={
+                  typeof parsedJson.contactNote === "string"
+                    ? parsedJson.contactNote
+                    : ""
+                }
                 onChange={(e) => updateJsonField("contactNote", e.target.value)}
                 rows={2}
                 className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
               />
             </div>
             <div className="rounded-md border border-border bg-white p-3">
-              <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-600">Structure cards</p>
+              <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-600">
+                Structure cards
+              </p>
               <div className="grid gap-3 sm:grid-cols-3">
                 {[
-                  { day: "One", labelKey: "dayOneLabel", titleKey: "dayOneTitle", bodyKey: "dayOneBody" },
-                  { day: "Two", labelKey: "dayTwoLabel", titleKey: "dayTwoTitle", bodyKey: "dayTwoBody" },
-                  { day: "Three", labelKey: "dayThreeLabel", titleKey: "dayThreeTitle", bodyKey: "dayThreeBody" },
+                  {
+                    day: "One",
+                    labelKey: "dayOneLabel",
+                    titleKey: "dayOneTitle",
+                    bodyKey: "dayOneBody",
+                  },
+                  {
+                    day: "Two",
+                    labelKey: "dayTwoLabel",
+                    titleKey: "dayTwoTitle",
+                    bodyKey: "dayTwoBody",
+                  },
+                  {
+                    day: "Three",
+                    labelKey: "dayThreeLabel",
+                    titleKey: "dayThreeTitle",
+                    bodyKey: "dayThreeBody",
+                  },
                 ].map((card) => (
-                  <div key={card.day} className="rounded-md border border-border p-3">
-                    <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">Day {card.day}</p>
-                    <label className="mt-2 block text-xs font-medium text-slate-600">Label</label>
+                  <div
+                    key={card.day}
+                    className="rounded-md border border-border p-3"
+                  >
+                    <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">
+                      Day {card.day}
+                    </p>
+                    <label className="mt-2 block text-xs font-medium text-slate-600">
+                      Label
+                    </label>
                     <input
                       type="text"
-                      value={typeof parsedJson[card.labelKey] === "string" ? String(parsedJson[card.labelKey]) : ""}
-                      onChange={(e) => updateJsonField(card.labelKey, e.target.value)}
+                      value={
+                        typeof parsedJson[card.labelKey] === "string"
+                          ? String(parsedJson[card.labelKey])
+                          : ""
+                      }
+                      onChange={(e) =>
+                        updateJsonField(card.labelKey, e.target.value)
+                      }
                       className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                     />
-                    <label className="mt-2 block text-xs font-medium text-slate-600">Title</label>
+                    <label className="mt-2 block text-xs font-medium text-slate-600">
+                      Title
+                    </label>
                     <input
                       type="text"
-                      value={typeof parsedJson[card.titleKey] === "string" ? String(parsedJson[card.titleKey]) : ""}
-                      onChange={(e) => updateJsonField(card.titleKey, e.target.value)}
+                      value={
+                        typeof parsedJson[card.titleKey] === "string"
+                          ? String(parsedJson[card.titleKey])
+                          : ""
+                      }
+                      onChange={(e) =>
+                        updateJsonField(card.titleKey, e.target.value)
+                      }
                       className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                     />
-                    <label className="mt-2 block text-xs font-medium text-slate-600">Description</label>
+                    <label className="mt-2 block text-xs font-medium text-slate-600">
+                      Description
+                    </label>
                     <textarea
-                      value={typeof parsedJson[card.bodyKey] === "string" ? String(parsedJson[card.bodyKey]) : ""}
-                      onChange={(e) => updateJsonField(card.bodyKey, e.target.value)}
+                      value={
+                        typeof parsedJson[card.bodyKey] === "string"
+                          ? String(parsedJson[card.bodyKey])
+                          : ""
+                      }
+                      onChange={(e) =>
+                        updateJsonField(card.bodyKey, e.target.value)
+                      }
                       rows={3}
                       className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                     />
@@ -2925,49 +4477,91 @@ export function PageContentForm({ item }: PageContentFormProps) {
               </div>
             </div>
             <div className="rounded-md border border-border bg-white p-3">
-              <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-600">Sponsorship & final CTA</p>
+              <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-600">
+                Sponsorship & final CTA
+              </p>
               <div className="grid gap-3 sm:grid-cols-2">
                 <div className="sm:col-span-2">
-                  <label className="block text-xs font-medium text-slate-600">Sponsorship intro</label>
+                  <label className="block text-xs font-medium text-slate-600">
+                    Sponsorship intro
+                  </label>
                   <textarea
-                    value={typeof parsedJson.sponsorshipIntro === "string" ? parsedJson.sponsorshipIntro : ""}
-                    onChange={(e) => updateJsonField("sponsorshipIntro", e.target.value)}
+                    value={
+                      typeof parsedJson.sponsorshipIntro === "string"
+                        ? parsedJson.sponsorshipIntro
+                        : ""
+                    }
+                    onChange={(e) =>
+                      updateJsonField("sponsorshipIntro", e.target.value)
+                    }
                     rows={3}
                     className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-slate-600">Final CTA heading</label>
+                  <label className="block text-xs font-medium text-slate-600">
+                    Final CTA heading
+                  </label>
                   <input
                     type="text"
-                    value={typeof parsedJson.finalCtaHeading === "string" ? parsedJson.finalCtaHeading : ""}
-                    onChange={(e) => updateJsonField("finalCtaHeading", e.target.value)}
+                    value={
+                      typeof parsedJson.finalCtaHeading === "string"
+                        ? parsedJson.finalCtaHeading
+                        : ""
+                    }
+                    onChange={(e) =>
+                      updateJsonField("finalCtaHeading", e.target.value)
+                    }
                     className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-slate-600">Final address line</label>
+                  <label className="block text-xs font-medium text-slate-600">
+                    Final address line
+                  </label>
                   <input
                     type="text"
-                    value={typeof parsedJson.finalAddress === "string" ? parsedJson.finalAddress : ""}
-                    onChange={(e) => updateJsonField("finalAddress", e.target.value)}
+                    value={
+                      typeof parsedJson.finalAddress === "string"
+                        ? parsedJson.finalAddress
+                        : ""
+                    }
+                    onChange={(e) =>
+                      updateJsonField("finalAddress", e.target.value)
+                    }
                     className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                   />
                 </div>
                 <div className="sm:col-span-2">
-                  <label className="block text-xs font-medium text-slate-600">Final CTA body</label>
+                  <label className="block text-xs font-medium text-slate-600">
+                    Final CTA body
+                  </label>
                   <textarea
-                    value={typeof parsedJson.finalCtaBody === "string" ? parsedJson.finalCtaBody : ""}
-                    onChange={(e) => updateJsonField("finalCtaBody", e.target.value)}
+                    value={
+                      typeof parsedJson.finalCtaBody === "string"
+                        ? parsedJson.finalCtaBody
+                        : ""
+                    }
+                    onChange={(e) =>
+                      updateJsonField("finalCtaBody", e.target.value)
+                    }
                     rows={3}
                     className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                   />
                 </div>
                 <div className="sm:col-span-2">
-                  <label className="block text-xs font-medium text-slate-600">Final participants note</label>
+                  <label className="block text-xs font-medium text-slate-600">
+                    Final participants note
+                  </label>
                   <textarea
-                    value={typeof parsedJson.finalParticipantsNote === "string" ? parsedJson.finalParticipantsNote : ""}
-                    onChange={(e) => updateJsonField("finalParticipantsNote", e.target.value)}
+                    value={
+                      typeof parsedJson.finalParticipantsNote === "string"
+                        ? parsedJson.finalParticipantsNote
+                        : ""
+                    }
+                    onChange={(e) =>
+                      updateJsonField("finalParticipantsNote", e.target.value)
+                    }
                     rows={3}
                     className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                   />
@@ -2979,98 +4573,173 @@ export function PageContentForm({ item }: PageContentFormProps) {
         )}
         {item.slug === "aypf" && (
           <div className="mb-3 grid gap-3 rounded-lg border border-border bg-slate-50 p-3">
-            <p className="text-xs font-semibold uppercase tracking-wide text-slate-600">AYPF helper</p>
-            <p className="text-xs text-slate-500">
-              Hero image uses the shared field below. List fields: one item per line.
+            <p className="text-xs font-semibold uppercase tracking-wide text-slate-600">
+              AYPF helper
             </p>
-            <div className="grid gap-2 sm:grid-cols-2">
+            <p className="text-xs text-slate-500">
+              Hero image uses the shared field below. List fields: one item per
+              line.
+            </p>
+            {/* <div className="grid gap-2 sm:grid-cols-2">
               <div>
-                <label className="block text-xs font-medium text-slate-600">Breadcrumb label (last segment)</label>
+                <label className="block text-xs font-medium text-slate-600">
+                  Breadcrumb label (last segment)
+                </label>
                 <input
                   type="text"
-                  value={typeof parsedJson.breadcrumbLabel === "string" ? parsedJson.breadcrumbLabel : ""}
-                  onChange={(e) => updateJsonField("breadcrumbLabel", e.target.value)}
+                  value={
+                    typeof parsedJson.breadcrumbLabel === "string"
+                      ? parsedJson.breadcrumbLabel
+                      : ""
+                  }
+                  onChange={(e) =>
+                    updateJsonField("breadcrumbLabel", e.target.value)
+                  }
                   className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                 />
               </div>
               <div>
-                <label className="block text-xs font-medium text-slate-600">Hero image alt</label>
+                <label className="block text-xs font-medium text-slate-600">
+                  Hero image alt
+                </label>
                 <input
                   type="text"
-                  value={typeof parsedJson.heroImageAlt === "string" ? parsedJson.heroImageAlt : ""}
-                  onChange={(e) => updateJsonField("heroImageAlt", e.target.value)}
+                  value={
+                    typeof parsedJson.heroImageAlt === "string"
+                      ? parsedJson.heroImageAlt
+                      : ""
+                  }
+                  onChange={(e) =>
+                    updateJsonField("heroImageAlt", e.target.value)
+                  }
                   className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                 />
               </div>
               <div className="sm:col-span-2">
-                <label className="block text-xs font-medium text-slate-600">Page title (hero)</label>
+                <label className="block text-xs font-medium text-slate-600">
+                  Page title (hero)
+                </label>
                 <input
                   type="text"
-                  value={typeof parsedJson.title === "string" ? parsedJson.title : ""}
+                  value={
+                    typeof parsedJson.title === "string" ? parsedJson.title : ""
+                  }
                   onChange={(e) => updateJsonField("title", e.target.value)}
                   className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                 />
               </div>
               <div className="sm:col-span-2">
-                <label className="block text-xs font-medium text-slate-600">Hero subtitle</label>
+                <label className="block text-xs font-medium text-slate-600">
+                  Hero subtitle
+                </label>
                 <textarea
-                  value={typeof parsedJson.subtitle === "string" ? parsedJson.subtitle : ""}
+                  value={
+                    typeof parsedJson.subtitle === "string"
+                      ? parsedJson.subtitle
+                      : ""
+                  }
                   onChange={(e) => updateJsonField("subtitle", e.target.value)}
                   rows={2}
                   className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                 />
               </div>
-            </div>
-            <div>
-              <label className="block text-xs font-medium text-slate-600">Lead paragraph</label>
+            </div> */}
+            {/* <div>
+              <label className="block text-xs font-medium text-slate-600">
+                Lead paragraph
+              </label>
               <textarea
-                value={typeof parsedJson.leadParagraph === "string" ? parsedJson.leadParagraph : ""}
-                onChange={(e) => updateJsonField("leadParagraph", e.target.value)}
+                value={
+                  typeof parsedJson.leadParagraph === "string"
+                    ? parsedJson.leadParagraph
+                    : ""
+                }
+                onChange={(e) =>
+                  updateJsonField("leadParagraph", e.target.value)
+                }
                 rows={3}
                 className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
               />
-            </div>
-            <div>
-              <label className="block text-xs font-medium text-slate-600">Launch paragraph</label>
+            </div> */}
+            {/* <div>
+              <label className="block text-xs font-medium text-slate-600">
+                Launch paragraph
+              </label>
               <textarea
-                value={typeof parsedJson.launchParagraph === "string" ? parsedJson.launchParagraph : ""}
-                onChange={(e) => updateJsonField("launchParagraph", e.target.value)}
+                value={
+                  typeof parsedJson.launchParagraph === "string"
+                    ? parsedJson.launchParagraph
+                    : ""
+                }
+                onChange={(e) =>
+                  updateJsonField("launchParagraph", e.target.value)
+                }
                 rows={3}
                 className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
               />
-            </div>
-            <div>
-              <label className="block text-xs font-medium text-slate-600">Theme (quoted)</label>
+            </div> */}
+            {/* <div>
+              <label className="block text-xs font-medium text-slate-600">
+                Theme (quoted)
+              </label>
               <textarea
-                value={typeof parsedJson.themeQuote === "string" ? parsedJson.themeQuote : ""}
+                value={
+                  typeof parsedJson.themeQuote === "string"
+                    ? parsedJson.themeQuote
+                    : ""
+                }
                 onChange={(e) => updateJsonField("themeQuote", e.target.value)}
                 rows={2}
                 className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
               />
             </div>
             <div>
-              <label className="block text-xs font-medium text-slate-600">Inaugural paragraph</label>
+              <label className="block text-xs font-medium text-slate-600">
+                Inaugural paragraph
+              </label>
               <textarea
-                value={typeof parsedJson.inauguralParagraph === "string" ? parsedJson.inauguralParagraph : ""}
-                onChange={(e) => updateJsonField("inauguralParagraph", e.target.value)}
+                value={
+                  typeof parsedJson.inauguralParagraph === "string"
+                    ? parsedJson.inauguralParagraph
+                    : ""
+                }
+                onChange={(e) =>
+                  updateJsonField("inauguralParagraph", e.target.value)
+                }
                 rows={2}
                 className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
               />
-            </div>
+            </div> */}
             <div className="rounded-md border border-border bg-white p-3">
-              <p className="text-xs font-semibold uppercase tracking-wide text-slate-600">AYPF Images</p>
+              <p className="text-xs font-semibold uppercase tracking-wide text-slate-600">
+                AYPF Images
+              </p>
               <div className="mt-2 grid gap-2 sm:grid-cols-2">
                 {[
-                  { label: "Focus section background image", key: "focusSectionBgImage" },
-                  { label: "Strategic priorities background image", key: "strategicPrioritiesBgImage" },
+                  {
+                    label: "Focus section background image",
+                    key: "focusSectionBgImage",
+                  },
+                  {
+                    label: "Strategic priorities background image",
+                    key: "strategicPrioritiesBgImage",
+                  },
                 ].map((field) => (
                   <div key={field.key}>
-                    <label className="block text-xs font-medium text-slate-600">{field.label}</label>
+                    <label className="block text-xs font-medium text-slate-600">
+                      {field.label}
+                    </label>
                     <div className="mt-1 flex gap-2">
                       <input
                         type="text"
-                        value={typeof parsedJson[field.key] === "string" ? String(parsedJson[field.key]) : ""}
-                        onChange={(e) => updateJsonField(field.key, e.target.value)}
+                        value={
+                          typeof parsedJson[field.key] === "string"
+                            ? String(parsedJson[field.key])
+                            : ""
+                        }
+                        onChange={(e) =>
+                          updateJsonField(field.key, e.target.value)
+                        }
                         placeholder="media-... or /uploads/..."
                         className="w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                       />
@@ -3087,48 +4756,76 @@ export function PageContentForm({ item }: PageContentFormProps) {
                 ))}
               </div>
             </div>
-            <div className="rounded-md border border-border bg-white p-3">
-              <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-600">Purpose section</p>
+            {/* <div className="rounded-md border border-border bg-white p-3">
+              <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-600">
+                Purpose section
+              </p>
               <div className="grid gap-2 sm:grid-cols-2">
                 <div>
-                  <label className="block text-xs font-medium text-slate-600">Eyebrow</label>
+                  <label className="block text-xs font-medium text-slate-600">
+                    Eyebrow
+                  </label>
                   <input
                     type="text"
                     value={getNestedString(["purposeSection", "eyebrow"])}
-                    onChange={(e) => updateNestedString(["purposeSection", "eyebrow"], e.target.value)}
+                    onChange={(e) =>
+                      updateNestedString(
+                        ["purposeSection", "eyebrow"],
+                        e.target.value,
+                      )
+                    }
                     className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-slate-600">Heading</label>
+                  <label className="block text-xs font-medium text-slate-600">
+                    Heading
+                  </label>
                   <input
                     type="text"
                     value={getNestedString(["purposeSection", "heading"])}
-                    onChange={(e) => updateNestedString(["purposeSection", "heading"], e.target.value)}
+                    onChange={(e) =>
+                      updateNestedString(
+                        ["purposeSection", "heading"],
+                        e.target.value,
+                      )
+                    }
                     className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                   />
                 </div>
               </div>
               <div className="mt-2">
-                <label className="block text-xs font-medium text-slate-600">Intro</label>
+                <label className="block text-xs font-medium text-slate-600">
+                  Intro
+                </label>
                 <textarea
                   value={getNestedString(["purposeSection", "intro"])}
-                  onChange={(e) => updateNestedString(["purposeSection", "intro"], e.target.value)}
+                  onChange={(e) =>
+                    updateNestedString(
+                      ["purposeSection", "intro"],
+                      e.target.value,
+                    )
+                  }
                   rows={2}
                   className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                 />
               </div>
               <div className="mt-2">
-                <label className="block text-xs font-medium text-slate-600">Focus areas (one per line)</label>
+                <label className="block text-xs font-medium text-slate-600">
+                  Focus areas (one per line)
+                </label>
                 <textarea
-                  value={getNestedStringArray(["purposeSection", "focusAreas"]).join("\n")}
+                  value={getNestedStringArray([
+                    "purposeSection",
+                    "focusAreas",
+                  ]).join("\n")}
                   onChange={(e) =>
                     updateNestedStringArray(
                       ["purposeSection", "focusAreas"],
                       e.target.value
                         .split("\n")
                         .map((s) => s.trim())
-                        .filter(Boolean)
+                        .filter(Boolean),
                     )
                   }
                   rows={6}
@@ -3137,56 +4834,92 @@ export function PageContentForm({ item }: PageContentFormProps) {
               </div>
             </div>
             <div>
-              <label className="block text-xs font-medium text-slate-600">Legitimacy paragraph</label>
+              <label className="block text-xs font-medium text-slate-600">
+                Legitimacy paragraph
+              </label>
               <textarea
-                value={typeof parsedJson.legitimacyParagraph === "string" ? parsedJson.legitimacyParagraph : ""}
-                onChange={(e) => updateJsonField("legitimacyParagraph", e.target.value)}
+                value={
+                  typeof parsedJson.legitimacyParagraph === "string"
+                    ? parsedJson.legitimacyParagraph
+                    : ""
+                }
+                onChange={(e) =>
+                  updateJsonField("legitimacyParagraph", e.target.value)
+                }
                 rows={2}
                 className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
               />
             </div>
             <div className="rounded-md border border-border bg-white p-3">
-              <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-600">From dialogue to action</p>
+              <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-600">
+                From dialogue to action
+              </p>
               <div className="grid gap-2 sm:grid-cols-2">
                 <div>
-                  <label className="block text-xs font-medium text-slate-600">Eyebrow</label>
+                  <label className="block text-xs font-medium text-slate-600">
+                    Eyebrow
+                  </label>
                   <input
                     type="text"
                     value={getNestedString(["actionSection", "eyebrow"])}
-                    onChange={(e) => updateNestedString(["actionSection", "eyebrow"], e.target.value)}
+                    onChange={(e) =>
+                      updateNestedString(
+                        ["actionSection", "eyebrow"],
+                        e.target.value,
+                      )
+                    }
                     className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-slate-600">Heading</label>
+                  <label className="block text-xs font-medium text-slate-600">
+                    Heading
+                  </label>
                   <input
                     type="text"
                     value={getNestedString(["actionSection", "heading"])}
-                    onChange={(e) => updateNestedString(["actionSection", "heading"], e.target.value)}
+                    onChange={(e) =>
+                      updateNestedString(
+                        ["actionSection", "heading"],
+                        e.target.value,
+                      )
+                    }
                     className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                   />
                 </div>
               </div>
               <div className="mt-2">
-                <label className="block text-xs font-medium text-slate-600">Intro</label>
+                <label className="block text-xs font-medium text-slate-600">
+                  Intro
+                </label>
                 <textarea
                   value={getNestedString(["actionSection", "intro"])}
-                  onChange={(e) => updateNestedString(["actionSection", "intro"], e.target.value)}
+                  onChange={(e) =>
+                    updateNestedString(
+                      ["actionSection", "intro"],
+                      e.target.value,
+                    )
+                  }
                   rows={3}
                   className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                 />
               </div>
               <div className="mt-2">
-                <label className="block text-xs font-medium text-slate-600">Discussion points (one per line)</label>
+                <label className="block text-xs font-medium text-slate-600">
+                  Discussion points (one per line)
+                </label>
                 <textarea
-                  value={getNestedStringArray(["actionSection", "discussionPoints"]).join("\n")}
+                  value={getNestedStringArray([
+                    "actionSection",
+                    "discussionPoints",
+                  ]).join("\n")}
                   onChange={(e) =>
                     updateNestedStringArray(
                       ["actionSection", "discussionPoints"],
                       e.target.value
                         .split("\n")
                         .map((s) => s.trim())
-                        .filter(Boolean)
+                        .filter(Boolean),
                     )
                   }
                   rows={5}
@@ -3195,47 +4928,75 @@ export function PageContentForm({ item }: PageContentFormProps) {
               </div>
             </div>
             <div className="rounded-md border border-border bg-white p-3">
-              <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-600">Looking ahead</p>
+              <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-600">
+                Looking ahead
+              </p>
               <div className="grid gap-2 sm:grid-cols-2">
                 <div>
-                  <label className="block text-xs font-medium text-slate-600">Eyebrow</label>
+                  <label className="block text-xs font-medium text-slate-600">
+                    Eyebrow
+                  </label>
                   <input
                     type="text"
                     value={getNestedString(["lookingAheadSection", "eyebrow"])}
-                    onChange={(e) => updateNestedString(["lookingAheadSection", "eyebrow"], e.target.value)}
+                    onChange={(e) =>
+                      updateNestedString(
+                        ["lookingAheadSection", "eyebrow"],
+                        e.target.value,
+                      )
+                    }
                     className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-slate-600">Heading</label>
+                  <label className="block text-xs font-medium text-slate-600">
+                    Heading
+                  </label>
                   <input
                     type="text"
                     value={getNestedString(["lookingAheadSection", "heading"])}
-                    onChange={(e) => updateNestedString(["lookingAheadSection", "heading"], e.target.value)}
+                    onChange={(e) =>
+                      updateNestedString(
+                        ["lookingAheadSection", "heading"],
+                        e.target.value,
+                      )
+                    }
                     className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                   />
                 </div>
               </div>
               <div className="mt-2">
-                <label className="block text-xs font-medium text-slate-600">Intro</label>
+                <label className="block text-xs font-medium text-slate-600">
+                  Intro
+                </label>
                 <textarea
                   value={getNestedString(["lookingAheadSection", "intro"])}
-                  onChange={(e) => updateNestedString(["lookingAheadSection", "intro"], e.target.value)}
+                  onChange={(e) =>
+                    updateNestedString(
+                      ["lookingAheadSection", "intro"],
+                      e.target.value,
+                    )
+                  }
                   rows={3}
                   className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                 />
               </div>
               <div className="mt-2">
-                <label className="block text-xs font-medium text-slate-600">Topics (one per line)</label>
+                <label className="block text-xs font-medium text-slate-600">
+                  Topics (one per line)
+                </label>
                 <textarea
-                  value={getNestedStringArray(["lookingAheadSection", "topics"]).join("\n")}
+                  value={getNestedStringArray([
+                    "lookingAheadSection",
+                    "topics",
+                  ]).join("\n")}
                   onChange={(e) =>
                     updateNestedStringArray(
                       ["lookingAheadSection", "topics"],
                       e.target.value
                         .split("\n")
                         .map((s) => s.trim())
-                        .filter(Boolean)
+                        .filter(Boolean),
                     )
                   }
                   rows={5}
@@ -3243,66 +5004,114 @@ export function PageContentForm({ item }: PageContentFormProps) {
                 />
               </div>
               <div className="mt-2">
-                <label className="block text-xs font-medium text-slate-600">Invitation note</label>
+                <label className="block text-xs font-medium text-slate-600">
+                  Invitation note
+                </label>
                 <textarea
-                  value={getNestedString(["lookingAheadSection", "invitationNote"])}
-                  onChange={(e) => updateNestedString(["lookingAheadSection", "invitationNote"], e.target.value)}
+                  value={getNestedString([
+                    "lookingAheadSection",
+                    "invitationNote",
+                  ])}
+                  onChange={(e) =>
+                    updateNestedString(
+                      ["lookingAheadSection", "invitationNote"],
+                      e.target.value,
+                    )
+                  }
                   rows={2}
                   className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                 />
               </div>
             </div>
             <div className="rounded-md border border-border bg-white p-3">
-              <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-600">Register</p>
+              <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-600">
+                Register
+              </p>
               <div className="grid gap-2 sm:grid-cols-2">
                 <div className="sm:col-span-2">
-                  <label className="block text-xs font-medium text-slate-600">Heading</label>
+                  <label className="block text-xs font-medium text-slate-600">
+                    Heading
+                  </label>
                   <input
                     type="text"
                     value={getNestedString(["registerSection", "heading"])}
-                    onChange={(e) => updateNestedString(["registerSection", "heading"], e.target.value)}
+                    onChange={(e) =>
+                      updateNestedString(
+                        ["registerSection", "heading"],
+                        e.target.value,
+                      )
+                    }
                     className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                   />
                 </div>
                 <div className="sm:col-span-2">
-                  <label className="block text-xs font-medium text-slate-600">Intro</label>
+                  <label className="block text-xs font-medium text-slate-600">
+                    Intro
+                  </label>
                   <textarea
                     value={getNestedString(["registerSection", "intro"])}
-                    onChange={(e) => updateNestedString(["registerSection", "intro"], e.target.value)}
+                    onChange={(e) =>
+                      updateNestedString(
+                        ["registerSection", "intro"],
+                        e.target.value,
+                      )
+                    }
                     rows={2}
                     className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-slate-600">CTA label</label>
+                  <label className="block text-xs font-medium text-slate-600">
+                    CTA label
+                  </label>
                   <input
                     type="text"
                     value={getNestedString(["registerSection", "ctaLabel"])}
-                    onChange={(e) => updateNestedString(["registerSection", "ctaLabel"], e.target.value)}
+                    onChange={(e) =>
+                      updateNestedString(
+                        ["registerSection", "ctaLabel"],
+                        e.target.value,
+                      )
+                    }
                     className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-slate-600">Registration URL</label>
+                  <label className="block text-xs font-medium text-slate-600">
+                    Registration URL
+                  </label>
                   <input
                     type="url"
-                    value={getNestedString(["registerSection", "registrationHref"])}
-                    onChange={(e) => updateNestedString(["registerSection", "registrationHref"], e.target.value)}
+                    value={getNestedString([
+                      "registerSection",
+                      "registrationHref",
+                    ])}
+                    onChange={(e) =>
+                      updateNestedString(
+                        ["registerSection", "registrationHref"],
+                        e.target.value,
+                      )
+                    }
                     placeholder="https://…"
                     className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                   />
                 </div>
                 <div className="sm:col-span-2">
-                  <label className="block text-xs font-medium text-slate-600">Benefits list (one per line)</label>
+                  <label className="block text-xs font-medium text-slate-600">
+                    Benefits list (one per line)
+                  </label>
                   <textarea
-                    value={getNestedStringArray(["registerSection", "benefits"]).join("\n")}
+                    value={getNestedStringArray([
+                      "registerSection",
+                      "benefits",
+                    ]).join("\n")}
                     onChange={(e) =>
                       updateNestedStringArray(
                         ["registerSection", "benefits"],
                         e.target.value
                           .split("\n")
                           .map((s) => s.trim())
-                          .filter(Boolean)
+                          .filter(Boolean),
                       )
                     }
                     rows={4}
@@ -3310,32 +5119,58 @@ export function PageContentForm({ item }: PageContentFormProps) {
                   />
                 </div>
               </div>
-            </div>
+            </div> */}
             <div className="rounded-md border border-border bg-white p-3">
-              <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-600">Main section text (new)</p>
+              <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-600">
+                Main section text (new)
+              </p>
               <div className="grid gap-3 sm:grid-cols-2">
                 <div>
-                  <label className="block text-xs font-medium text-slate-600">Top section eyebrow</label>
+                  <label className="block text-xs font-medium text-slate-600">
+                    Top section eyebrow
+                  </label>
                   <input
                     type="text"
-                    value={typeof parsedJson.aboutEyebrow === "string" ? parsedJson.aboutEyebrow : ""}
-                    onChange={(e) => updateJsonField("aboutEyebrow", e.target.value)}
+                    value={
+                      typeof parsedJson.aboutEyebrow === "string"
+                        ? parsedJson.aboutEyebrow
+                        : ""
+                    }
+                    onChange={(e) =>
+                      updateJsonField("aboutEyebrow", e.target.value)
+                    }
                     className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                   />
                 </div>
                 <div className="sm:col-span-2">
-                  <label className="block text-xs font-medium text-slate-600">Top section heading</label>
+                  <label className="block text-xs font-medium text-slate-600">
+                    Top section heading
+                  </label>
                   <input
                     type="text"
-                    value={typeof parsedJson.aboutHeading === "string" ? parsedJson.aboutHeading : ""}
-                    onChange={(e) => updateJsonField("aboutHeading", e.target.value)}
+                    value={
+                      typeof parsedJson.aboutHeading === "string"
+                        ? parsedJson.aboutHeading
+                        : ""
+                    }
+                    onChange={(e) =>
+                      updateJsonField("aboutHeading", e.target.value)
+                    }
                     className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                   />
                 </div>
                 <div className="sm:col-span-2">
-                  <label className="block text-xs font-medium text-slate-600">Top section paragraphs (one per line)</label>
+                  <label className="block text-xs font-medium text-slate-600">
+                    Top section paragraphs (one per line)
+                  </label>
                   <textarea
-                    value={Array.isArray(parsedJson.aboutParagraphs) ? parsedJson.aboutParagraphs.filter((x) => typeof x === "string").join("\n") : ""}
+                    value={
+                      Array.isArray(parsedJson.aboutParagraphs)
+                        ? parsedJson.aboutParagraphs
+                            .filter((x) => typeof x === "string")
+                            .join("\n")
+                        : ""
+                    }
                     onChange={(e) =>
                       updateJsonObject({
                         ...parsedJson,
@@ -3352,25 +5187,51 @@ export function PageContentForm({ item }: PageContentFormProps) {
               </div>
             </div>
             <div className="rounded-md border border-border bg-white p-3">
-              <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-600">Focus, objectives and priorities (new)</p>
+              <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-600">
+                Focus, objectives and priorities (new)
+              </p>
               <div className="grid gap-3">
-                <label className="block text-xs font-medium text-slate-600">Focus heading</label>
+                <label className="block text-xs font-medium text-slate-600">
+                  Focus heading
+                </label>
                 <input
                   type="text"
-                  value={typeof parsedJson.focusHeading === "string" ? parsedJson.focusHeading : ""}
-                  onChange={(e) => updateJsonField("focusHeading", e.target.value)}
+                  value={
+                    typeof parsedJson.focusHeading === "string"
+                      ? parsedJson.focusHeading
+                      : ""
+                  }
+                  onChange={(e) =>
+                    updateJsonField("focusHeading", e.target.value)
+                  }
                   className="w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                 />
-                <label className="block text-xs font-medium text-slate-600">Focus intro</label>
+                <label className="block text-xs font-medium text-slate-600">
+                  Focus intro
+                </label>
                 <textarea
-                  value={typeof parsedJson.focusIntro === "string" ? parsedJson.focusIntro : ""}
-                  onChange={(e) => updateJsonField("focusIntro", e.target.value)}
+                  value={
+                    typeof parsedJson.focusIntro === "string"
+                      ? parsedJson.focusIntro
+                      : ""
+                  }
+                  onChange={(e) =>
+                    updateJsonField("focusIntro", e.target.value)
+                  }
                   rows={3}
                   className="w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                 />
-                <label className="block text-xs font-medium text-slate-600">Focus points (one per line)</label>
+                <label className="block text-xs font-medium text-slate-600">
+                  Focus points (one per line)
+                </label>
                 <textarea
-                  value={Array.isArray(parsedJson.focusAreas) ? parsedJson.focusAreas.filter((x) => typeof x === "string").join("\n") : ""}
+                  value={
+                    Array.isArray(parsedJson.focusAreas)
+                      ? parsedJson.focusAreas
+                          .filter((x) => typeof x === "string")
+                          .join("\n")
+                      : ""
+                  }
                   onChange={(e) =>
                     updateJsonObject({
                       ...parsedJson,
@@ -3383,32 +5244,62 @@ export function PageContentForm({ item }: PageContentFormProps) {
                   rows={5}
                   className="w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                 />
-                <label className="block text-xs font-medium text-slate-600">AYPF 2026 heading</label>
+                <label className="block text-xs font-medium text-slate-600">
+                  AYPF 2026 heading
+                </label>
                 <input
                   type="text"
-                  value={typeof parsedJson.summit2026Heading === "string" ? parsedJson.summit2026Heading : ""}
-                  onChange={(e) => updateJsonField("summit2026Heading", e.target.value)}
+                  value={
+                    typeof parsedJson.summit2026Heading === "string"
+                      ? parsedJson.summit2026Heading
+                      : ""
+                  }
+                  onChange={(e) =>
+                    updateJsonField("summit2026Heading", e.target.value)
+                  }
                   className="w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                 />
-                <label className="block text-xs font-medium text-slate-600">AYPF 2026 paragraph</label>
+                <label className="block text-xs font-medium text-slate-600">
+                  AYPF 2026 paragraph
+                </label>
                 <textarea
-                  value={typeof parsedJson.summit2026Paragraphs === "string" ? parsedJson.summit2026Paragraphs : ""}
+                  value={
+                    typeof parsedJson.summit2026Paragraphs === "string"
+                      ? parsedJson.summit2026Paragraphs
+                      : ""
+                  }
                   onChange={(e) =>
                     updateJsonField("summit2026Paragraphs", e.target.value)
                   }
                   rows={4}
                   className="w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                 />
-                <label className="block text-xs font-medium text-slate-600">Objectives heading</label>
+                <label className="block text-xs font-medium text-slate-600">
+                  Objectives heading
+                </label>
                 <input
                   type="text"
-                  value={typeof parsedJson.objectivesHeading === "string" ? parsedJson.objectivesHeading : ""}
-                  onChange={(e) => updateJsonField("objectivesHeading", e.target.value)}
+                  value={
+                    typeof parsedJson.objectivesHeading === "string"
+                      ? parsedJson.objectivesHeading
+                      : ""
+                  }
+                  onChange={(e) =>
+                    updateJsonField("objectivesHeading", e.target.value)
+                  }
                   className="w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                 />
-                <label className="block text-xs font-medium text-slate-600">Objectives points (one per line)</label>
+                <label className="block text-xs font-medium text-slate-600">
+                  Objectives points (one per line)
+                </label>
                 <textarea
-                  value={Array.isArray(parsedJson.objectives) ? parsedJson.objectives.filter((x) => typeof x === "string").join("\n") : ""}
+                  value={
+                    Array.isArray(parsedJson.objectives)
+                      ? parsedJson.objectives
+                          .filter((x) => typeof x === "string")
+                          .join("\n")
+                      : ""
+                  }
                   onChange={(e) =>
                     updateJsonObject({
                       ...parsedJson,
@@ -3421,29 +5312,67 @@ export function PageContentForm({ item }: PageContentFormProps) {
                   rows={5}
                   className="w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                 />
-                <label className="block text-xs font-medium text-slate-600">Strategic priorities heading</label>
+                <label className="block text-xs font-medium text-slate-600">
+                  Strategic priorities heading
+                </label>
                 <input
                   type="text"
-                  value={typeof parsedJson.strategicPrioritiesHeading === "string" ? parsedJson.strategicPrioritiesHeading : ""}
-                  onChange={(e) => updateJsonField("strategicPrioritiesHeading", e.target.value)}
+                  value={
+                    typeof parsedJson.strategicPrioritiesHeading === "string"
+                      ? parsedJson.strategicPrioritiesHeading
+                      : ""
+                  }
+                  onChange={(e) =>
+                    updateJsonField(
+                      "strategicPrioritiesHeading",
+                      e.target.value,
+                    )
+                  }
                   className="w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                 />
               </div>
               <div className="mt-3 grid gap-3 sm:grid-cols-2">
                 {Array.from({ length: 4 }).map((_, idx) => (
-                  <div key={idx} className="rounded-md border border-border p-3">
-                    <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">Priority {idx + 1}</p>
-                    <label className="mt-2 block text-xs font-medium text-slate-600">Title</label>
+                  <div
+                    key={idx}
+                    className="rounded-md border border-border p-3"
+                  >
+                    <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">
+                      Priority {idx + 1}
+                    </p>
+                    <label className="mt-2 block text-xs font-medium text-slate-600">
+                      Title
+                    </label>
                     <input
                       type="text"
-                      value={getNestedString(["strategicPriorities", String(idx), "title"])}
-                      onChange={(e) => updateNestedString(["strategicPriorities", String(idx), "title"], e.target.value)}
+                      value={getNestedString([
+                        "strategicPriorities",
+                        String(idx),
+                        "title",
+                      ])}
+                      onChange={(e) =>
+                        updateNestedString(
+                          ["strategicPriorities", String(idx), "title"],
+                          e.target.value,
+                        )
+                      }
                       className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                     />
-                    <label className="mt-2 block text-xs font-medium text-slate-600">Description</label>
+                    <label className="mt-2 block text-xs font-medium text-slate-600">
+                      Description
+                    </label>
                     <textarea
-                      value={getNestedString(["strategicPriorities", String(idx), "body"])}
-                      onChange={(e) => updateNestedString(["strategicPriorities", String(idx), "body"], e.target.value)}
+                      value={getNestedString([
+                        "strategicPriorities",
+                        String(idx),
+                        "body",
+                      ])}
+                      onChange={(e) =>
+                        updateNestedString(
+                          ["strategicPriorities", String(idx), "body"],
+                          e.target.value,
+                        )
+                      }
                       rows={3}
                       className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                     />
@@ -3452,39 +5381,73 @@ export function PageContentForm({ item }: PageContentFormProps) {
               </div>
             </div>
             <div className="rounded-md border border-border bg-white p-3">
-              <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-600">Register section (new quick fields)</p>
+              <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-600">
+                Register section (new quick fields)
+              </p>
               <div className="grid gap-3 sm:grid-cols-2">
                 <div>
-                  <label className="block text-xs font-medium text-slate-600">Heading</label>
+                  <label className="block text-xs font-medium text-slate-600">
+                    Heading
+                  </label>
                   <input
                     type="text"
-                    value={typeof parsedJson.registerHeading === "string" ? parsedJson.registerHeading : ""}
-                    onChange={(e) => updateJsonField("registerHeading", e.target.value)}
+                    value={
+                      typeof parsedJson.registerHeading === "string"
+                        ? parsedJson.registerHeading
+                        : ""
+                    }
+                    onChange={(e) =>
+                      updateJsonField("registerHeading", e.target.value)
+                    }
                     className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-slate-600">CTA label</label>
+                  <label className="block text-xs font-medium text-slate-600">
+                    CTA label
+                  </label>
                   <input
                     type="text"
-                    value={typeof parsedJson.registerCtaLabel === "string" ? parsedJson.registerCtaLabel : ""}
-                    onChange={(e) => updateJsonField("registerCtaLabel", e.target.value)}
+                    value={
+                      typeof parsedJson.registerCtaLabel === "string"
+                        ? parsedJson.registerCtaLabel
+                        : ""
+                    }
+                    onChange={(e) =>
+                      updateJsonField("registerCtaLabel", e.target.value)
+                    }
                     className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                   />
                 </div>
                 <div className="sm:col-span-2">
-                  <label className="block text-xs font-medium text-slate-600">Intro line</label>
+                  <label className="block text-xs font-medium text-slate-600">
+                    Intro line
+                  </label>
                   <textarea
-                    value={typeof parsedJson.registerIntro === "string" ? parsedJson.registerIntro : ""}
-                    onChange={(e) => updateJsonField("registerIntro", e.target.value)}
+                    value={
+                      typeof parsedJson.registerIntro === "string"
+                        ? parsedJson.registerIntro
+                        : ""
+                    }
+                    onChange={(e) =>
+                      updateJsonField("registerIntro", e.target.value)
+                    }
                     rows={2}
                     className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                   />
                 </div>
                 <div className="sm:col-span-2">
-                  <label className="block text-xs font-medium text-slate-600">Benefits (one per line)</label>
+                  <label className="block text-xs font-medium text-slate-600">
+                    Benefits (one per line)
+                  </label>
                   <textarea
-                    value={Array.isArray(parsedJson.registerBenefits) ? parsedJson.registerBenefits.filter((x) => typeof x === "string").join("\n") : ""}
+                    value={
+                      Array.isArray(parsedJson.registerBenefits)
+                        ? parsedJson.registerBenefits
+                            .filter((x) => typeof x === "string")
+                            .join("\n")
+                        : ""
+                    }
                     onChange={(e) =>
                       updateJsonObject({
                         ...parsedJson,
@@ -3504,253 +5467,463 @@ export function PageContentForm({ item }: PageContentFormProps) {
         )}
         {item.slug === "applications" && (
           <div className="mb-3 grid gap-3 rounded-lg border border-border bg-slate-50 p-3">
-            <p className="text-xs font-semibold uppercase tracking-wide text-slate-600">Applications page helper</p>
+            <p className="text-xs font-semibold uppercase tracking-wide text-slate-600">
+              Applications page helper
+            </p>
             <p className="text-xs text-slate-500">
-              Hero and intro also live here. Optional <code className="rounded bg-white px-1">fieldLabelOverrides</code> in the JSON
-              below: object mapping field <code className="rounded bg-white px-1">name</code> to custom labels (e.g.{" "}
-              <code className="rounded bg-white px-1">{`{"fullName":"Your name"}`}</code>).
+              Hero and intro also live here. Optional{" "}
+              <code className="rounded bg-white px-1">fieldLabelOverrides</code>{" "}
+              in the JSON below: object mapping field{" "}
+              <code className="rounded bg-white px-1">name</code> to custom
+              labels (e.g.{" "}
+              <code className="rounded bg-white px-1">{`{"fullName":"Your name"}`}</code>
+              ).
             </p>
             <div className="grid gap-2 sm:grid-cols-2">
               <div>
-                <label className="block text-xs font-medium text-slate-600">Hero image alt</label>
+                <label className="block text-xs font-medium text-slate-600">
+                  Hero image alt
+                </label>
                 <input
                   type="text"
-                  value={typeof parsedJson.heroImageAlt === "string" ? parsedJson.heroImageAlt : ""}
-                  onChange={(e) => updateJsonField("heroImageAlt", e.target.value)}
+                  value={
+                    typeof parsedJson.heroImageAlt === "string"
+                      ? parsedJson.heroImageAlt
+                      : ""
+                  }
+                  onChange={(e) =>
+                    updateJsonField("heroImageAlt", e.target.value)
+                  }
                   className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                 />
               </div>
               <div>
-                <label className="block text-xs font-medium text-slate-600">Breadcrumb: Home</label>
+                <label className="block text-xs font-medium text-slate-600">
+                  Breadcrumb: Home
+                </label>
                 <input
                   type="text"
-                  value={typeof parsedJson.breadcrumbHome === "string" ? parsedJson.breadcrumbHome : ""}
-                  onChange={(e) => updateJsonField("breadcrumbHome", e.target.value)}
+                  value={
+                    typeof parsedJson.breadcrumbHome === "string"
+                      ? parsedJson.breadcrumbHome
+                      : ""
+                  }
+                  onChange={(e) =>
+                    updateJsonField("breadcrumbHome", e.target.value)
+                  }
                   className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                 />
               </div>
               <div>
-                <label className="block text-xs font-medium text-slate-600">Breadcrumb: Get involved</label>
+                <label className="block text-xs font-medium text-slate-600">
+                  Breadcrumb: Get involved
+                </label>
                 <input
                   type="text"
-                  value={typeof parsedJson.breadcrumbGetInvolved === "string" ? parsedJson.breadcrumbGetInvolved : ""}
-                  onChange={(e) => updateJsonField("breadcrumbGetInvolved", e.target.value)}
+                  value={
+                    typeof parsedJson.breadcrumbGetInvolved === "string"
+                      ? parsedJson.breadcrumbGetInvolved
+                      : ""
+                  }
+                  onChange={(e) =>
+                    updateJsonField("breadcrumbGetInvolved", e.target.value)
+                  }
                   className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                 />
               </div>
               <div>
-                <label className="block text-xs font-medium text-slate-600">Breadcrumb: Volunteer</label>
+                <label className="block text-xs font-medium text-slate-600">
+                  Breadcrumb: Volunteer
+                </label>
                 <input
                   type="text"
-                  value={typeof parsedJson.breadcrumbVolunteer === "string" ? parsedJson.breadcrumbVolunteer : ""}
-                  onChange={(e) => updateJsonField("breadcrumbVolunteer", e.target.value)}
+                  value={
+                    typeof parsedJson.breadcrumbVolunteer === "string"
+                      ? parsedJson.breadcrumbVolunteer
+                      : ""
+                  }
+                  onChange={(e) =>
+                    updateJsonField("breadcrumbVolunteer", e.target.value)
+                  }
                   className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                 />
               </div>
               <div>
-                <label className="block text-xs font-medium text-slate-600">Breadcrumb: Current page</label>
+                <label className="block text-xs font-medium text-slate-600">
+                  Breadcrumb: Current page
+                </label>
                 <input
                   type="text"
-                  value={typeof parsedJson.breadcrumbApplication === "string" ? parsedJson.breadcrumbApplication : ""}
-                  onChange={(e) => updateJsonField("breadcrumbApplication", e.target.value)}
+                  value={
+                    typeof parsedJson.breadcrumbApplication === "string"
+                      ? parsedJson.breadcrumbApplication
+                      : ""
+                  }
+                  onChange={(e) =>
+                    updateJsonField("breadcrumbApplication", e.target.value)
+                  }
                   className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                 />
               </div>
               <div>
-                <label className="block text-xs font-medium text-slate-600">Apply eyebrow</label>
+                <label className="block text-xs font-medium text-slate-600">
+                  Apply eyebrow
+                </label>
                 <input
                   type="text"
-                  value={typeof parsedJson.formEyebrow === "string" ? parsedJson.formEyebrow : ""}
-                  onChange={(e) => updateJsonField("formEyebrow", e.target.value)}
+                  value={
+                    typeof parsedJson.formEyebrow === "string"
+                      ? parsedJson.formEyebrow
+                      : ""
+                  }
+                  onChange={(e) =>
+                    updateJsonField("formEyebrow", e.target.value)
+                  }
                   className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                 />
               </div>
               <div className="sm:col-span-2">
-                <label className="block text-xs font-medium text-slate-600">Form card title</label>
+                <label className="block text-xs font-medium text-slate-600">
+                  Form card title
+                </label>
                 <input
                   type="text"
-                  value={typeof parsedJson.formCardTitle === "string" ? parsedJson.formCardTitle : ""}
-                  onChange={(e) => updateJsonField("formCardTitle", e.target.value)}
+                  value={
+                    typeof parsedJson.formCardTitle === "string"
+                      ? parsedJson.formCardTitle
+                      : ""
+                  }
+                  onChange={(e) =>
+                    updateJsonField("formCardTitle", e.target.value)
+                  }
                   className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                 />
               </div>
               <div>
-                <label className="block text-xs font-medium text-slate-600">Section: Personal</label>
+                <label className="block text-xs font-medium text-slate-600">
+                  Section: Personal
+                </label>
                 <input
                   type="text"
-                  value={typeof parsedJson.sectionPersonal === "string" ? parsedJson.sectionPersonal : ""}
-                  onChange={(e) => updateJsonField("sectionPersonal", e.target.value)}
+                  value={
+                    typeof parsedJson.sectionPersonal === "string"
+                      ? parsedJson.sectionPersonal
+                      : ""
+                  }
+                  onChange={(e) =>
+                    updateJsonField("sectionPersonal", e.target.value)
+                  }
                   className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                 />
               </div>
               <div>
-                <label className="block text-xs font-medium text-slate-600">Section: Experience</label>
+                <label className="block text-xs font-medium text-slate-600">
+                  Section: Experience
+                </label>
                 <input
                   type="text"
-                  value={typeof parsedJson.sectionExperience === "string" ? parsedJson.sectionExperience : ""}
-                  onChange={(e) => updateJsonField("sectionExperience", e.target.value)}
+                  value={
+                    typeof parsedJson.sectionExperience === "string"
+                      ? parsedJson.sectionExperience
+                      : ""
+                  }
+                  onChange={(e) =>
+                    updateJsonField("sectionExperience", e.target.value)
+                  }
                   className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                 />
               </div>
               <div>
-                <label className="block text-xs font-medium text-slate-600">Section: Motivation</label>
+                <label className="block text-xs font-medium text-slate-600">
+                  Section: Motivation
+                </label>
                 <input
                   type="text"
-                  value={typeof parsedJson.sectionMotivation === "string" ? parsedJson.sectionMotivation : ""}
-                  onChange={(e) => updateJsonField("sectionMotivation", e.target.value)}
+                  value={
+                    typeof parsedJson.sectionMotivation === "string"
+                      ? parsedJson.sectionMotivation
+                      : ""
+                  }
+                  onChange={(e) =>
+                    updateJsonField("sectionMotivation", e.target.value)
+                  }
                   className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                 />
               </div>
               <div className="sm:col-span-2">
-                <label className="block text-xs font-medium text-slate-600">Application type label</label>
+                <label className="block text-xs font-medium text-slate-600">
+                  Application type label
+                </label>
                 <input
                   type="text"
-                  value={typeof parsedJson.applicationTypeLabel === "string" ? parsedJson.applicationTypeLabel : ""}
-                  onChange={(e) => updateJsonField("applicationTypeLabel", e.target.value)}
+                  value={
+                    typeof parsedJson.applicationTypeLabel === "string"
+                      ? parsedJson.applicationTypeLabel
+                      : ""
+                  }
+                  onChange={(e) =>
+                    updateJsonField("applicationTypeLabel", e.target.value)
+                  }
                   className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                 />
               </div>
               <div>
-                <label className="block text-xs font-medium text-slate-600">Option: Volunteer</label>
+                <label className="block text-xs font-medium text-slate-600">
+                  Option: Volunteer
+                </label>
                 <input
                   type="text"
-                  value={typeof parsedJson.optionVolunteer === "string" ? parsedJson.optionVolunteer : ""}
-                  onChange={(e) => updateJsonField("optionVolunteer", e.target.value)}
+                  value={
+                    typeof parsedJson.optionVolunteer === "string"
+                      ? parsedJson.optionVolunteer
+                      : ""
+                  }
+                  onChange={(e) =>
+                    updateJsonField("optionVolunteer", e.target.value)
+                  }
                   className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                 />
               </div>
               <div>
-                <label className="block text-xs font-medium text-slate-600">Option: Staff</label>
+                <label className="block text-xs font-medium text-slate-600">
+                  Option: Staff
+                </label>
                 <input
                   type="text"
-                  value={typeof parsedJson.optionStaff === "string" ? parsedJson.optionStaff : ""}
-                  onChange={(e) => updateJsonField("optionStaff", e.target.value)}
+                  value={
+                    typeof parsedJson.optionStaff === "string"
+                      ? parsedJson.optionStaff
+                      : ""
+                  }
+                  onChange={(e) =>
+                    updateJsonField("optionStaff", e.target.value)
+                  }
                   className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                 />
               </div>
               <div>
-                <label className="block text-xs font-medium text-slate-600">Option: Fellow</label>
+                <label className="block text-xs font-medium text-slate-600">
+                  Option: Fellow
+                </label>
                 <input
                   type="text"
-                  value={typeof parsedJson.optionFellow === "string" ? parsedJson.optionFellow : ""}
-                  onChange={(e) => updateJsonField("optionFellow", e.target.value)}
+                  value={
+                    typeof parsedJson.optionFellow === "string"
+                      ? parsedJson.optionFellow
+                      : ""
+                  }
+                  onChange={(e) =>
+                    updateJsonField("optionFellow", e.target.value)
+                  }
                   className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                 />
               </div>
               <div>
-                <label className="block text-xs font-medium text-slate-600">Availability placeholder</label>
+                <label className="block text-xs font-medium text-slate-600">
+                  Availability placeholder
+                </label>
                 <input
                   type="text"
-                  value={typeof parsedJson.availabilityPlaceholder === "string" ? parsedJson.availabilityPlaceholder : ""}
-                  onChange={(e) => updateJsonField("availabilityPlaceholder", e.target.value)}
+                  value={
+                    typeof parsedJson.availabilityPlaceholder === "string"
+                      ? parsedJson.availabilityPlaceholder
+                      : ""
+                  }
+                  onChange={(e) =>
+                    updateJsonField("availabilityPlaceholder", e.target.value)
+                  }
                   className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                 />
               </div>
               <div>
-                <label className="block text-xs font-medium text-slate-600">Availability: Full-time</label>
+                <label className="block text-xs font-medium text-slate-600">
+                  Availability: Full-time
+                </label>
                 <input
                   type="text"
-                  value={typeof parsedJson.availabilityFullTime === "string" ? parsedJson.availabilityFullTime : ""}
-                  onChange={(e) => updateJsonField("availabilityFullTime", e.target.value)}
+                  value={
+                    typeof parsedJson.availabilityFullTime === "string"
+                      ? parsedJson.availabilityFullTime
+                      : ""
+                  }
+                  onChange={(e) =>
+                    updateJsonField("availabilityFullTime", e.target.value)
+                  }
                   className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                 />
               </div>
               <div>
-                <label className="block text-xs font-medium text-slate-600">Availability: Part-time</label>
+                <label className="block text-xs font-medium text-slate-600">
+                  Availability: Part-time
+                </label>
                 <input
                   type="text"
-                  value={typeof parsedJson.availabilityPartTime === "string" ? parsedJson.availabilityPartTime : ""}
-                  onChange={(e) => updateJsonField("availabilityPartTime", e.target.value)}
+                  value={
+                    typeof parsedJson.availabilityPartTime === "string"
+                      ? parsedJson.availabilityPartTime
+                      : ""
+                  }
+                  onChange={(e) =>
+                    updateJsonField("availabilityPartTime", e.target.value)
+                  }
                   className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                 />
               </div>
               <div>
-                <label className="block text-xs font-medium text-slate-600">Availability: Flexible</label>
+                <label className="block text-xs font-medium text-slate-600">
+                  Availability: Flexible
+                </label>
                 <input
                   type="text"
-                  value={typeof parsedJson.availabilityFlexible === "string" ? parsedJson.availabilityFlexible : ""}
-                  onChange={(e) => updateJsonField("availabilityFlexible", e.target.value)}
+                  value={
+                    typeof parsedJson.availabilityFlexible === "string"
+                      ? parsedJson.availabilityFlexible
+                      : ""
+                  }
+                  onChange={(e) =>
+                    updateJsonField("availabilityFlexible", e.target.value)
+                  }
                   className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                 />
               </div>
               <div>
-                <label className="block text-xs font-medium text-slate-600">Submit (idle)</label>
+                <label className="block text-xs font-medium text-slate-600">
+                  Submit (idle)
+                </label>
                 <input
                   type="text"
-                  value={typeof parsedJson.submitIdle === "string" ? parsedJson.submitIdle : ""}
-                  onChange={(e) => updateJsonField("submitIdle", e.target.value)}
+                  value={
+                    typeof parsedJson.submitIdle === "string"
+                      ? parsedJson.submitIdle
+                      : ""
+                  }
+                  onChange={(e) =>
+                    updateJsonField("submitIdle", e.target.value)
+                  }
                   className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                 />
               </div>
               <div>
-                <label className="block text-xs font-medium text-slate-600">Submit (sending)</label>
+                <label className="block text-xs font-medium text-slate-600">
+                  Submit (sending)
+                </label>
                 <input
                   type="text"
-                  value={typeof parsedJson.submitSending === "string" ? parsedJson.submitSending : ""}
-                  onChange={(e) => updateJsonField("submitSending", e.target.value)}
+                  value={
+                    typeof parsedJson.submitSending === "string"
+                      ? parsedJson.submitSending
+                      : ""
+                  }
+                  onChange={(e) =>
+                    updateJsonField("submitSending", e.target.value)
+                  }
                   className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                 />
               </div>
               <div className="sm:col-span-2">
-                <label className="block text-xs font-medium text-slate-600">Success message</label>
+                <label className="block text-xs font-medium text-slate-600">
+                  Success message
+                </label>
                 <textarea
-                  value={typeof parsedJson.successMessage === "string" ? parsedJson.successMessage : ""}
-                  onChange={(e) => updateJsonField("successMessage", e.target.value)}
+                  value={
+                    typeof parsedJson.successMessage === "string"
+                      ? parsedJson.successMessage
+                      : ""
+                  }
+                  onChange={(e) =>
+                    updateJsonField("successMessage", e.target.value)
+                  }
                   rows={2}
                   className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                 />
               </div>
               <div className="sm:col-span-2">
-                <label className="block text-xs font-medium text-slate-600">Email warning intro (before programs email)</label>
+                <label className="block text-xs font-medium text-slate-600">
+                  Email warning intro (before programs email)
+                </label>
                 <textarea
-                  value={typeof parsedJson.emailWarnIntro === "string" ? parsedJson.emailWarnIntro : ""}
-                  onChange={(e) => updateJsonField("emailWarnIntro", e.target.value)}
+                  value={
+                    typeof parsedJson.emailWarnIntro === "string"
+                      ? parsedJson.emailWarnIntro
+                      : ""
+                  }
+                  onChange={(e) =>
+                    updateJsonField("emailWarnIntro", e.target.value)
+                  }
                   rows={2}
                   className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                 />
               </div>
               <div className="sm:col-span-2">
-                <label className="block text-xs font-medium text-slate-600">Generic error fallback</label>
+                <label className="block text-xs font-medium text-slate-600">
+                  Generic error fallback
+                </label>
                 <input
                   type="text"
-                  value={typeof parsedJson.errorFallback === "string" ? parsedJson.errorFallback : ""}
-                  onChange={(e) => updateJsonField("errorFallback", e.target.value)}
+                  value={
+                    typeof parsedJson.errorFallback === "string"
+                      ? parsedJson.errorFallback
+                      : ""
+                  }
+                  onChange={(e) =>
+                    updateJsonField("errorFallback", e.target.value)
+                  }
                   className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                 />
               </div>
             </div>
           </div>
         )}
-        {(item.slug === "privacy-policy" || item.slug === "terms-of-service") && (
+        {(item.slug === "privacy-policy" ||
+          item.slug === "terms-of-service") && (
           <div className="mb-3 grid gap-3 rounded-lg border border-border bg-slate-50 p-3">
-            <p className="text-xs font-semibold uppercase tracking-wide text-slate-600">Legal page helper</p>
+            <p className="text-xs font-semibold uppercase tracking-wide text-slate-600">
+              Legal page helper
+            </p>
             <div className="grid gap-3 sm:grid-cols-2">
               <div>
-                <label className="block text-xs font-medium text-slate-600">Page title</label>
+                <label className="block text-xs font-medium text-slate-600">
+                  Page title
+                </label>
                 <input
                   type="text"
-                  value={typeof parsedJson.title === "string" ? parsedJson.title : ""}
+                  value={
+                    typeof parsedJson.title === "string" ? parsedJson.title : ""
+                  }
                   onChange={(e) => updateJsonField("title", e.target.value)}
                   className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                 />
               </div>
               <div>
-                <label className="block text-xs font-medium text-slate-600">Last updated</label>
+                <label className="block text-xs font-medium text-slate-600">
+                  Last updated
+                </label>
                 <input
                   type="text"
-                  value={typeof parsedJson.lastUpdated === "string" ? parsedJson.lastUpdated : ""}
-                  onChange={(e) => updateJsonField("lastUpdated", e.target.value)}
+                  value={
+                    typeof parsedJson.lastUpdated === "string"
+                      ? parsedJson.lastUpdated
+                      : ""
+                  }
+                  onChange={(e) =>
+                    updateJsonField("lastUpdated", e.target.value)
+                  }
                   className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                 />
               </div>
             </div>
             <div className="rounded-md border border-border bg-white p-3">
               <div className="mb-2 flex items-center justify-between">
-                <p className="text-xs font-semibold uppercase tracking-wide text-slate-600">Sections</p>
+                <p className="text-xs font-semibold uppercase tracking-wide text-slate-600">
+                  Sections
+                </p>
                 <button
                   type="button"
                   onClick={() =>
-                    updateNestedArray(["sections"], (arr) => [...arr, { title: "", content: "", items: [] }])
+                    updateNestedArray(["sections"], (arr) => [
+                      ...arr,
+                      { title: "", content: "", items: [] },
+                    ])
                   }
                   className="rounded-md border border-border px-2 py-1 text-xs text-slate-700 hover:bg-slate-50"
                 >
@@ -3758,128 +5931,169 @@ export function PageContentForm({ item }: PageContentFormProps) {
                 </button>
               </div>
               <div className="space-y-2">
-                {legalSections.map((sec, idx) => (
+                {legalSections.map((sec, idx) =>
                   (() => {
                     const isCollapsed = collapsedSections.includes(idx);
                     return (
-                  <div
-                    key={idx}
-                    draggable
-                    onDragStart={() => setDragLegalIdx(idx)}
-                    onDragOver={(e) => e.preventDefault()}
-                    onDrop={() => {
-                      if (dragLegalIdx !== null) reorderNestedArray(["sections"], dragLegalIdx, idx);
-                      setDragLegalIdx(null);
-                    }}
-                    onDragEnd={() => setDragLegalIdx(null)}
-                    className="rounded-md border border-border p-3"
-                  >
-                    <div className="mb-2 flex items-center justify-between">
-                      <button
-                        type="button"
-                        onClick={() => toggleCollapsedSection(idx)}
-                        className="inline-flex items-center gap-1 text-xs font-medium text-slate-700 hover:text-slate-900"
+                      <div
+                        key={idx}
+                        draggable
+                        onDragStart={() => setDragLegalIdx(idx)}
+                        onDragOver={(e) => e.preventDefault()}
+                        onDrop={() => {
+                          if (dragLegalIdx !== null)
+                            reorderNestedArray(["sections"], dragLegalIdx, idx);
+                          setDragLegalIdx(null);
+                        }}
+                        onDragEnd={() => setDragLegalIdx(null)}
+                        className="rounded-md border border-border p-3"
                       >
-                        {isCollapsed ? (
-                          <ChevronRight className="h-3.5 w-3.5" />
-                        ) : (
-                          <ChevronDown className="h-3.5 w-3.5" />
-                        )}
-                        {typeof sec.title === "string" && sec.title ? sec.title : `Section ${idx + 1}`}
-                      </button>
-                    </div>
-                    {!isCollapsed && (
-                    <>
-                    <div className="grid gap-2 sm:grid-cols-2">
-                      <div className="inline-flex items-center gap-1 text-[11px] text-slate-500 sm:col-span-2">
-                        <GripVertical className="h-3.5 w-3.5" /> Drag section to reorder
-                      </div>
-                      <input
-                        value={typeof sec.title === "string" ? sec.title : ""}
-                        onChange={(e) =>
-                          updateNestedArray(["sections"], (arr) =>
-                            arr.map((s, i) => (i === idx ? { ...s, title: e.target.value } : s))
-                          )
-                        }
-                        placeholder="Section title"
-                        className="rounded-md border border-border px-2 py-1 text-xs"
-                      />
-                      <button
-                        type="button"
-                        onClick={() =>
-                          updateNestedArray(["sections"], (arr) => arr.filter((_, i) => i !== idx))
-                        }
-                        className="justify-self-end rounded-md border border-red-200 px-2 py-1 text-xs text-red-700 hover:bg-red-50"
-                      >
-                        Remove
-                      </button>
-                      <div className="justify-self-end flex gap-1">
-                        <button
-                          type="button"
-                          onClick={() => reorderNestedArray(["sections"], idx, idx - 1)}
-                          className="rounded-md border border-border px-2 py-1 text-xs text-slate-700 hover:bg-slate-50"
-                          title="Move section up"
-                        >
-                          <ArrowUp className="h-3.5 w-3.5" />
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => reorderNestedArray(["sections"], idx, idx + 1)}
-                          className="rounded-md border border-border px-2 py-1 text-xs text-slate-700 hover:bg-slate-50"
-                          title="Move section down"
-                        >
-                          <ArrowDown className="h-3.5 w-3.5" />
-                        </button>
-                      </div>
-                    </div>
-                    <textarea
-                      value={typeof sec.content === "string" ? sec.content : ""}
-                      onChange={(e) =>
-                        updateNestedArray(["sections"], (arr) =>
-                          arr.map((s, i) => (i === idx ? { ...s, content: e.target.value } : s))
-                        )
-                      }
-                      rows={3}
-                      placeholder="Section content"
-                      className="mt-2 w-full rounded-md border border-border px-2 py-1 text-xs"
-                    />
-                    <textarea
-                      value={Array.isArray(sec.items) ? sec.items.filter((x) => typeof x === "string").join("\n") : ""}
-                      onChange={(e) =>
-                        updateNestedArray(["sections"], (arr) =>
-                          arr.map((s, i) =>
-                            i === idx
-                              ? {
-                                  ...s,
-                                  items: e.target.value
-                                    .split("\n")
-                                    .map((line) => line.trim())
-                                    .filter(Boolean),
+                        <div className="mb-2 flex items-center justify-between">
+                          <button
+                            type="button"
+                            onClick={() => toggleCollapsedSection(idx)}
+                            className="inline-flex items-center gap-1 text-xs font-medium text-slate-700 hover:text-slate-900"
+                          >
+                            {isCollapsed ? (
+                              <ChevronRight className="h-3.5 w-3.5" />
+                            ) : (
+                              <ChevronDown className="h-3.5 w-3.5" />
+                            )}
+                            {typeof sec.title === "string" && sec.title
+                              ? sec.title
+                              : `Section ${idx + 1}`}
+                          </button>
+                        </div>
+                        {!isCollapsed && (
+                          <>
+                            <div className="grid gap-2 sm:grid-cols-2">
+                              <div className="inline-flex items-center gap-1 text-[11px] text-slate-500 sm:col-span-2">
+                                <GripVertical className="h-3.5 w-3.5" /> Drag
+                                section to reorder
+                              </div>
+                              <input
+                                value={
+                                  typeof sec.title === "string" ? sec.title : ""
                                 }
-                              : s
-                          )
-                        )
-                      }
-                      rows={3}
-                      placeholder="Bullet items (one per line)"
-                      className="mt-2 w-full rounded-md border border-border px-2 py-1 text-xs"
-                    />
-                    </>
-                    )}
-                  </div>
+                                onChange={(e) =>
+                                  updateNestedArray(["sections"], (arr) =>
+                                    arr.map((s, i) =>
+                                      i === idx
+                                        ? { ...s, title: e.target.value }
+                                        : s,
+                                    ),
+                                  )
+                                }
+                                placeholder="Section title"
+                                className="rounded-md border border-border px-2 py-1 text-xs"
+                              />
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  updateNestedArray(["sections"], (arr) =>
+                                    arr.filter((_, i) => i !== idx),
+                                  )
+                                }
+                                className="justify-self-end rounded-md border border-red-200 px-2 py-1 text-xs text-red-700 hover:bg-red-50"
+                              >
+                                Remove
+                              </button>
+                              <div className="justify-self-end flex gap-1">
+                                <button
+                                  type="button"
+                                  onClick={() =>
+                                    reorderNestedArray(
+                                      ["sections"],
+                                      idx,
+                                      idx - 1,
+                                    )
+                                  }
+                                  className="rounded-md border border-border px-2 py-1 text-xs text-slate-700 hover:bg-slate-50"
+                                  title="Move section up"
+                                >
+                                  <ArrowUp className="h-3.5 w-3.5" />
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() =>
+                                    reorderNestedArray(
+                                      ["sections"],
+                                      idx,
+                                      idx + 1,
+                                    )
+                                  }
+                                  className="rounded-md border border-border px-2 py-1 text-xs text-slate-700 hover:bg-slate-50"
+                                  title="Move section down"
+                                >
+                                  <ArrowDown className="h-3.5 w-3.5" />
+                                </button>
+                              </div>
+                            </div>
+                            <textarea
+                              value={
+                                typeof sec.content === "string"
+                                  ? sec.content
+                                  : ""
+                              }
+                              onChange={(e) =>
+                                updateNestedArray(["sections"], (arr) =>
+                                  arr.map((s, i) =>
+                                    i === idx
+                                      ? { ...s, content: e.target.value }
+                                      : s,
+                                  ),
+                                )
+                              }
+                              rows={3}
+                              placeholder="Section content"
+                              className="mt-2 w-full rounded-md border border-border px-2 py-1 text-xs"
+                            />
+                            <textarea
+                              value={
+                                Array.isArray(sec.items)
+                                  ? sec.items
+                                      .filter((x) => typeof x === "string")
+                                      .join("\n")
+                                  : ""
+                              }
+                              onChange={(e) =>
+                                updateNestedArray(["sections"], (arr) =>
+                                  arr.map((s, i) =>
+                                    i === idx
+                                      ? {
+                                          ...s,
+                                          items: e.target.value
+                                            .split("\n")
+                                            .map((line) => line.trim())
+                                            .filter(Boolean),
+                                        }
+                                      : s,
+                                  ),
+                                )
+                              }
+                              rows={3}
+                              placeholder="Bullet items (one per line)"
+                              className="mt-2 w-full rounded-md border border-border px-2 py-1 text-xs"
+                            />
+                          </>
+                        )}
+                      </div>
                     );
-                  })()
-                ))}
+                  })(),
+                )}
               </div>
             </div>
             <p className="text-xs text-slate-500">
-              For complex privacy subsections, use the advanced editor below for full control.
+              For complex privacy subsections, use the advanced editor below for
+              full control.
             </p>
           </div>
         )}
         <div className="mb-3 grid gap-3 rounded-lg border border-border bg-slate-50 p-3 sm:grid-cols-2">
           <div>
-            <label className="block text-xs font-semibold uppercase tracking-wide text-slate-600">Hero image</label>
+            <label className="block text-xs font-semibold uppercase tracking-wide text-slate-600">
+              Hero image
+            </label>
             <div className="mt-1 flex gap-2">
               <input
                 type="text"
@@ -3899,12 +6113,16 @@ export function PageContentForm({ item }: PageContentFormProps) {
             </div>
           </div>
           <div>
-            <label className="block text-xs font-semibold uppercase tracking-wide text-slate-600">Section image</label>
+            <label className="block text-xs font-semibold uppercase tracking-wide text-slate-600">
+              Section image
+            </label>
             <div className="mt-1 flex gap-2">
               <input
                 type="text"
                 value={quickValues.sectionImage}
-                onChange={(e) => updateJsonField("sectionImage", e.target.value)}
+                onChange={(e) =>
+                  updateJsonField("sectionImage", e.target.value)
+                }
                 placeholder="media-... or /uploads/..."
                 className="w-full rounded-md border border-border bg-white px-3 py-2 text-sm text-slate-900"
               />
@@ -3919,7 +6137,9 @@ export function PageContentForm({ item }: PageContentFormProps) {
             </div>
           </div>
           <div>
-            <label className="block text-xs font-semibold uppercase tracking-wide text-slate-600">Subtitle</label>
+            <label className="block text-xs font-semibold uppercase tracking-wide text-slate-600">
+              Subtitle
+            </label>
             <input
               type="text"
               value={quickValues.subtitle}
@@ -3929,7 +6149,9 @@ export function PageContentForm({ item }: PageContentFormProps) {
             />
           </div>
           <div>
-            <label className="block text-xs font-semibold uppercase tracking-wide text-slate-600">Apply intro</label>
+            <label className="block text-xs font-semibold uppercase tracking-wide text-slate-600">
+              Apply intro
+            </label>
             <input
               type="text"
               value={quickValues.applyIntro}
@@ -3949,15 +6171,19 @@ export function PageContentForm({ item }: PageContentFormProps) {
           placeholder='{"heroImage":"media-...","intro":"..."}'
         />
         <p className="mt-1 text-xs text-slate-500">
-          Edit extra fields and media links here when needed. Use a media ID such as <code>media-…</code> or a path like{" "}
-          <code>/uploads/…</code>.
+          Edit extra fields and media links here when needed. Use a media ID
+          such as <code>media-…</code> or a path like <code>/uploads/…</code>.
         </p>
-        {jsonError ? <p className="mt-2 text-xs text-red-600">{jsonError}</p> : null}
+        {jsonError ? (
+          <p className="mt-2 text-xs text-red-600">{jsonError}</p>
+        ) : null}
       </div>
 
       <AdminFormStickyActions>
         <SubmitButton />
-        <AdminFormPreviewLink href={publicPathForPageSlug(item.slug)}>Preview on site</AdminFormPreviewLink>
+        <AdminFormPreviewLink href={publicPathForPageSlug(item.slug)}>
+          Preview on site
+        </AdminFormPreviewLink>
         <a
           href="/admin/pages"
           className="flex min-h-11 items-center rounded-lg border border-border px-6 py-3 font-medium text-slate-700 hover:bg-slate-50"

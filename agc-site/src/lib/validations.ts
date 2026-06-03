@@ -32,7 +32,10 @@ export const subscribeSchema = z.object({
 });
 
 export const applicationSchema = z.object({
-  applicationType: z.enum(["volunteer", "staff", "fellow"]).optional().default("volunteer"),
+  applicationType: z
+    .enum(["volunteer", "staff", "fellow"])
+    .optional()
+    .default("volunteer"),
   fullName: z.string().min(1, "Full name is required").max(200),
   email: z.string().email("Valid email is required"),
   phone: z.string().max(50).optional(),
@@ -93,11 +96,14 @@ export const eventFormSchema = z.object({
   eventType: z.string().max(100).optional(),
   venueName: z.string().max(255).optional(),
   venueAddress: z.string().max(500).optional(),
-  capacity: z.string().optional().transform((v) => {
-    if (v === "" || !v) return undefined;
-    const n = parseInt(v, 10);
-    return isNaN(n) ? undefined : n;
-  }),
+  capacity: z
+    .string()
+    .optional()
+    .transform((v) => {
+      if (v === "" || !v) return undefined;
+      const n = parseInt(v, 10);
+      return isNaN(n) ? undefined : n;
+    }),
   registrationDeadline: z.string().optional(),
   status: z.enum(["draft", "published"]),
   /** Client-serialized JSON array of { time?, title, description? } */
@@ -128,13 +134,22 @@ export const teamFormSchema = z.object({
   bio: z.string().max(5000).optional(),
   image: z.string().max(500).optional(),
   section: z
-    .enum(["executive_council", "advisory_board", "management_team", "fellows", "associate_fellows"])
+    .enum([
+      "executive_council",
+      "advisory_board",
+      "management_team",
+      "fellows",
+      "associate_fellows",
+    ])
     .optional(),
-  order: z.string().optional().transform((v) => {
-    if (v === "" || !v) return 0;
-    const n = parseInt(v, 10);
-    return isNaN(n) ? 0 : n;
-  }),
+  order: z
+    .string()
+    .optional()
+    .transform((v) => {
+      if (v === "" || !v) return 0;
+      const n = parseInt(v, 10);
+      return isNaN(n) ? 0 : n;
+    }),
   status: z.enum(["draft", "published"]),
 });
 
@@ -154,11 +169,14 @@ export const programFormSchema = z.object({
   title: z.string().min(1, "Title is required").max(255),
   description: z.string().max(5000).optional(),
   image: z.string().max(500).optional(),
-  order: z.string().optional().transform((v) => {
-    if (v === "" || !v) return 0;
-    const n = parseInt(v, 10);
-    return isNaN(n) ? 0 : n;
-  }),
+  order: z
+    .string()
+    .optional()
+    .transform((v) => {
+      if (v === "" || !v) return 0;
+      const n = parseInt(v, 10);
+      return isNaN(n) ? 0 : n;
+    }),
   status: z.enum(["draft", "published"]),
 });
 
@@ -166,11 +184,14 @@ export const projectFormSchema = z.object({
   title: z.string().min(1, "Title is required").max(255),
   description: z.string().max(5000).optional(),
   image: z.string().max(500).optional(),
-  order: z.string().optional().transform((v) => {
-    if (v === "" || !v) return 0;
-    const n = parseInt(v, 10);
-    return isNaN(n) ? 0 : n;
-  }),
+  order: z
+    .string()
+    .optional()
+    .transform((v) => {
+      if (v === "" || !v) return 0;
+      const n = parseInt(v, 10);
+      return isNaN(n) ? 0 : n;
+    }),
   status: z.enum(["draft", "published"]),
 });
 
@@ -178,11 +199,14 @@ export const advisoryFormSchema = z.object({
   title: z.string().min(1, "Title is required").max(255),
   description: z.string().max(5000).optional(),
   image: z.string().max(500).optional(),
-  order: z.string().optional().transform((v) => {
-    if (v === "" || !v) return 0;
-    const n = parseInt(v, 10);
-    return isNaN(n) ? 0 : n;
-  }),
+  order: z
+    .string()
+    .optional()
+    .transform((v) => {
+      if (v === "" || !v) return 0;
+      const n = parseInt(v, 10);
+      return isNaN(n) ? 0 : n;
+    }),
   status: z.enum(["draft", "published"]),
 });
 
@@ -190,17 +214,21 @@ export const partnerFormSchema = z.object({
   name: z.string().min(1, "Name is required").max(255),
   logo: z.string().max(500).optional(),
   url: z.string().max(500).optional(),
-  order: z.string().optional().transform((v) => {
-    if (v === "" || !v) return 0;
-    const n = parseInt(v, 10);
-    return isNaN(n) ? 0 : n;
-  }),
+  order: z
+    .string()
+    .optional()
+    .transform((v) => {
+      if (v === "" || !v) return 0;
+      const n = parseInt(v, 10);
+      return isNaN(n) ? 0 : n;
+    }),
   status: z.enum(["draft", "published"]),
 });
 
 export const pageContentFormSchema = z.object({
   slug: z.string().min(1, "Slug is required").max(100),
   title: z.string().max(255).optional(),
+  mainTitle: z.string().max(255).optional(),
   status: z.enum(["draft", "published"]),
   heroSubtitle: z.string().max(1000).optional(),
   heroTitle: z.string().max(255).optional(),
@@ -310,14 +338,16 @@ export const homeSettingsFormSchema = z.object({
   testimonialInitials: z.string().min(1).max(10),
   spotlightLabel: z.string().min(1).max(120),
   spotlightHeadline: z.preprocess(
-    (value) => (typeof value === "string" && value.trim() === "" ? undefined : value),
-    z.string().max(255).optional()
+    (value) =>
+      typeof value === "string" && value.trim() === "" ? undefined : value,
+    z.string().max(255).optional(),
   ),
   spotlightParagraphs: z.string().min(1).max(8000),
   spotlightName: z.string().min(1).max(255),
   spotlightRole: z.preprocess(
-    (value) => (typeof value === "string" && value.trim() === "" ? undefined : value),
-    z.string().max(255).optional()
+    (value) =>
+      typeof value === "string" && value.trim() === "" ? undefined : value,
+    z.string().max(255).optional(),
   ),
   spotlightInitials: z.string().max(10).optional(),
   spotlightImage: z.string().max(500).optional(),

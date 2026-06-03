@@ -490,6 +490,8 @@ export async function getPageContent(slug: string) {
     const contentJson: Record<string, unknown> = {
       ...fromDb,
       title: p.title ?? heroTitle,
+      heroTitle: heroTitle,
+      mainTitle: p.mainTitle,
       subtitle: heroSubtitle,
       hero: { title: heroTitle, subtitle: heroSubtitle },
       intro: p.intro,
