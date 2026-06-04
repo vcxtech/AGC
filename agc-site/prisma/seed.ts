@@ -417,7 +417,7 @@ async function main() {
   if (existingPrograms === 0) {
     await prisma.program.createMany({ data: programs });
   }
-  console.log(`  Programs: ${programs.length}`);
+  // console.log(`  Programs: ${programs.length}`);
 
   // Projects (image optional — null in seed; admin sets image when needed)
   const projects = [
@@ -467,7 +467,7 @@ async function main() {
   if (existingProjects === 0) {
     await prisma.project.createMany({ data: projects });
   }
-  console.log(`  Projects: ${projects.length}`);
+  // console.log(`  Projects: ${projects.length}`);
 
   // Partners
   const partners = [
@@ -501,7 +501,7 @@ async function main() {
   if (existingPartners === 0) {
     await prisma.partner.createMany({ data: partners });
   }
-  console.log(`  Partners: ${partners.length}`);
+  // console.log(`  Partners: ${partners.length}`);
 
   // Team (advisory board)
   const team = [
@@ -553,7 +553,7 @@ async function main() {
   if (existingTeam === 0) {
     await prisma.team.createMany({ data: team });
   }
-  console.log(`  Team: ${team.length} members`);
+  // console.log(`  Team: ${team.length} members`);
 
   // News (seed full existing fallback set so local admin matches public content inventory)
   const existingNews = await prisma.news.count();
@@ -573,7 +573,7 @@ async function main() {
     await prisma.news.createMany({
       data: newsRows,
     });
-    console.log(`  News: ${newsRows.length} items`);
+    // console.log(`  News: ${newsRows.length} items`);
   }
 
   // Events (seed full existing fallback set so local admin matches public content inventory)
@@ -594,7 +594,7 @@ async function main() {
     await prisma.event.createMany({
       data: eventRows,
     });
-    console.log(`  Events: ${eventRows.length} items`);
+    // console.log(`  Events: ${eventRows.length} items`);
   }
 
   // Publications (seed full existing fallback set so local admin matches public content inventory)
@@ -620,7 +620,7 @@ async function main() {
     await prisma.publication.createMany({
       data: publicationRows,
     });
-    console.log(`  Publications: ${publicationRows.length} items`);
+    // console.log(`  Publications: ${publicationRows.length} items`);
   }
 
   const hasTaxonomy = await prisma.pageContent.findUnique({

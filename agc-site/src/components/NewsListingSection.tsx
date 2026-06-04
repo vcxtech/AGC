@@ -11,7 +11,14 @@ export type NewsListingItem = { item: CmsNews; imageUrl: string };
 const PAGE_SIZE = 9;
 
 /** Tag slugs treated as geography “country” filters (subset of taxonomy). */
-const COUNTRY_TAG_SLUGS = new Set(["ghana", "algeria", "senegal", "nigeria", "kenya", "south-africa"]);
+const COUNTRY_TAG_SLUGS = new Set([
+  "ghana",
+  "algeria",
+  "senegal",
+  "nigeria",
+  "kenya",
+  "south-africa",
+]);
 
 /** Region groups → tag slugs that imply that region (expand as content grows). */
 const REGION_TO_TAGS: Record<string, string[]> = {
@@ -52,7 +59,9 @@ function textMatches(item: CmsNews, q: string): boolean {
   const s = q.trim().toLowerCase();
   if (!s) return true;
   const title = (item.title || "").toLowerCase();
-  const excerpt = (item.excerpt || item.content || "").replace(/<[^>]*>/g, "").toLowerCase();
+  const excerpt = (item.excerpt || item.content || "")
+    .replace(/<[^>]*>/g, "")
+    .toLowerCase();
   return title.includes(s) || excerpt.includes(s);
 }
 
@@ -77,7 +86,7 @@ export function NewsListingSection({
   }, [tagOptions]);
   const countryTags = useMemo(
     () => tagOptions.filter((t) => COUNTRY_TAG_SLUGS.has(t.slug)),
-    [tagOptions]
+    [tagOptions],
   );
 
   const filtered = useMemo(() => {
@@ -106,8 +115,10 @@ export function NewsListingSection({
     });
   }, [items, search, theme, region, country, programme]);
 
-  const totalPages = filtered.length === 0 ? 0 : Math.ceil(filtered.length / PAGE_SIZE);
-  const currentPage = totalPages === 0 ? 1 : Math.min(Math.max(1, page), totalPages);
+  const totalPages =
+    filtered.length === 0 ? 0 : Math.ceil(filtered.length / PAGE_SIZE);
+  const currentPage =
+    totalPages === 0 ? 1 : Math.min(Math.max(1, page), totalPages);
   const pageSlice = useMemo(() => {
     if (totalPages === 0) return [];
     const start = (currentPage - 1) * PAGE_SIZE;
@@ -134,10 +145,14 @@ export function NewsListingSection({
 
       <div className="border-b border-border/80 pb-8">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-          <span className="shrink-0 text-sm font-semibold text-black">{labels.filter}</span>
+          <span className="shrink-0 text-sm font-semibold text-black">
+            {labels.filter}
+          </span>
           <div className="flex w-full flex-1 flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-end lg:justify-end">
             <label className="flex w-full min-w-0 flex-col gap-1 sm:w-auto sm:min-w-[140px] sm:flex-1">
-              <span className="text-[0.65rem] font-semibold uppercase tracking-wider text-black">{labels.textSearch}</span>
+              <span className="text-[0.65rem] font-semibold uppercase tracking-wider text-black">
+                {labels.textSearch}
+              </span>
               <input
                 type="search"
                 value={search}
@@ -151,7 +166,9 @@ export function NewsListingSection({
               />
             </label>
             <label className="flex w-full min-w-0 flex-col gap-1 sm:w-auto sm:min-w-[140px] sm:flex-1">
-              <span className="text-[0.65rem] font-semibold uppercase tracking-wider text-black">{labels.theme}</span>
+              <span className="text-[0.65rem] font-semibold uppercase tracking-wider text-black">
+                {labels.theme}
+              </span>
               <select
                 value={theme}
                 onChange={(e) => {
@@ -170,7 +187,9 @@ export function NewsListingSection({
               </select>
             </label>
             <label className="flex w-full min-w-0 flex-col gap-1 sm:w-auto sm:min-w-[140px] sm:flex-1">
-              <span className="text-[0.65rem] font-semibold uppercase tracking-wider text-black">{labels.region}</span>
+              <span className="text-[0.65rem] font-semibold uppercase tracking-wider text-black">
+                {labels.region}
+              </span>
               <select
                 value={region}
                 onChange={(e) => {
@@ -188,7 +207,9 @@ export function NewsListingSection({
               </select>
             </label>
             <label className="flex w-full min-w-0 flex-col gap-1 sm:w-auto sm:min-w-[140px] sm:flex-1">
-              <span className="text-[0.65rem] font-semibold uppercase tracking-wider text-black">{labels.country}</span>
+              <span className="text-[0.65rem] font-semibold uppercase tracking-wider text-black">
+                {labels.country}
+              </span>
               <select
                 value={country}
                 onChange={(e) => {
@@ -207,7 +228,9 @@ export function NewsListingSection({
               </select>
             </label>
             <label className="flex w-full min-w-0 flex-col gap-1 sm:w-auto sm:min-w-[140px] sm:flex-1">
-              <span className="text-[0.65rem] font-semibold uppercase tracking-wider text-black">{labels.programme}</span>
+              <span className="text-[0.65rem] font-semibold uppercase tracking-wider text-black">
+                {labels.programme}
+              </span>
               <select
                 value={programme}
                 onChange={(e) => {
@@ -240,7 +263,13 @@ export function NewsListingSection({
         <>
           <div className="mt-10 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
             {pageSlice.map(({ item, imageUrl }) => (
-              <NewsCard key={item.id} item={item} imageUrl={imageUrl} href="/news" variant="listing" />
+              <NewsCard
+                key={item.id}
+                item={item}
+                imageUrl={imageUrl}
+                href="/news"
+                variant="listing"
+              />
             ))}
           </div>
           {totalPages > 1 && (
@@ -271,7 +300,9 @@ export function NewsListingSection({
           )}
         </>
       ) : items.length > 0 ? (
-        <p className="mt-12 text-center text-base text-black">{labels.noMatches}</p>
+        <p className="mt-12 text-center text-base text-black">
+          {labels.noMatches}
+        </p>
       ) : null}
     </>
   );

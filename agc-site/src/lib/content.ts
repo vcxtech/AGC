@@ -245,12 +245,12 @@ export async function getNews(limit = 10) {
       const socialLinks = normalizeNewsSocialLinks({
         downloadResources: n.downloadResources,
       });
-      console.log(
-        `[getNews] Article "${n.title}": downloadResources =`,
-        n.downloadResources,
-        ", normalized downloads =",
-        downloads,
-      );
+      // console.log(
+      //   `[getNews] Article "${n.title}": downloadResources =`,
+      //   n.downloadResources,
+      //   ", normalized downloads =",
+      //   downloads,
+      // );
       return {
         id: n.id,
         status: n.status,
