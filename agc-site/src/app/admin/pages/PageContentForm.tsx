@@ -42,9 +42,7 @@ const fieldVisibilityConfig: Record<
   string,
   { showMainTitle?: boolean; showDescription?: boolean }
 > = {
-  // Pages that don't need Main Title and Description
   "app-summit": { showMainTitle: false, showDescription: false },
-  // Add more pages as needed
   applications: { showMainTitle: false },
   awpls: { showMainTitle: false, showDescription: false },
   aypf: { showMainTitle: false, showDescription: false },
@@ -52,9 +50,20 @@ const fieldVisibilityConfig: Record<
   "get-involved": { showMainTitle: false },
   "get-involved-join-us": { showMainTitle: false, showDescription: false },
   "get-involved-partnership": { showDescription: false, showMainTitle: false },
-
-  // "other-page": { showMainTitle: false, showDescription: false },
-  // Default: all fields shown
+  subscribe: { showMainTitle: false, showDescription: false },
+  "get-involved-volunteer": { showMainTitle: false, showDescription: false },
+  news: { showMainTitle: false, showDescription: false },
+  "our-work": { showMainTitle: false, showDescription: false },
+  "our-work-programs": { showMainTitle: false, showDescription: false },
+  programs: { showMainTitle: false, showDescription: false },
+  research: { showMainTitle: false, showDescription: false },
+  advisory: { showMainTitle: false, showDescription: false },
+  projects: { showMainTitle: false, showDescription: false },
+  training: { showMainTitle: false, showDescription: false },
+  publications: { showMainTitle: false, showDescription: false },
+  "site-taxonomy": { showMainTitle: false, showDescription: false },
+  "terms-of-service": { showMainTitle: false, showDescription: false },
+  "privacy-policy": { showMainTitle: false, showDescription: false },
 };
 
 function getFieldVisibility(slug: string) {
@@ -762,7 +771,7 @@ export function PageContentForm({ item }: PageContentFormProps) {
                   hero.
                 </p>
               </div>
-              <div className="sm:col-span-2">
+              {/* <div className="sm:col-span-2">
                 <label className="block text-sm font-medium text-slate-700">
                   Hero title
                 </label>
@@ -776,7 +785,7 @@ export function PageContentForm({ item }: PageContentFormProps) {
                   onChange={(e) => updateJsonField("heroTitle", e.target.value)}
                   className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                 />
-              </div>
+              </div> */}
               <div className="sm:col-span-2">
                 <label className="block text-sm font-medium text-slate-700">
                   Hero subtitle
@@ -1688,7 +1697,7 @@ export function PageContentForm({ item }: PageContentFormProps) {
                 Hero and section labels
               </p>
               <div className="mt-3 grid gap-3 sm:grid-cols-2">
-                <div>
+                {/* <div>
                   <label className="block text-xs font-medium text-slate-600">
                     Hero title
                   </label>
@@ -1700,8 +1709,8 @@ export function PageContentForm({ item }: PageContentFormProps) {
                     }
                     className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                   />
-                </div>
-                <div>
+                </div> */}
+                {/* <div>
                   <label className="block text-xs font-medium text-slate-600">
                     Hero subtitle
                   </label>
@@ -1713,7 +1722,7 @@ export function PageContentForm({ item }: PageContentFormProps) {
                     }
                     className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                   />
-                </div>
+                </div> */}
                 <div>
                   <label className="block text-xs font-medium text-slate-600">
                     Approach eyebrow
@@ -3612,7 +3621,7 @@ export function PageContentForm({ item }: PageContentFormProps) {
                 [
                   ["intro", "Intro"],
                   ["description", "Description"],
-                  ["readyBody", "Ready body"],
+                  // ["readyBody", "Ready body"],
                 ] as const
               ).map(([key, label]) => (
                 <div key={key}>
@@ -5879,7 +5888,7 @@ export function PageContentForm({ item }: PageContentFormProps) {
             </div>
           </div>
         )}
-        {(item.slug === "privacy-policy" ||
+        {/* {(item.slug === "privacy-policy" ||
           item.slug === "terms-of-service") && (
           <div className="mb-3 grid gap-3 rounded-lg border border-border bg-slate-50 p-3">
             <p className="text-xs font-semibold uppercase tracking-wide text-slate-600">
@@ -5917,6 +5926,269 @@ export function PageContentForm({ item }: PageContentFormProps) {
                 />
               </div>
             </div>
+            <div className="rounded-md border border-border bg-white p-3">
+              <div className="mb-2 flex items-center justify-between">
+                <p className="text-xs font-semibold uppercase tracking-wide text-slate-600">
+                  Sections
+                </p>
+                <button
+                  type="button"
+                  onClick={() =>
+                    updateNestedArray(["sections"], (arr) => [
+                      ...arr,
+                      { title: "", content: "", items: [] },
+                    ])
+                  }
+                  className="rounded-md border border-border px-2 py-1 text-xs text-slate-700 hover:bg-slate-50"
+                >
+                  + Add section
+                </button>
+              </div>
+              <div className="space-y-2">
+                {legalSections.map((sec, idx) =>
+                  (() => {
+                    const isCollapsed = collapsedSections.includes(idx);
+                    return (
+                      <div
+                        key={idx}
+                        draggable
+                        onDragStart={() => setDragLegalIdx(idx)}
+                        onDragOver={(e) => e.preventDefault()}
+                        onDrop={() => {
+                          if (dragLegalIdx !== null)
+                            reorderNestedArray(["sections"], dragLegalIdx, idx);
+                          setDragLegalIdx(null);
+                        }}
+                        onDragEnd={() => setDragLegalIdx(null)}
+                        className="rounded-md border border-border p-3"
+                      >
+                        <div className="mb-2 flex items-center justify-between">
+                          <button
+                            type="button"
+                            onClick={() => toggleCollapsedSection(idx)}
+                            className="inline-flex items-center gap-1 text-xs font-medium text-slate-700 hover:text-slate-900"
+                          >
+                            {isCollapsed ? (
+                              <ChevronRight className="h-3.5 w-3.5" />
+                            ) : (
+                              <ChevronDown className="h-3.5 w-3.5" />
+                            )}
+                            {typeof sec.title === "string" && sec.title
+                              ? sec.title
+                              : `Section ${idx + 1}`}
+                          </button>
+                        </div>
+                        {!isCollapsed && (
+                          <>
+                            <div className="grid gap-2 sm:grid-cols-2">
+                              <div className="inline-flex items-center gap-1 text-[11px] text-slate-500 sm:col-span-2">
+                                <GripVertical className="h-3.5 w-3.5" /> Drag
+                                section to reorder
+                              </div>
+                              <input
+                                value={
+                                  typeof sec.title === "string" ? sec.title : ""
+                                }
+                                onChange={(e) =>
+                                  updateNestedArray(["sections"], (arr) =>
+                                    arr.map((s, i) =>
+                                      i === idx
+                                        ? { ...s, title: e.target.value }
+                                        : s,
+                                    ),
+                                  )
+                                }
+                                placeholder="Section title"
+                                className="rounded-md border border-border px-2 py-1 text-xs"
+                              />
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  updateNestedArray(["sections"], (arr) =>
+                                    arr.filter((_, i) => i !== idx),
+                                  )
+                                }
+                                className="justify-self-end rounded-md border border-red-200 px-2 py-1 text-xs text-red-700 hover:bg-red-50"
+                              >
+                                Remove
+                              </button>
+                              <div className="justify-self-end flex gap-1">
+                                <button
+                                  type="button"
+                                  onClick={() =>
+                                    reorderNestedArray(
+                                      ["sections"],
+                                      idx,
+                                      idx - 1,
+                                    )
+                                  }
+                                  className="rounded-md border border-border px-2 py-1 text-xs text-slate-700 hover:bg-slate-50"
+                                  title="Move section up"
+                                >
+                                  <ArrowUp className="h-3.5 w-3.5" />
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() =>
+                                    reorderNestedArray(
+                                      ["sections"],
+                                      idx,
+                                      idx + 1,
+                                    )
+                                  }
+                                  className="rounded-md border border-border px-2 py-1 text-xs text-slate-700 hover:bg-slate-50"
+                                  title="Move section down"
+                                >
+                                  <ArrowDown className="h-3.5 w-3.5" />
+                                </button>
+                              </div>
+                            </div>
+                            <textarea
+                              value={
+                                typeof sec.content === "string"
+                                  ? sec.content
+                                  : ""
+                              }
+                              onChange={(e) =>
+                                updateNestedArray(["sections"], (arr) =>
+                                  arr.map((s, i) =>
+                                    i === idx
+                                      ? { ...s, content: e.target.value }
+                                      : s,
+                                  ),
+                                )
+                              }
+                              rows={3}
+                              placeholder="Section content"
+                              className="mt-2 w-full rounded-md border border-border px-2 py-1 text-xs"
+                            />
+                            <textarea
+                              value={
+                                Array.isArray(sec.items)
+                                  ? sec.items
+                                      .filter((x) => typeof x === "string")
+                                      .join("\n")
+                                  : ""
+                              }
+                              onChange={(e) =>
+                                updateNestedArray(["sections"], (arr) =>
+                                  arr.map((s, i) =>
+                                    i === idx
+                                      ? {
+                                          ...s,
+                                          items: e.target.value
+                                            .split("\n")
+                                            .map((line) => line.trim())
+                                            .filter(Boolean),
+                                        }
+                                      : s,
+                                  ),
+                                )
+                              }
+                              rows={3}
+                              placeholder="Bullet items (one per line)"
+                              className="mt-2 w-full rounded-md border border-border px-2 py-1 text-xs"
+                            />
+                          </>
+                        )}
+                      </div>
+                    );
+                  })(),
+                )}
+              </div>
+            </div>
+            <p className="text-xs text-slate-500">
+              For complex privacy subsections, use the advanced editor below for
+              full control.
+            </p>
+          </div>
+        )} */}
+        {(item.slug === "privacy-policy" ||
+          item.slug === "terms-of-service") && (
+          <div className="mb-3 grid gap-3 rounded-lg border border-border bg-slate-50 p-3">
+            <p className="text-xs font-semibold uppercase tracking-wide text-slate-600">
+              Legal page helper
+            </p>
+
+            {/* Page Title & Last Updated */}
+            <div className="grid gap-3 sm:grid-cols-2">
+              <div>
+                <label className="block text-xs font-medium text-slate-600">
+                  Page title
+                </label>
+                <input
+                  type="text"
+                  value={
+                    typeof parsedJson.title === "string" ? parsedJson.title : ""
+                  }
+                  onChange={(e) => updateJsonField("title", e.target.value)}
+                  className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-slate-600">
+                  Last updated
+                </label>
+                <input
+                  type="text"
+                  value={
+                    typeof parsedJson.lastUpdated === "string"
+                      ? parsedJson.lastUpdated
+                      : ""
+                  }
+                  onChange={(e) =>
+                    updateJsonField("lastUpdated", e.target.value)
+                  }
+                  className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
+                />
+              </div>
+            </div>
+
+            {/* NEW SECTION: Card Section Visuals */}
+            <div className="rounded-md border border-border bg-white p-3">
+              <p className="text-xs font-semibold uppercase tracking-wide text-slate-600 mb-2">
+                Card Section Visuals
+              </p>
+              <div className="grid gap-3 sm:grid-cols-3">
+                {[
+                  { key: "sectionVisualA", label: "Fair Use Image" },
+                  {
+                    key: "sectionVisualB",
+                    label: "User Responsibilities Image",
+                  },
+                  { key: "sectionVisualC", label: "Legal Clarity Image" },
+                ].map(({ key, label }) => (
+                  <div key={key}>
+                    <label className="block text-[11px] font-medium text-slate-500">
+                      {label}
+                    </label>
+                    <div className="mt-1 flex gap-1">
+                      <input
+                        type="text"
+                        value={
+                          typeof parsedJson[key] === "string"
+                            ? String(parsedJson[key])
+                            : ""
+                        }
+                        onChange={(e) => updateJsonField(key, e.target.value)}
+                        placeholder="media-..."
+                        className="w-full rounded-md border border-border bg-white px-2 py-1 text-xs"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setPickerTarget({ nested: [key] })}
+                        className="inline-flex items-center gap-1 rounded-md border border-border bg-white px-2 py-1 text-xs text-slate-700 hover:bg-slate-100"
+                        title="Pick from Media Library"
+                      >
+                        <ImagePlus className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Sections Collection */}
             <div className="rounded-md border border-border bg-white p-3">
               <div className="mb-2 flex items-center justify-between">
                 <p className="text-xs font-semibold uppercase tracking-wide text-slate-600">
