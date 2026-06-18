@@ -248,7 +248,7 @@ export default async function NewsDetailPage({ params }: Props) {
                   prose-code:text-sm prose-code:bg-stone-100 prose-code:px-2 prose-code:py-1 prose-code:rounded prose-code:text-black"
                 dangerouslySetInnerHTML={{ __html: bodyHtml }}
               /> */}
-              <div
+              {/* <div
                 className="prose prose-neutral max-w-3xl mx-auto
                 prose-p:text-gray-800
                 prose-p:leading-8
@@ -269,6 +269,35 @@ export default async function NewsDetailPage({ params }: Props) {
                 prose-blockquote:pl-4
                 prose-blockquote:italic
                 prose-img:rounded-xl"
+                dangerouslySetInnerHTML={{ __html: bodyHtml }}
+              /> */}
+              <div
+                className="prose prose-neutral max-w-3xl mx-auto
+                prose-p:text-gray-800
+                prose-p:leading-8
+                prose-p:mb-6
+                prose-p:text-left
+                prose-headings:text-gray-900
+                prose-headings:font-semibold
+                prose-headings:tracking-tight
+                prose-h1:text-4xl
+                prose-h2:text-3xl
+                prose-h3:text-2xl
+                prose-a:text-[#1A2E4C]
+                prose-a:no-underline
+                hover:prose-a:underline
+                prose-strong:text-black
+                prose-blockquote:border-l-4
+                prose-blockquote:border-[#1A2E4C]
+                prose-blockquote:pl-4
+                prose-blockquote:italic
+                prose-img:rounded-xl
+                
+                /* ADD THESE CLASSES BELOW */
+                [&_p:empty]:min-h-[1.5rem] 
+                [&_p_br]:block 
+                [&_p_br]:content-[''] 
+                [&_p_br]:mt-4"
                 dangerouslySetInnerHTML={{ __html: bodyHtml }}
               />
 
