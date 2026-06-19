@@ -10,6 +10,7 @@ import {
   isSupabaseMediaEnabled,
   remoteMediaLibraryJsonUrl,
   resolvePublicMediaUrl,
+  supabasePublicObjectUrl,
 } from "@/lib/media-public-url";
 
 const UPLOADS_DIR = path.join(process.cwd(), "public", "uploads");
@@ -75,12 +76,13 @@ async function listMediaFromSupabase(): Promise<MediaItem[]> {
 
 export async function listMedia(): Promise<MediaItem[]> {
   try {
+    if (isSupabaseMediaEnabled()) {
+      const remote = await listMediaFromSupabase();
+      if (remote.length > 0) return remote;
+    }
     if (existsSync(METADATA_PATH)) {
       const raw = await readFile(METADATA_PATH, "utf-8");
       return loadMediaLibraryJson(raw);
-    }
-    if (isSupabaseMediaEnabled()) {
-      return listMediaFromSupabase();
     }
     return [];
   } catch {
@@ -227,6 +229,22 @@ export function mediaFileExistsOnDisk(
   }
   for (const n of names) {
     if (existsSync(path.join(uploadsDir, n))) return true;
+  }
+  return false;
+}
+
+/** True when the binary exists locally or on Supabase Storage (Vercel). */
+export function mediaFileIsAvailable(item: MediaItem, uploadsDir: string): boolean {
+  if (mediaFileExistsOnDisk(item, uploadsDir)) return true;
+  if (!isSupabaseMediaEnabled()) return false;
+  const names = new Set<string>();
+  const fromFilename = item.filename?.trim();
+  if (fromFilename) names.add(fromFilename);
+  if (item.url?.startsWith("/uploads/")) {
+    names.add(item.url.slice("/uploads/".length));
+  }
+  for (const name of names) {
+    if (supabasePublicObjectUrl(`uploads/${name}`)) return true;
   }
   return false;
 }

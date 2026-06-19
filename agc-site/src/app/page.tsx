@@ -147,7 +147,15 @@ export default async function HomePage() {
     }))
   );
 
-  const heroSlides = home.heroSliderImages ?? [];
+  const heroSlidesRaw = home.heroSliderImages ?? [];
+  const heroSlides = (
+    await Promise.all(
+      heroSlidesRaw.map(async (ref) => {
+        const url = await resolveImageUrl(ref);
+        return url ?? ref;
+      }),
+    )
+  ).filter((s): s is string => typeof s === "string" && s.length > 0);
   const rawHeroVideo = home.heroBackgroundVideoSrc;
   const heroBackgroundVideoSrc =
     rawHeroVideo === undefined || rawHeroVideo === null

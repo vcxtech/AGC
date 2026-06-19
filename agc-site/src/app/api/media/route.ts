@@ -11,7 +11,7 @@ import {
   isImageMimeType,
   isDocumentMimeType,
   assertUploadWithinLimit,
-  mediaFileExistsOnDisk,
+  mediaFileIsAvailable,
   type MediaItem,
 } from "@/lib/media";
 import { requireAdmin } from "@/lib/auth-api";
@@ -86,7 +86,7 @@ export async function GET() {
     const uploadsDir = getUploadsDir();
     const itemsWithDisk = items.map((item) => ({
       ...item,
-      fileMissing: !mediaFileExistsOnDisk(item, uploadsDir),
+      fileMissing: !mediaFileIsAvailable(item, uploadsDir),
     }));
     return NextResponse.json({ items: itemsWithDisk });
   } catch (err) {

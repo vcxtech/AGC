@@ -41,6 +41,9 @@ yarn-error.log*
 /public/uploads/*
 !/public/uploads/placeholder.svg
 
+# media metadata — lives on disk (Coolify) or Supabase Storage (Vercel), not in git
+/data/media-library.json
+
 # vercel
 .vercel
 

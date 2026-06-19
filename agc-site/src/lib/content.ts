@@ -14,6 +14,7 @@ import {
   normalizeNewsSocialLinks,
 } from "@/lib/news-downloads";
 import { devPublicRead } from "@/lib/skip-db";
+import { resolvePublicMediaUrl } from "@/lib/media-public-url";
 
 // ============ Shared types (compatible with former Cms* interfaces) ============
 
@@ -528,13 +529,12 @@ export async function getPageContent(slug: string) {
 export function getContentImageUrl(path: string | undefined): string | null {
   if (!path) return null;
   if (path.startsWith("http")) return path;
-  return path.startsWith("/") ? path : `/${path}`;
+  const local = path.startsWith("/") ? path : `/${path}`;
+  return resolvePublicMediaUrl(local);
 }
 
 export function getContentFileUrl(path: string | undefined): string | null {
-  if (!path) return null;
-  if (path.startsWith("http")) return path;
-  return path.startsWith("/") ? path : `/${path}`;
+  return getContentImageUrl(path);
 }
 
 /** Resolve event/image ref to URL for sync use. Content layer uses paths (uploads/xxx or /uploads/xxx). */
@@ -549,8 +549,12 @@ export function resolveImageUrlSync(
         ? ref.trim()
         : "";
   if (!id) return null;
-  if (id.startsWith("http") || id.startsWith("/")) return id;
-  if (id.includes("/") || id.startsWith("uploads"))
-    return id.startsWith("/") ? id : `/${id}`;
+  if (/^media-/i.test(id)) return null;
+  if (id.startsWith("http")) return id;
+  if (id.startsWith("/")) return resolvePublicMediaUrl(id);
+  if (id.includes("/") || id.startsWith("uploads")) {
+    const local = id.startsWith("/") ? id : `/${id}`;
+    return resolvePublicMediaUrl(local);
+  }
   return null;
 }
