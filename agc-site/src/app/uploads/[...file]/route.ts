@@ -3,6 +3,10 @@ import { readFile } from "fs/promises";
 import { existsSync } from "fs";
 import path from "path";
 import { getUploadsDir } from "@/lib/media";
+import {
+  isSupabaseMediaEnabled,
+  supabasePublicObjectUrl,
+} from "@/lib/media-public-url";
 
 const MIME_BY_EXT: Record<string, string> = {
   ".jpg": "image/jpeg",
@@ -54,6 +58,14 @@ export async function GET(
     }
 
     const relativePath = path.join(...file);
+
+    if (isSupabaseMediaEnabled()) {
+      const remote = supabasePublicObjectUrl(`uploads/${relativePath}`);
+      if (remote) {
+        return NextResponse.redirect(remote, 307);
+      }
+    }
+
     const uploadsDir = getUploadsDir();
     const absolutePath = path.join(uploadsDir, relativePath);
     const normalizedUploadsDir = path.resolve(uploadsDir);

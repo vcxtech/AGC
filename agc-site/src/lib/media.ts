@@ -6,6 +6,11 @@ import { readFile, writeFile, mkdir, readdir } from "fs/promises";
 import { existsSync } from "fs";
 import path from "path";
 import { MAX_MEDIA_UPLOAD_BYTES } from "@/lib/media-limits";
+import {
+  isSupabaseMediaEnabled,
+  remoteMediaLibraryJsonUrl,
+  resolvePublicMediaUrl,
+} from "@/lib/media-public-url";
 
 const UPLOADS_DIR = path.join(process.cwd(), "public", "uploads");
 const METADATA_PATH = path.join(process.cwd(), "data", "media-library.json");
@@ -51,12 +56,33 @@ async function ensureDirs(): Promise<void> {
   await mkdir(UPLOADS_DIR, { recursive: true });
 }
 
+async function loadMediaLibraryJson(raw: string): Promise<MediaItem[]> {
+  const data = JSON.parse(raw);
+  return Array.isArray(data) ? data : [];
+}
+
+async function listMediaFromSupabase(): Promise<MediaItem[]> {
+  const url = remoteMediaLibraryJsonUrl();
+  if (!url) return [];
+  try {
+    const res = await fetch(url, { next: { revalidate: 300 } });
+    if (!res.ok) return [];
+    return loadMediaLibraryJson(await res.text());
+  } catch {
+    return [];
+  }
+}
+
 export async function listMedia(): Promise<MediaItem[]> {
   try {
-    if (!existsSync(METADATA_PATH)) return [];
-    const raw = await readFile(METADATA_PATH, "utf-8");
-    const data = JSON.parse(raw);
-    return Array.isArray(data) ? data : [];
+    if (existsSync(METADATA_PATH)) {
+      const raw = await readFile(METADATA_PATH, "utf-8");
+      return loadMediaLibraryJson(raw);
+    }
+    if (isSupabaseMediaEnabled()) {
+      return listMediaFromSupabase();
+    }
+    return [];
   } catch {
     return [];
   }
@@ -169,9 +195,10 @@ export async function updateMediaItem(
 }
 
 export function getMediaUrl(item: MediaItem): string {
-  return item.url.startsWith("/")
+  const local = item.url.startsWith("/")
     ? item.url
     : `/${item.url.replace(/^\//, "")}`;
+  return resolvePublicMediaUrl(local);
 }
 
 /** Single segment under uploads/ (flat library); rejects traversal. */
@@ -217,10 +244,13 @@ export async function resolveImageUrl(
         : "";
   if (!id) return null;
   if (/^media-/i.test(id)) return getMediaUrlById(id);
-  if (id.startsWith("http") || id.startsWith("/")) return id;
+  if (id.startsWith("http")) return id;
+  if (id.startsWith("/")) return resolvePublicMediaUrl(id);
   // Content layer paths (uploads/xxx)
-  if (id.includes("/") || id.startsWith("uploads"))
-    return id.startsWith("/") ? id : `/${id}`;
+  if (id.includes("/") || id.startsWith("uploads")) {
+    const path = id.startsWith("/") ? id : `/${id}`;
+    return resolvePublicMediaUrl(path);
+  }
   return null;
 }
 

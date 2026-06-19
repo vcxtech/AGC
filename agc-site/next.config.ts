@@ -19,6 +19,20 @@ function buildImageRemotePatterns(): NonNullable<NonNullable<NextConfig["images"
     { protocol: "https", hostname: "**.sslip.io", pathname: "/**" },
   ];
 
+  const supabase = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  if (supabase) {
+    try {
+      const u = new URL(supabase);
+      patterns.push({
+        protocol: "https",
+        hostname: u.hostname,
+        pathname: "/storage/v1/object/public/**",
+      });
+    } catch {
+      /* ignore */
+    }
+  }
+
   const site = process.env.NEXT_PUBLIC_SITE_URL;
   if (site) {
     try {
