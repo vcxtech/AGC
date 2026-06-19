@@ -54,6 +54,7 @@ function buildImageRemotePatterns(): NonNullable<NonNullable<NextConfig["images"
 
 const nextConfig: NextConfig = {
   output: "standalone",
+  outputFileTracingRoot: projectRoot,
   /** When a parent directory has a lockfile, Turbopack can pick the wrong root; dev uses `--webpack` anyway. */
   turbopack: {
     root: projectRoot,
