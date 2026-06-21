@@ -76,7 +76,12 @@ function excerptToLeadHtml(excerpt: string | undefined): string {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  const cmsItem = await getNewsBySlug(slug);
+  let cmsItem: CmsNews | null = null;
+  try {
+    cmsItem = await getNewsBySlug(slug);
+  } catch (e) {
+    console.error("[news detail metadata] CMS read failed for slug:", slug, e);
+  }
   const fallback = (fallbackNews as CmsNews[]).find((n) => n.slug === slug);
   const item = cmsItem ?? fallback;
   if (!item) return { title: "News" };
@@ -101,8 +106,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 async function getNewsItem(slug: string): Promise<CmsNews | null> {
-  const cmsItem = await getNewsBySlug(slug);
-  if (cmsItem) return cmsItem;
+  try {
+    const cmsItem = await getNewsBySlug(slug);
+    if (cmsItem) return cmsItem;
+  } catch (e) {
+    console.error("[news detail] CMS read failed for slug:", slug, e);
+  }
   const fallback = (fallbackNews as CmsNews[]).find((n) => n.slug === slug);
   return fallback ?? null;
 }

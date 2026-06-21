@@ -9,7 +9,15 @@ const ALLOWED_TAGS = ["p", "br", "strong", "em", "b", "i", "u", "a", "ul", "ol",
 /** Sanitize HTML for safe render. Returns empty string if input is invalid. */
 export function sanitizeHtml(html: string | null | undefined): string {
   if (html == null || typeof html !== "string") return "";
-  return DOMPurify.sanitize(html, { ALLOWED_TAGS, ALLOWED_ATTR: ["href", "target", "rel"] });
+  try {
+    return DOMPurify.sanitize(html, {
+      ALLOWED_TAGS,
+      ALLOWED_ATTR: ["href", "target", "rel"],
+    });
+  } catch (e) {
+    console.error("[sanitizeHtml] DOMPurify failed; stripping tags instead.", e);
+    return html.replace(/<[^>]*>/g, "");
+  }
 }
 
 /** Convert newlines to <br> and escape HTML (for plain text in email body) */

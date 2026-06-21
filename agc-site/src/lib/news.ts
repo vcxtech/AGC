@@ -10,7 +10,8 @@ import {
 
 /** Resolve taxonomy item to slug */
 function toSlug(item: string | { slug: string; name?: string }): string {
-  return typeof item === "string" ? item : item.slug;
+  if (typeof item === "string") return item.trim();
+  return typeof item?.slug === "string" ? item.slug.trim() : "";
 }
 
 /** Get category label by slug (pass taxonomy from `getSiteTaxonomy()` when available) */
@@ -25,16 +26,36 @@ export function getTagLabel(slug: string, tags: TaxonomyOption[] = defaultNewsTa
 
 /** Extract category slugs from a news item */
 export function getNewsCategorySlugs(item: CmsNews): string[] {
-  const cats = (item as { categories?: (string | { slug: string })[] }).categories;
-  if (!cats?.length) return [];
-  return cats.map(toSlug);
+  const cats = (item as { categories?: unknown }).categories;
+  if (!cats) return [];
+  if (typeof cats === "string") return cats.trim() ? [cats.trim()] : [];
+  if (Array.isArray(cats)) {
+    return cats
+      .map((entry) => toSlug(entry as string | { slug: string; name?: string }))
+      .filter((slug): slug is string => Boolean(slug?.trim()));
+  }
+  if (typeof cats === "object") {
+    const slug = toSlug(cats as { slug: string; name?: string });
+    return slug ? [slug] : [];
+  }
+  return [];
 }
 
 /** Extract tag slugs from a news item */
 export function getNewsTagSlugs(item: CmsNews): string[] {
-  const tags = (item as { tags?: (string | { slug: string })[] }).tags;
-  if (!tags?.length) return [];
-  return tags.map(toSlug);
+  const tags = (item as { tags?: unknown }).tags;
+  if (!tags) return [];
+  if (typeof tags === "string") return tags.trim() ? [tags.trim()] : [];
+  if (Array.isArray(tags)) {
+    return tags
+      .map((entry) => toSlug(entry as string | { slug: string; name?: string }))
+      .filter((slug): slug is string => Boolean(slug?.trim()));
+  }
+  if (typeof tags === "object") {
+    const slug = toSlug(tags as { slug: string; name?: string });
+    return slug ? [slug] : [];
+  }
+  return [];
 }
 
 /** Filter news by category slug */

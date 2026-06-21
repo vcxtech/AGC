@@ -60,8 +60,10 @@ export async function devPublicRead<T>(fallback: T, run: () => Promise<T>): Prom
       e !== null &&
       "code" in e &&
       (e as { code: string }).code === "P2022";
-    if (isSchema && process.env.NODE_ENV === "development") {
-      console.warn("[agc-site] Prisma P2022 — run `npx prisma migrate deploy`. Using read fallback.");
+    if (isSchema) {
+      console.warn(
+        "[agc-site] Prisma P2022 (schema/column mismatch) — using read fallback. Run `npx prisma migrate deploy` against production.",
+      );
       return fallback;
     }
     if (process.env.NODE_ENV === "development" && isPrismaUnreachable(e)) {
