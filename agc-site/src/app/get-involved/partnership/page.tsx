@@ -9,6 +9,7 @@ import { getSiteSettings } from "@/lib/site-settings";
 import { PartnershipInquiryForm } from "@/components/PartnershipInquiryForm";
 import { ProgramsCarousel } from "@/components/ProgramsCarousel";
 import { Section } from "@/components/Section";
+import { RichTextContent } from "@/components/RichTextContent";
 
 export const metadata = {
   title: "Partnership",
@@ -103,8 +104,8 @@ export default async function PartnershipPage() {
             <h2 className="mt-3 font-serif text-[1.85rem] font-semibold tracking-tight text-black sm:text-[2.2rem] lg:text-[2.55rem] lg:leading-tight">
               {getString("sectionHeading", "Partnership")}
             </h2>
-            <p className="mt-4 page-prose text-[1.08rem] leading-relaxed">{c.intro}</p>
-            <p className="mt-6 page-prose">{c.description}</p>
+            <RichTextContent html={c.intro} className="mt-4 text-[1.08rem] leading-relaxed" />
+            <RichTextContent html={c.description} className="mt-6" />
 
             {partnershipItems.length > 0 && (
               <ul className="mt-10 grid gap-4 sm:grid-cols-2">
@@ -144,12 +145,13 @@ export default async function PartnershipPage() {
               <h2 className="page-heading mt-3 text-2xl text-black">
                 {getString("footerHeading", "Start a conversation")}
               </h2>
-              <p className="mt-4 max-w-none text-base leading-relaxed text-black">
-                {getString(
+              <RichTextContent
+                html={getString(
                   "footerBody",
                   "Governments, institutions, civil society, and funders committed to good governance — we'd like to hear from you."
                 )}
-              </p>
+                className="mt-4 max-w-none text-base leading-relaxed text-black"
+              />
               <div className="mt-6">
                 <PartnershipInquiryForm programsEmail={siteSettings.email.programs} />
               </div>

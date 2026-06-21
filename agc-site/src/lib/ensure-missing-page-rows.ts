@@ -36,6 +36,11 @@ const BASELINE_PAGES: { slug: string; title: string; contentJson: Record<string,
     contentJson: workContent.training as unknown as Record<string, unknown>,
   },
   {
+    slug: "our-work-partnership",
+    title: "Partnership",
+    contentJson: workContent.partnership as unknown as Record<string, unknown>,
+  },
+  {
     slug: "aypf",
     title: "African Youth in Politics Forum (AYPF)",
     contentJson: { ...aypfContent, heroImage: "/uploads/placeholder.svg" },

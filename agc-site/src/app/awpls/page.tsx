@@ -8,6 +8,9 @@ import { cmsStaticOrEmpty, getMergedPageContent } from "@/lib/page-content";
 import { cardImageUrlOrNull } from "@/lib/image-delivery";
 import { resolveImageUrl } from "@/lib/media";
 import { getSiteSettings } from "@/lib/site-settings";
+import { RichTextContent } from "@/components/RichTextContent";
+import { RichTextListItems } from "@/components/RichTextListItems";
+import { resolveRichHtml } from "@/lib/rich-text";
 
 export const metadata = {
   title: "African Women Political Leadership Summit (AWPLS)",
@@ -187,6 +190,14 @@ export default async function AwplsPage() {
     "Join leaders, policymakers, and partners shaping Africa’s future.",
   );
   const finalCtaButtonLabel = getString("finalCtaButtonLabel", "Register Now");
+  const aboutBodyHtml = resolveRichHtml({
+    html: typeof contentMap.aboutBody === "string" ? contentMap.aboutBody : undefined,
+    paragraphs: aboutParagraphs,
+  });
+  const summit2026Html = resolveRichHtml({
+    html: typeof contentMap.summit2026Body === "string" ? contentMap.summit2026Body : undefined,
+    paragraphs: summit2026Paragraphs,
+  });
 
   return (
     <>
@@ -217,14 +228,10 @@ export default async function AwplsPage() {
                 <h2 className="mt-3 font-serif text-[2rem] font-semibold leading-tight text-black sm:text-[2.5rem]">
                   {aboutHeading}
                 </h2>
-                {aboutParagraphs.map((paragraph, idx) => (
-                  <p
-                    key={`${paragraph}-${idx}`}
-                    className={`page-prose text-[1.08rem] font-medium leading-relaxed text-stone-800 ${idx === 0 ? "mt-6" : "mt-4"}`}
-                  >
-                    {paragraph}
-                  </p>
-                ))}
+                <RichTextContent
+                  html={aboutBodyHtml}
+                  className="mt-6 text-[1.08rem] font-medium leading-relaxed text-stone-800"
+                />
               </div>
               <div className="self-start rounded-none border border-border/90 bg-white p-6 shadow-sm">
                 <div className="relative mb-5 aspect-[4/3] w-full overflow-hidden bg-stone-100">
@@ -240,7 +247,7 @@ export default async function AwplsPage() {
                 <h3 className="font-serif text-xl font-semibold text-black">
                   {registerCardHeading}
                 </h3>
-                <p className="mt-2 text-sm text-black">{registerCardBody}</p>
+                <RichTextContent html={registerCardBody} className="mt-2 text-sm text-black" />
                 <Button
                   asChild
                   href="/contact"
@@ -286,9 +293,7 @@ export default async function AwplsPage() {
                 <h3 className="font-sans text-xl font-semibold text-black">
                   {card.title}
                 </h3>
-                <p className="mt-3 text-sm font-medium leading-relaxed text-black">
-                  {card.body}
-                </p>
+                <RichTextContent html={card.body} className="mt-3 text-sm font-medium leading-relaxed text-black" />
               </article>
             ))}
           </div>
@@ -306,16 +311,13 @@ export default async function AwplsPage() {
             <h2 className="font-serif text-[1.9rem] font-semibold sm:text-[2.3rem]">
               {targetsHeading}
             </h2>
-            <ul className="mt-6 grid gap-x-5 gap-y-4 sm:grid-cols-3">
-              {targetsPoints.map((item) => (
-                <li
-                  key={item}
-                  className="rounded-none border border-white/20 bg-white/5 p-5 text-sm leading-relaxed"
-                >
-                  {item}
-                </li>
-              ))}
-            </ul>
+            <RichTextListItems
+              items={targetsPoints}
+              as="ul"
+              listClassName="mt-6 grid gap-x-5 gap-y-4 sm:grid-cols-3"
+              itemClassName="rounded-none border border-white/20 bg-white/5 p-5 text-sm leading-relaxed"
+              className="text-sm leading-relaxed text-white/95"
+            />
           </div>
         </div>
       </section>
@@ -325,14 +327,10 @@ export default async function AwplsPage() {
           <h2 className="font-serif text-[1.9rem] font-semibold text-black sm:text-[2.3rem]">
             {summit2026Heading}
           </h2>
-          {summit2026Paragraphs.map((paragraph, idx) => (
-            <p
-              key={`${paragraph}-${idx}`}
-              className={`page-prose text-[1.08rem] font-medium leading-relaxed text-stone-800 ${idx === 0 ? "mt-5" : "mt-4"}`}
-            >
-              {paragraph}
-            </p>
-          ))}
+          <RichTextContent
+            html={summit2026Html}
+            className="mt-5 text-[1.08rem] font-medium leading-relaxed text-stone-800"
+          />
         </div>
       </section>
 
@@ -346,19 +344,17 @@ export default async function AwplsPage() {
           <h2 className="font-serif text-[1.9rem] font-semibold text-white sm:text-[2.3rem]">
             {deliverHeading}
           </h2>
-          <ul className="mt-6 grid gap-x-6 gap-y-5 sm:grid-cols-2">
-            {deliverPoints.map((item) => (
-              <li
-                key={item}
-                className="rounded-none border border-white/70 bg-white/88 p-5 text-sm font-medium leading-relaxed text-black shadow-[0_8px_24px_-16px_rgba(15,23,42,0.35)] backdrop-blur-[1px]"
-              >
-                {item}
-              </li>
-            ))}
-          </ul>
-          <p className="mt-6 page-prose text-[1.02rem] font-medium leading-relaxed text-white/90">
-            {deliverClosingParagraph}
-          </p>
+          <RichTextListItems
+            items={deliverPoints}
+            as="ul"
+            listClassName="mt-6 grid gap-x-6 gap-y-5 sm:grid-cols-2"
+            itemClassName="rounded-none border border-white/70 bg-white/88 p-5 text-sm font-medium leading-relaxed text-black shadow-[0_8px_24px_-16px_rgba(15,23,42,0.35)] backdrop-blur-[1px]"
+            className="text-sm font-medium leading-relaxed text-black"
+          />
+          <RichTextContent
+            html={deliverClosingParagraph}
+            className="mt-6 text-[1.02rem] font-medium leading-relaxed text-white/90"
+          />
         </div>
       </section>
 
@@ -368,7 +364,7 @@ export default async function AwplsPage() {
             <h2 className="font-serif text-3xl font-semibold text-black">
               {finalCtaHeading}
             </h2>
-            <p className="mt-3 text-sm text-black">{finalCtaBody}</p>
+            <RichTextContent html={finalCtaBody} className="mt-3 text-sm text-black" />
             <div className="mt-6">
               <Button
                 asChild

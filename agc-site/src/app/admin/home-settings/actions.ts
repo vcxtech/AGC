@@ -9,6 +9,7 @@ import { getHomePageCmsForEdit } from "@/lib/home-page-data";
 import { getBootstrapHomePageCms } from "@/lib/cms-bootstrap";
 import { homeSettingsFormSchema } from "@/lib/validations";
 import { ADMIN_DB_ERROR_MESSAGE } from "@/lib/admin-flash-messages";
+import { isRichTextHtml } from "@/lib/rich-text";
 
 function splitLines(input: string | undefined): string[] {
   return (input || "").split("\n").map((x) => x.trim()).filter(Boolean);
@@ -51,6 +52,12 @@ export async function updateHomeSettings(formData: FormData) {
       current.homeSpotlightStory.paragraphs.join("\n"),
       bootstrap.homeSpotlightStory.paragraphs.join("\n")
     ),
+    spotlightBody: preferNonEmpty(
+      (current.homeSpotlightStory as { bodyHtml?: string }).bodyHtml ??
+        current.homeSpotlightStory.paragraphs.join("\n"),
+      (bootstrap.homeSpotlightStory as { bodyHtml?: string }).bodyHtml ??
+        bootstrap.homeSpotlightStory.paragraphs.join("\n")
+    ),
     spotlightName: preferNonEmpty(current.homeSpotlightStory.name, bootstrap.homeSpotlightStory.name),
     spotlightCtaLabel: preferNonEmpty(current.homeSpotlightStory.ctaLabel, bootstrap.homeSpotlightStory.ctaLabel),
     spotlightCtaHref: preferNonEmpty(current.homeSpotlightStory.ctaHref, bootstrap.homeSpotlightStory.ctaHref),
@@ -71,6 +78,14 @@ export async function updateHomeSettings(formData: FormData) {
     redirect(`/admin/home-settings?error=${encodeURIComponent(`${field}: ${message}`)}`);
   }
   const d = parsed.data;
+
+  const spotlightRaw = (d.spotlightBody ?? d.spotlightParagraphs ?? "").trim();
+  const spotlightBodyHtml = isRichTextHtml(spotlightRaw) ? spotlightRaw : undefined;
+  const spotlightParagraphs = spotlightBodyHtml
+    ? []
+    : splitLines(spotlightRaw).length > 0
+      ? splitLines(spotlightRaw)
+      : splitLines(d.spotlightParagraphs);
 
   const impactStats = splitLines(d.impactStats).map((line) => {
     const [value = "", label = "", note = ""] = line.split("|").map((x) => x.trim());
@@ -106,7 +121,8 @@ export async function updateHomeSettings(formData: FormData) {
     homeSpotlightStory: {
       label: d.spotlightLabel,
       headline: d.spotlightHeadline,
-      paragraphs: splitLines(d.spotlightParagraphs),
+      paragraphs: spotlightParagraphs,
+      ...(spotlightBodyHtml ? { bodyHtml: spotlightBodyHtml } : {}),
       name: d.spotlightName,
       role: d.spotlightRole,
       initials: d.spotlightInitials,

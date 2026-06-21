@@ -4,6 +4,7 @@ import { placeholderImages } from "@/data/images";
 import type { CmsEvent } from "@/lib/content";
 import { resolveImageUrlSync } from "@/lib/content";
 import { preferUnoptimizedImage } from "@/lib/image-delivery";
+import { richTextToPlain } from "@/lib/rich-text";
 
 function categoryLabel(event: CmsEvent): string {
   const raw =
@@ -27,7 +28,7 @@ function eventDateLabel(start: string): string {
 
 function excerpt(event: CmsEvent): string {
   const source = event.short_description || event.description || "";
-  const text = source.replace(/<[^>]*>/g, "").trim();
+  const text = richTextToPlain(source);
   if (!text) return "Read more about this event on our events page.";
   return text.length > 160 ? `${text.slice(0, 157)}...` : text;
 }

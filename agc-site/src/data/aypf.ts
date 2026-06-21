@@ -71,6 +71,11 @@ export const aypfContent = {
     /** Set in Admin when the registration URL is available. */
     registrationHref: "",
   },
+  /** Sidebar card beside the about section */
+  registerCardHeading: "Secure your spot at AYPF 2026",
+  registerCardBody:
+    "Participation is by invitation. Register your interest to receive official updates and access preparatory dialogues.",
+  registerCardCtaLabel: "Register Now",
 };
 
 export type AypfCmsContent = typeof aypfContent;

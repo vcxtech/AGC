@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 import { useEditor, EditorContent, type Editor } from "@tiptap/react";
 import Placeholder from "@tiptap/extension-placeholder";
 import StarterKit from "@tiptap/starter-kit";
+import Underline from "@tiptap/extension-underline";
 import {
   Bold,
   Heading2,
@@ -26,6 +27,8 @@ type RichTextEditorProps = {
   placeholder?: string;
   /** Associate with a <label htmlFor={editorId}> */
   editorId?: string;
+  /** Shorter editor for sidebars and card bodies. */
+  compact?: boolean;
 };
 
 function ToolbarButton({
@@ -165,7 +168,7 @@ function Toolbar({ editor }: { editor: Editor | null }) {
   );
 }
 
-export function RichTextEditor({ initialHtml, onHtmlChange, placeholder, editorId }: RichTextEditorProps) {
+export function RichTextEditor({ initialHtml, onHtmlChange, placeholder, editorId, compact }: RichTextEditorProps) {
   const editor = useEditor({
     immediatelyRender: false,
     extensions: [
@@ -183,6 +186,7 @@ export function RichTextEditor({ initialHtml, onHtmlChange, placeholder, editorI
           },
         },
       }),
+      Underline,
       Placeholder.configure({
         placeholder: placeholder ?? "Write the article body…",
       }),
@@ -192,7 +196,7 @@ export function RichTextEditor({ initialHtml, onHtmlChange, placeholder, editorI
       attributes: {
         ...(editorId ? { id: editorId } : {}),
         class: cn(
-          "min-h-[220px] px-3 py-2 text-slate-900 outline-none",
+          compact ? "min-h-[140px] px-3 py-2 text-slate-900 outline-none" : "min-h-[220px] px-3 py-2 text-slate-900 outline-none",
           "[&_h2]:mt-4 [&_h2]:text-xl [&_h2]:font-bold",
           "[&_h3]:mt-3 [&_h3]:text-lg [&_h3]:font-semibold",
           "[&_h4]:mt-2 [&_h4]:text-base [&_h4]:font-semibold",
@@ -214,7 +218,13 @@ export function RichTextEditor({ initialHtml, onHtmlChange, placeholder, editorI
   return (
     <div className="rounded-lg border border-border bg-white">
       <Toolbar editor={editor} />
-      <EditorContent editor={editor} className="admin-rich-text [&_.ProseMirror]:min-h-[220px]" />
+      <EditorContent
+        editor={editor}
+        className={cn(
+          "admin-rich-text",
+          compact ? "[&_.ProseMirror]:min-h-[140px]" : "[&_.ProseMirror]:min-h-[220px]"
+        )}
+      />
     </div>
   );
 }

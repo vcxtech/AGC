@@ -5,6 +5,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import { ArrowDown, ArrowUp, ImagePlus, Trash2 } from "lucide-react";
 import { ImagePicker, type MediaItem } from "@/components/ImagePicker";
+import { CmsRichTextField } from "@/components/admin/CmsRichTextField";
 import type { HomePageCms } from "@/lib/home-page-data";
 import { updateHomeSettings } from "./actions";
 import { preferUnoptimizedImage } from "@/lib/image-delivery";
@@ -96,6 +97,31 @@ export function HomeSettingsForm({
   );
   const [ctaBandImage, setCtaBandImage] = useState(
     initialDraft?.ctaBandImage ?? home.homeCtaBand.image ?? "",
+  );
+  const [homeReachIntroHtml, setHomeReachIntroHtml] = useState(
+    initialDraft?.homeReachIntro ?? home.homeReach.intro ?? "",
+  );
+  const [homePartnerBlurbHtml, setHomePartnerBlurbHtml] = useState(
+    initialDraft?.homePartnerBlurb ?? home.homePartnerBlurb ?? "",
+  );
+  const [pillarDescriptionHtml, setPillarDescriptionHtml] = useState(
+    initialDraft?.pillarRowDescriptionPrimary ??
+      workPillars.pillarRowDescriptionPrimary ??
+      "",
+  );
+  const [testimonialQuoteHtml, setTestimonialQuoteHtml] = useState(
+    initialDraft?.testimonialQuote ?? home.homeTestimonial.quote ?? "",
+  );
+  const spotlightStory = home.homeSpotlightStory as HomePageCms["homeSpotlightStory"] & {
+    bodyHtml?: string;
+  };
+  const [spotlightBodyHtml, setSpotlightBodyHtml] = useState(
+    initialDraft?.spotlightBody ??
+      spotlightStory.bodyHtml ??
+      textAreaLines(home.homeSpotlightStory.paragraphs),
+  );
+  const [ctaBandBodyHtml, setCtaBandBodyHtml] = useState(
+    initialDraft?.ctaBandBody ?? home.homeCtaBand.body ?? "",
   );
   const [pillarImagePrograms, setPillarImagePrograms] = useState(
     initialDraft?.pillarImagePrograms ??
@@ -481,10 +507,14 @@ export function HomeSettingsForm({
             placeholder="Section title"
           />
           {/* Keep persisted values for compatibility; these are not part of the live Scope cards UI. */}
-          <input
-            type="hidden"
+          <CmsRichTextField
+            label="Reach section intro"
             name="homeReachIntro"
-            value={initialDraft?.homeReachIntro ?? home.homeReach.intro}
+            editorId="home-reach-intro"
+            initialHtml={homeReachIntroHtml}
+            onHtmlChange={setHomeReachIntroHtml}
+            compact
+            showPreviewToggle={false}
           />
           <input
             type="hidden"
@@ -517,14 +547,14 @@ export function HomeSettingsForm({
           button.
         </p>
         <div className="mt-4 grid gap-4">
-          <textarea
+          <CmsRichTextField
+            label="Subscribe band copy"
             name="homePartnerBlurb"
-            defaultValue={
-              initialDraft?.homePartnerBlurb ?? home.homePartnerBlurb
-            }
-            rows={2}
-            className="rounded-lg border border-border px-4 py-2"
-            placeholder="Our work is always collaborative—we don't arrive with ready-made answers."
+            editorId="home-partner-blurb"
+            initialHtml={homePartnerBlurbHtml}
+            onHtmlChange={setHomePartnerBlurbHtml}
+            hint="Blue band below the fellow spotlight."
+            compact
           />
         </div>
       </section>
@@ -562,16 +592,13 @@ export function HomeSettingsForm({
             className="rounded-lg border border-border px-4 py-2"
             placeholder="Row 2 heading (Research / Training / Partnership)"
           /> */}
-          <textarea
+          <CmsRichTextField
+            label="Work pillars intro"
             name="pillarRowDescriptionPrimary"
-            defaultValue={
-              initialDraft?.pillarRowDescriptionPrimary ??
-              workPillars.pillarRowDescriptionPrimary ??
-              ""
-            }
-            rows={3}
-            className="sm:col-span-2 rounded-lg border border-border px-4 py-2"
-            placeholder="Intro sub description"
+            editorId="home-pillar-description"
+            initialHtml={pillarDescriptionHtml}
+            onHtmlChange={setPillarDescriptionHtml}
+            compact
           />
           {/* <textarea
             name="pillarRowDescriptionSecondary"
@@ -739,14 +766,13 @@ export function HomeSettingsForm({
           Edits the quote card shown below the partner band on the homepage.
         </p>
         <div className="mt-4 grid gap-4 sm:grid-cols-2">
-          <textarea
+          <CmsRichTextField
+            label="Quote"
             name="testimonialQuote"
-            defaultValue={
-              initialDraft?.testimonialQuote ?? home.homeTestimonial.quote
-            }
-            rows={4}
-            className="sm:col-span-2 rounded-lg border border-border px-4 py-2"
-            placeholder="Quote"
+            editorId="home-testimonial-quote"
+            initialHtml={testimonialQuoteHtml}
+            onHtmlChange={setTestimonialQuoteHtml}
+            compact
           />
           <input
             name="testimonialName"
@@ -801,16 +827,15 @@ export function HomeSettingsForm({
             className="rounded-lg border border-border px-4 py-2"
             placeholder="Section label (e.g. Fellow spotlight)"
           />
-          <textarea
-            name="spotlightParagraphs"
-            defaultValue={
-              initialDraft?.spotlightParagraphs ??
-              textAreaLines(home.homeSpotlightStory.paragraphs)
-            }
-            rows={4}
-            className="sm:col-span-2 rounded-lg border border-border px-4 py-2"
-            placeholder="Body paragraphs (one per line)"
+          <CmsRichTextField
+            label="Spotlight body"
+            name="spotlightBody"
+            editorId="home-spotlight-body"
+            initialHtml={spotlightBodyHtml}
+            onHtmlChange={setSpotlightBodyHtml}
+            placeholder="Story about the fellow or programme…"
           />
+          <input type="hidden" name="spotlightParagraphs" value="" aria-hidden />
           <input
             name="spotlightName"
             defaultValue={
@@ -937,12 +962,12 @@ export function HomeSettingsForm({
             className="sm:col-span-2 rounded-lg border border-border px-4 py-2"
             placeholder="Headline"
           />
-          <textarea
+          <CmsRichTextField
+            label="Band body"
             name="ctaBandBody"
-            defaultValue={initialDraft?.ctaBandBody ?? home.homeCtaBand.body}
-            rows={4}
-            className="sm:col-span-2 rounded-lg border border-border px-4 py-2"
-            placeholder="Body"
+            editorId="home-cta-band-body"
+            initialHtml={ctaBandBodyHtml}
+            onHtmlChange={setCtaBandBodyHtml}
           />
           <div className="sm:col-span-2">
             <label

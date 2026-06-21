@@ -6,6 +6,8 @@ import { PageHero } from "@/components/PageHero";
 import { HomeScrollReveal } from "@/components/home/HomeScrollReveal";
 import { TeamSectionTabs } from "@/components/TeamSectionTabs";
 import { Button } from "@/components/Button";
+import { RichTextContent } from "@/components/RichTextContent";
+import { resolveLeadHtml } from "@/lib/rich-text";
 import { resolveImageUrl } from "@/lib/media";
 import { getBreadcrumbLabels } from "@/lib/breadcrumbs";
 import Image from "next/image";
@@ -115,13 +117,32 @@ export default async function AboutPage() {
     },
   );
   const contentMap = content as Record<string, unknown>;
-  const leadParagraphs =
-    Array.isArray(contentMap.leadParagraphs) &&
-    contentMap.leadParagraphs.every((item) => typeof item === "string")
-      ? (contentMap.leadParagraphs as string[]).filter(
-          (item) => item.trim().length > 0,
-        )
-      : ORG_INTRO_PARAGRAPHS;
+  const introText =
+    typeof contentMap.intro === "string" ? contentMap.intro.trim() : "";
+  const descriptionText =
+    typeof contentMap.description === "string"
+      ? contentMap.description.trim()
+      : "";
+  const missionText =
+    typeof contentMap.mission === "string" ? contentMap.mission.trim() : "";
+  const strategicObjectives =
+    contentMap.strategicObjectives &&
+    typeof contentMap.strategicObjectives === "object" &&
+    !Array.isArray(contentMap.strategicObjectives)
+      ? (contentMap.strategicObjectives as Record<string, unknown>)
+      : null;
+  const leadHtml = resolveLeadHtml({
+    leadBody:
+      typeof contentMap.leadBody === "string" ? contentMap.leadBody : undefined,
+    leadParagraphs:
+      Array.isArray(contentMap.leadParagraphs) &&
+      contentMap.leadParagraphs.every((item) => typeof item === "string")
+        ? (contentMap.leadParagraphs as string[]).filter((item) => item.trim())
+        : undefined,
+    intro: introText || undefined,
+    description: descriptionText || undefined,
+    fallbackParagraphs: ORG_INTRO_PARAGRAPHS,
+  });
   const partnershipsText =
     typeof contentMap.partnershipsText === "string" &&
     contentMap.partnershipsText.trim().length > 0
@@ -222,16 +243,52 @@ export default async function AboutPage() {
                 unoptimized={preferUnoptimizedImage(aboutSectionImage)}
               />
             </div> */}
-            <div className="mt-8 max-w-5xl space-y-6">
-              {leadParagraphs.map((paragraph) => (
-                <p
-                  key={paragraph}
-                  className="max-w-none text-black font-medium page-prose"
-                >
-                  {paragraph}
-                </p>
-              ))}
-            </div>
+            <RichTextContent html={leadHtml} className="mt-8 max-w-5xl font-medium text-black" />
+
+            {missionText ? (
+              <div className="mt-10 max-w-5xl border-t border-border/70 pt-8">
+                <h3 className="font-serif text-2xl font-semibold text-black sm:text-3xl">
+                  Our mission
+                </h3>
+                <RichTextContent html={missionText} className="mt-4 max-w-none font-medium text-black" />
+              </div>
+            ) : null}
+
+            {strategicObjectives &&
+            (typeof strategicObjectives.title === "string" ||
+              typeof strategicObjectives.content === "string" ||
+              typeof strategicObjectives.principles === "string" ||
+              typeof strategicObjectives.agenda2063 === "string") ? (
+              <div className="mt-10 max-w-5xl border-t border-border/70 pt-8">
+                {typeof strategicObjectives.title === "string" &&
+                strategicObjectives.title.trim() ? (
+                  <h3 className="font-serif text-2xl font-semibold text-black sm:text-3xl">
+                    {strategicObjectives.title}
+                  </h3>
+                ) : null}
+                {typeof strategicObjectives.content === "string" &&
+                strategicObjectives.content.trim() ? (
+                  <RichTextContent
+                    html={strategicObjectives.content}
+                    className="mt-4 max-w-none font-medium text-black"
+                  />
+                ) : null}
+                {typeof strategicObjectives.principles === "string" &&
+                strategicObjectives.principles.trim() ? (
+                  <RichTextContent
+                    html={strategicObjectives.principles}
+                    className="mt-4 max-w-none font-medium text-black"
+                  />
+                ) : null}
+                {typeof strategicObjectives.agenda2063 === "string" &&
+                strategicObjectives.agenda2063.trim() ? (
+                  <RichTextContent
+                    html={strategicObjectives.agenda2063}
+                    className="mt-4 max-w-none font-medium text-black"
+                  />
+                ) : null}
+              </div>
+            ) : null}
           </div>
         </section>
       </HomeScrollReveal>
@@ -275,9 +332,7 @@ export default async function AboutPage() {
                     <h3 className="font-serif text-2xl font-semibold text-black">
                       {point.title}
                     </h3>
-                    <p className="mt-3 text-black font-medium page-prose">
-                      {point.body}
-                    </p>
+                    <RichTextContent html={point.body} className="mt-3 font-medium text-black" />
                   </div>
                 </article>
               ))}
@@ -287,9 +342,7 @@ export default async function AboutPage() {
               <h3 className="font-serif text-2xl font-semibold text-black sm:text-3xl">
                 {partnershipsHeading}
               </h3>
-              <p className="page-prose mt-4 max-w-none font-medium text-black">
-                {partnershipsText}
-              </p>
+              <RichTextContent html={partnershipsText} className="mt-4 max-w-none font-medium text-black" />
             </div>
           </div>
         </section>

@@ -7,6 +7,7 @@ import { resolveImageUrl } from "@/lib/media";
 import { Button } from "@/components/Button";
 import { getBreadcrumbLabels } from "@/lib/breadcrumbs";
 import { ProgramsCarousel } from "@/components/ProgramsCarousel";
+import { RichTextContent } from "@/components/RichTextContent";
 import { Section } from "@/components/Section";
 
 export const metadata = {
@@ -25,6 +26,9 @@ type ResearchWorkMerged = typeof workContent.research & {
   heroImage?: string;
   cards?: ResearchItem[];
 };
+
+const RESEARCH_SECTION_DESCRIPTION =
+  "Our research generates rigorous, evidence-based analysis on governance, political economy, and institutional development across Africa. We prioritise work that is policy-relevant and grounded in African contexts, ensuring that our outputs contribute meaningfully to decision-making processes and public discourse. Through our research, we seek to bridge the gap between knowledge and practice while elevating African perspectives in continental and global debates.";
 
 const RESEARCH_FALLBACK_CARDS: ResearchItem[] = [
   {
@@ -101,16 +105,10 @@ export default async function ResearchWorkPage() {
               <h2 className="font-serif text-[1.85rem] font-semibold tracking-tight text-black sm:text-[2.2rem] lg:text-[2.55rem] lg:leading-tight">
                 Research
               </h2>
-              <p className="page-prose max-w-none text-black">
-                Our research generates rigorous, evidence-based analysis on
-                governance, political economy, and institutional development
-                across Africa. We prioritise work that is policy-relevant and
-                grounded in African contexts, ensuring that our outputs
-                contribute meaningfully to decision-making processes and public
-                discourse. Through our research, we seek to bridge the gap
-                between knowledge and practice while elevating African
-                perspectives in continental and global debates.
-              </p>
+              <RichTextContent
+                html={content.description?.trim() || RESEARCH_SECTION_DESCRIPTION}
+                className="max-w-none text-black"
+              />
 
               <ProgramsCarousel programs={research} />
             </div>

@@ -7,6 +7,7 @@ import { AdminFormStickyActions } from "../_components/AdminFormStickyActions";
 import { AdminFormPreviewLink } from "../_components/AdminFormPreviewLink";
 import { createTeam, updateTeam } from "./actions";
 import { ImagePicker, type MediaItem } from "@/components/ImagePicker";
+import { CmsRichTextField } from "@/components/admin/CmsRichTextField";
 
 type TeamFormProps = {
   item?: {
@@ -38,6 +39,7 @@ export function TeamForm({ item }: TeamFormProps) {
   const isEdit = !!item;
   const action = isEdit ? updateTeam.bind(null, item.id) : createTeam;
   const [image, setImage] = useState(item?.image ?? "");
+  const [bioHtml, setBioHtml] = useState(item?.bio ?? "");
   const [pickerOpen, setPickerOpen] = useState(false);
 
   return (
@@ -64,16 +66,15 @@ export function TeamForm({ item }: TeamFormProps) {
         />
       </div>
 
-      <div>
-        <label htmlFor="bio" className="block text-sm font-medium text-slate-700">Bio</label>
-        <textarea
-          id="bio"
-          name="bio"
-          defaultValue={item?.bio ?? ""}
-          rows={4}
-          className="mt-1 w-full rounded-lg border border-border px-4 py-2 text-slate-900"
-        />
-      </div>
+      <CmsRichTextField
+        label="Bio"
+        name="bio"
+        editorId="team-bio"
+        initialHtml={bioHtml}
+        onHtmlChange={setBioHtml}
+        hint="Biography shown on the team member profile page."
+        compact
+      />
 
       <div>
         <label htmlFor="image" className="block text-sm font-medium text-slate-700">Image URL</label>

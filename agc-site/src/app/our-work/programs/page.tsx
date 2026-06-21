@@ -7,6 +7,7 @@ import { resolveImageUrl } from "@/lib/media";
 import { Button } from "@/components/Button";
 import { getBreadcrumbLabels } from "@/lib/breadcrumbs";
 import { ProgramsCarousel } from "@/components/ProgramsCarousel";
+import { RichTextContent } from "@/components/RichTextContent";
 import { Section } from "@/components/Section";
 
 export const metadata = {
@@ -25,6 +26,9 @@ type ProgramsWorkMerged = typeof workContent.programs & {
   heroImage?: string;
   programs?: ProgramItem[];
 };
+
+const PROGRAMS_SECTION_DESCRIPTION =
+  "AGC designs and manages programmes that bring together multiple initiatives to address evolving governance challenge. These programmes provide structured frameworks for sustained engagement, combining research, dialogue, capacity building, and policy support within a coherent strategy. Through our programmes, we work with diverse stakeholders across sectors to drive long-term institutional strengthening and governance outcomes.";
 
 export default async function ProgramsPage() {
   const [merged, bc] = await Promise.all([
@@ -78,16 +82,10 @@ export default async function ProgramsPage() {
               <h2 className="font-serif text-[1.85rem] font-semibold tracking-tight text-black sm:text-[2.2rem] lg:text-[2.55rem] lg:leading-tight">
                 Programs
               </h2>
-              <p className="page-prose max-w-none text-black">
-                AGC designs and manages programmes that bring together multiple
-                initiatives to address evolving governance challenge. These
-                programmes provide structured frameworks for sustained
-                engagement, combining research, dialogue, capacity building, and
-                policy support within a coherent strategy. Through our
-                programmes, we work with diverse stakeholders across sectors to
-                drive long-term institutional strengthening and governance
-                outcomes.
-              </p>
+              <RichTextContent
+                html={content.description?.trim() || PROGRAMS_SECTION_DESCRIPTION}
+                className="max-w-none text-black"
+              />
 
               <ProgramsCarousel programs={programs} />
             </div>

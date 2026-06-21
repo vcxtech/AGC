@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { preferUnoptimizedImage } from "@/lib/image-delivery";
+import { RichTextContent } from "@/components/RichTextContent";
 import { cn } from "@/lib/utils";
 
 export type HomePillarCard = {
@@ -91,9 +92,10 @@ export function HeroFeaturesOverlap({
                       {titleForRow(rowIndex)}
                     </h2>
                     {descriptionForRow(rowIndex) ? (
-                      <p className="mx-auto mt-3 max-w-4xl text-[0.98rem] font-medium leading-relaxed text-black sm:text-[1.08rem]">
-                        {descriptionForRow(rowIndex)}
-                      </p>
+                      <RichTextContent
+                        html={descriptionForRow(rowIndex)}
+                        className="mx-auto mt-3 max-w-4xl text-[0.98rem] font-medium leading-relaxed text-black sm:text-[1.08rem]"
+                      />
                     ) : null}
                   </header>
                 ) : null}
@@ -156,9 +158,10 @@ export function HeroFeaturesOverlap({
                         {item.title}
                       </h3>
                       {item.description?.trim() ? (
-                        <p className="mt-2 overflow-hidden text-[0.95rem] font-medium leading-relaxed text-black transition-[opacity,transform,max-height] duration-500 ease-out max-h-0 translate-y-1 opacity-0 group-hover/card:max-h-24 group-hover/card:translate-y-0 group-hover/card:opacity-100 group-focus-visible/card:max-h-24 group-focus-visible/card:translate-y-0 group-focus-visible/card:opacity-100">
-                          {item.description}
-                        </p>
+                        <RichTextContent
+                          html={item.description}
+                          className="mt-2 overflow-hidden text-[0.95rem] font-medium leading-relaxed text-black transition-[opacity,transform,max-height] duration-500 ease-out max-h-0 translate-y-1 opacity-0 group-hover/card:max-h-24 group-hover/card:translate-y-0 group-hover/card:opacity-100 group-focus-visible/card:max-h-24 group-focus-visible/card:translate-y-0 group-focus-visible/card:opacity-100 [&_p]:mb-0"
+                        />
                       ) : null}
                     </div>
                   </Link>

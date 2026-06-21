@@ -46,7 +46,7 @@ export function Footer({ siteSettings, brandLogoSrc }: { siteSettings: SiteSetti
   );
 
   return (
-    <footer className="relative overflow-hidden pb-[calc(4.25rem+env(safe-area-inset-bottom,0px))] md:pb-0">
+    <footer className="relative overflow-hidden md:pb-0">
       {/* —— Tier 1: Newsletter — */}
       <div
         id="newsletter"
@@ -70,7 +70,7 @@ export function Footer({ siteSettings, brandLogoSrc }: { siteSettings: SiteSetti
 
       {/* —— Tier 2: Light panel — brand | quick links | contact & legal | donate & socials — */}
       <div className="border-t border-white/15 bg-white text-black">
-        <div className="mx-auto w-full max-w-none px-4 py-10 sm:px-6 sm:py-11 lg:px-8 lg:py-12 xl:px-12 2xl:px-16">
+        <div className="mx-auto w-full max-w-none px-4 py-10 pb-[calc(4.5rem+env(safe-area-inset-bottom,0px))] sm:px-6 sm:py-11 md:pb-11 lg:px-8 lg:py-12 xl:px-12 2xl:px-16">
           <div className="grid gap-9 lg:grid-cols-12 lg:gap-6 xl:gap-8">
             {/* Column 1 — brand: logo + tagline */}
             <div className="min-h-0 lg:col-span-3">

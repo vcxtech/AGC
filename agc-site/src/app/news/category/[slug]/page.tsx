@@ -8,6 +8,7 @@ import { PageHero } from "@/components/PageHero";
 import { HomeScrollReveal } from "@/components/home/HomeScrollReveal";
 import { NewsCard } from "@/components/NewsCard";
 import { NewsFilters } from "@/components/NewsFilters";
+import { ListingPageSection } from "@/components/layout/ListingPageSection";
 import { Button } from "@/components/Button";
 import { filterNewsByCategory, getActiveCategorySlugs, getCategoryLabel } from "@/lib/news";
 import { resolveImageUrl } from "@/lib/media";
@@ -77,8 +78,7 @@ export default async function NewsCategoryPage({ params }: Props) {
       />
 
       <HomeScrollReveal variant="slideLeft" start="top 88%" className="block w-full">
-        <section className="w-full border-t border-border/80 bg-white py-8 sm:py-12 lg:py-14">
-        <div className="mx-auto w-full max-w-none px-6 sm:px-8 lg:px-11 xl:px-16 2xl:px-24">
+        <ListingPageSection>
           <div className="mb-10 bg-white p-5 sm:p-6">
             <div className="flex flex-wrap items-baseline justify-between gap-4 pb-4">
               <div>
@@ -117,15 +117,14 @@ export default async function NewsCategoryPage({ params }: Props) {
               </div>
             </div>
           ) : (
-            <div className="page-card max-w-lg border-l-[4px] border-l-accent-600 p-8 sm:p-10">
+            <div className="page-card max-w-2xl p-8">
               <p className="page-prose">{pageCopy.filters.noResults}</p>
-              <Button asChild href="/news" variant="primary" className="mt-6">
+              <Button asChild href="/news" variant="outline" className="mt-6">
                 View all news
               </Button>
             </div>
           )}
-        </div>
-      </section>
+        </ListingPageSection>
       </HomeScrollReveal>
     </>
   );

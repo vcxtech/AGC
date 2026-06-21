@@ -5,7 +5,8 @@ import type { CmsNews } from "@/lib/content";
 import { PageHero } from "@/components/PageHero";
 import { HomeScrollReveal } from "@/components/home/HomeScrollReveal";
 import { NewsListingSection } from "@/components/NewsListingSection";
-import { Button } from "@/components/Button";
+import { ListingPageSection } from "@/components/layout/ListingPageSection";
+import { EmptyListingCard } from "@/components/layout/EmptyListingCard";
 import { resolveImageUrl } from "@/lib/media";
 import { getSiteTaxonomy } from "@/lib/site-taxonomy";
 import { cmsStaticOrEmpty, getMergedPageContent } from "@/lib/page-content";
@@ -81,8 +82,7 @@ export default async function NewsPage() {
       />
 
       <HomeScrollReveal variant="slideRight" start="top 88%" className="block w-full">
-        <section className="w-full border-t border-border/80 bg-white py-8 sm:py-12 lg:py-14">
-        <div className="mx-auto w-full max-w-none px-6 sm:px-8 lg:px-11 xl:px-16 2xl:px-24">
+        <ListingPageSection>
           {newsItems.length > 0 ? (
             <NewsListingSection
               items={itemsWithImages}
@@ -95,22 +95,12 @@ export default async function NewsPage() {
               }
             />
           ) : (
-            <div className="page-card max-w-2xl p-8">
-              <p className="page-prose">{content.intro || newsContent.intro}</p>
-              <p className="page-prose mt-6">
-                Stay up-to-date with our latest news and initiatives. Subscribe to our newsletter or contact{" "}
-                <a href={`mailto:${siteSettings.email.programs}`} className="font-medium text-accent-600 hover:underline">
-                  {siteSettings.email.programs}
-                </a>{" "}
-                to receive updates.
-              </p>
-              <Button asChild href="/contact" variant="outline" className="mt-6">
-                Contact Us
-              </Button>
-            </div>
+            <EmptyListingCard
+              intro={content.intro || newsContent.intro}
+              programsEmail={siteSettings.email.programs}
+            />
           )}
-        </div>
-      </section>
+        </ListingPageSection>
       </HomeScrollReveal>
     </>
   );

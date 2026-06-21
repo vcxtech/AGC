@@ -6,6 +6,7 @@ import { HomeScrollReveal } from "@/components/home/HomeScrollReveal";
 import { placeholderImages } from "@/data/images";
 import { resolveImageUrlSync } from "@/lib/content";
 import { preferUnoptimizedImage } from "@/lib/image-delivery";
+import { richTextToPlain } from "@/lib/rich-text";
 
 type HomeEventsSectionProps = {
   pastEvents: CmsEvent[];
@@ -48,7 +49,7 @@ function eventDateLabel(start: string): string {
 
 function excerpt(e: CmsEvent): string {
   const source = e.short_description || e.description || "";
-  const text = source.replace(/<[^>]*>/g, "").trim();
+  const text = richTextToPlain(source);
   if (!text) return "Read more about this event on our events page.";
   return text.length > 160 ? `${text.slice(0, 157)}...` : text;
 }

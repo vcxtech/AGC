@@ -18,6 +18,7 @@ import { resolveImageUrl } from "@/lib/media";
 import { resolveEventsForPublic, resolveNewsForPublic } from "@/lib/cms-fallback";
 import { CmsDraftNotice } from "@/components/CmsDraftNotice";
 import { HomeScrollReveal } from "@/components/home/HomeScrollReveal";
+import { RichTextContent } from "@/components/RichTextContent";
 import { getSiteSettings } from "@/lib/site-settings";
 
 export const revalidate = 30;
@@ -327,6 +328,12 @@ export default async function HomePage() {
                     <h2 className="font-serif text-[1.85rem] font-semibold tracking-tight text-black sm:text-[2.2rem] lg:text-[2.55rem] lg:leading-tight">
                       {home.homeReach.title}
                     </h2>
+                    {home.homeReach.intro?.trim() ? (
+                      <RichTextContent
+                        html={home.homeReach.intro}
+                        className="mt-4 max-w-3xl text-base font-medium leading-relaxed text-black"
+                      />
+                    ) : null}
                   </div>
                 </HomeScrollReveal>
               )}
@@ -377,9 +384,9 @@ export default async function HomePage() {
                 {home.homeTestimonial.initials}
               </div>
               <blockquote className="min-w-0">
-                <p className="font-serif text-lg font-medium leading-relaxed text-black sm:text-xl sm:leading-relaxed">
-                  &ldquo;{home.homeTestimonial.quote}&rdquo;
-                </p>
+                <div className="font-serif text-lg font-medium leading-relaxed text-black sm:text-xl sm:leading-relaxed">
+                  <RichTextContent html={home.homeTestimonial.quote} />
+                </div>
                 <footer className="mt-8 border-t border-border/60 pt-6">
                   <cite className="not-italic">
                     <span className="text-lg font-medium text-black">{home.homeTestimonial.name}</span>
@@ -427,7 +434,10 @@ export default async function HomePage() {
               </div>
               <div className="flex flex-col justify-center pt-4 lg:col-span-6 lg:pt-0">
                 {home.homeCtaBand.body?.trim() ? (
-                  <p className="max-w-[48ch] text-[17px] leading-[1.65] text-white/95">{home.homeCtaBand.body}</p>
+                  <RichTextContent
+                    html={home.homeCtaBand.body}
+                    className="max-w-[48ch] text-[17px] leading-[1.65] text-white/95 [&_a]:text-white [&_a]:underline"
+                  />
                 ) : null}
                 <div className="mt-7 flex flex-wrap gap-3">
                   {home.homeCtaBand.primaryCta?.trim() ? (

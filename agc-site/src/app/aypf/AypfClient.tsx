@@ -7,6 +7,9 @@ import { HomeScrollReveal } from "@/components/home/HomeScrollReveal";
 import { Button } from "@/components/Button";
 import type { AypfCmsContent } from "@/data/aypf";
 import type { SiteSettings } from "@/lib/site-settings";
+import { RichTextContent } from "@/components/RichTextContent";
+import { RichTextListItems } from "@/components/RichTextListItems";
+import { resolveRichHtml } from "@/lib/rich-text";
 
 function getNestedRegisterString(
   map: Record<string, unknown>,
@@ -279,6 +282,30 @@ export function AypfClient({
     "registerCtaLabel",
     getNestedRegisterString(contentMap, "ctaLabel", "Register Now"),
   );
+  const registerCardHeading = getString(
+    "registerCardHeading",
+    "Secure your spot at AYPF 2026",
+  );
+  const registerCardBody = getString(
+    "registerCardBody",
+    "Participation is by invitation. Register your interest to receive official updates and access preparatory dialogues.",
+  );
+  const registerCardCtaLabel = getString(
+    "registerCardCtaLabel",
+    registerCtaLabel,
+  );
+  const aboutBodyHtml = resolveRichHtml({
+    html: typeof contentMap.aboutBody === "string" ? contentMap.aboutBody : undefined,
+    paragraphs: aboutParagraphs,
+  });
+  const summit2026Html = resolveRichHtml({
+    html:
+      typeof contentMap.summit2026Body === "string"
+        ? contentMap.summit2026Body
+        : typeof contentMap.summit2026Paragraphs === "string"
+          ? contentMap.summit2026Paragraphs
+          : summit2026Paragraphs,
+  });
 
   const [priorityIndex, setPriorityIndex] = useState(0);
   const activePriority = strategicPriorities[priorityIndex];
@@ -297,7 +324,6 @@ export function AypfClient({
 
   return (
     <>
-      j
       <PageHero
         breadcrumbs={[
           { label: siteSettings.chrome.breadcrumbs.home, href: "/" },
@@ -323,30 +349,26 @@ export function AypfClient({
                 <h2 className="mt-3 font-serif text-[2rem] font-semibold leading-tight text-black sm:text-[2.5rem]">
                   {aboutHeading}
                 </h2>
-                {aboutParagraphs.map((paragraph, idx) => (
-                  <p
-                    key={`${paragraph}-${idx}`}
-                    className={`page-prose text-[1.08rem] font-medium leading-relaxed text-stone-800 ${idx === 0 ? "mt-6" : "mt-4"}`}
-                  >
-                    {paragraph}
-                  </p>
-                ))}
+                <RichTextContent
+                  html={aboutBodyHtml}
+                  className="mt-6 text-[1.08rem] font-medium leading-relaxed text-stone-800"
+                />
               </div>
               <div className="self-start rounded-none border border-border/90 bg-white p-6 shadow-sm">
                 <h3 className="font-serif text-xl font-semibold text-black">
-                  Secure your spot at AYPF 2026
+                  {registerCardHeading}
                 </h3>
-                <p className="mt-2 text-sm text-black">
-                  Participation is by invitation. Register your interest to
-                  receive official updates and access preparatory dialogues.
-                </p>
+                <RichTextContent
+                  html={registerCardBody}
+                  className="mt-2 text-sm text-black"
+                />
                 <Button
                   asChild
                   href={regHref}
                   variant="primary"
                   className="mt-5 w-full rounded-none bg-accent-600 hover:bg-accent-700"
                 >
-                  Register Now
+                  {registerCardCtaLabel}
                 </Button>
               </div>
             </div>
@@ -368,19 +390,17 @@ export function AypfClient({
             <h2 className="max-w-5xl font-serif text-[1.9rem] font-semibold sm:text-[2.3rem]">
               {focusHeading}
             </h2>
-            <p className="mt-5 max-w-4xl text-base font-medium leading-relaxed text-white/95 sm:text-[1.03rem]">
-              {focusIntro}
-            </p>
-            <ul className="mt-9 grid gap-x-8 gap-y-5 sm:grid-cols-2">
-              {focusAreas.map((item) => (
-                <li
-                  key={item}
-                  className="rounded-none border border-white/30 bg-white/5 px-4 py-4 text-sm font-medium leading-relaxed sm:px-5"
-                >
-                  {item}
-                </li>
-              ))}
-            </ul>
+            <RichTextContent
+              html={focusIntro}
+              className="mt-5 max-w-4xl text-base font-medium leading-relaxed text-white/95 sm:text-[1.03rem] [&_a]:text-white [&_a]:underline"
+            />
+            <RichTextListItems
+              items={focusAreas}
+              as="ul"
+              listClassName="mt-9 grid gap-x-8 gap-y-5 sm:grid-cols-2"
+              itemClassName="rounded-none border border-white/30 bg-white/5 px-4 py-4 text-sm font-medium leading-relaxed sm:px-5"
+              className="text-sm font-medium leading-relaxed text-white/95"
+            />
           </div>
         </section>
       </HomeScrollReveal>
@@ -394,9 +414,10 @@ export function AypfClient({
             <h2 className="font-serif text-[1.9rem] font-semibold text-black sm:text-[2.3rem]">
               {summit2026Heading}
             </h2>
-            <p className="mt-5 page-prose text-[1.08rem] font-medium leading-relaxed text-stone-800">
-              {summit2026Paragraphs}
-            </p>
+            <RichTextContent
+              html={summit2026Html}
+              className="mt-5 text-[1.08rem] font-medium leading-relaxed text-stone-800"
+            />
           </div>
         </section>
       </HomeScrollReveal>
@@ -410,16 +431,13 @@ export function AypfClient({
             <h2 className="font-serif text-[1.9rem] font-semibold text-black sm:text-[2.3rem]">
               {objectivesHeading}
             </h2>
-            <ul className="mt-6 grid gap-x-7 gap-y-5 sm:grid-cols-2">
-              {objectives.map((item) => (
-                <li
-                  key={item}
-                  className="rounded-none border border-border/80 bg-white p-6 text-sm font-medium leading-relaxed text-black"
-                >
-                  {item}
-                </li>
-              ))}
-            </ul>
+            <RichTextListItems
+              items={objectives}
+              as="ul"
+              listClassName="mt-6 grid gap-x-7 gap-y-5 sm:grid-cols-2"
+              itemClassName="rounded-none border border-border/80 bg-white p-6 text-sm font-medium leading-relaxed text-black"
+              className="text-sm font-medium leading-relaxed text-black"
+            />
           </div>
         </section>
       </HomeScrollReveal>
@@ -443,9 +461,10 @@ export function AypfClient({
                 <h3 className="max-w-4xl font-sans text-[1.85rem] font-semibold leading-tight text-white sm:text-[2.05rem]">
                   {activePriority.title}
                 </h3>
-                <p className="mt-5 max-w-3xl text-base font-medium leading-relaxed text-white/95 sm:text-[1.03rem]">
-                  {activePriority.body}
-                </p>
+                <RichTextContent
+                  html={activePriority.body}
+                  className="mt-5 max-w-3xl text-base font-medium leading-relaxed text-white/95 sm:text-[1.03rem] [&_a]:text-white [&_a]:underline"
+                />
               </article>
               <div className="flex items-center justify-between border-t border-white/30 bg-black/30 px-5 py-3.5 sm:px-7">
                 <div className="text-sm font-medium text-white">
@@ -485,14 +504,16 @@ export function AypfClient({
               <h2 className="font-serif text-3xl font-semibold text-white">
                 {registerHeading}
               </h2>
-              <p className="mt-3 text-sm font-medium leading-relaxed text-white/95">
-                {registerIntro}
-              </p>
-              <ul className="mt-5 list-disc space-y-3 pl-6 text-white marker:text-white">
-                {registerBenefits.map((item) => (
-                  <li key={item}>{item}</li>
-                ))}
-              </ul>
+              <RichTextContent
+                html={registerIntro}
+                className="mt-3 text-sm font-medium leading-relaxed text-white/95"
+              />
+              <RichTextListItems
+                items={registerBenefits}
+                as="ul"
+                listClassName="mt-5 list-disc space-y-3 pl-6 text-white marker:text-white"
+                className="text-sm font-medium leading-relaxed text-white/95"
+              />
               <Button
                 asChild
                 href={regHref}

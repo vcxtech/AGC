@@ -1,8 +1,6 @@
-import Image from "next/image";
-import { notFound } from "next/navigation";
 import Link from "next/link";
 import type { Metadata } from "next";
-import { Calendar, Download } from "lucide-react";
+import { notFound } from "next/navigation";
 import { publicationsContent, fallbackPublications } from "@/data/content";
 import { placeholderImages } from "@/data/images";
 import { getPublicationBySlug, getContentFileUrl, getPublications } from "@/lib/content";
@@ -12,11 +10,14 @@ import { cmsStaticOrEmpty, getMergedPageContent } from "@/lib/page-content";
 import { getSiteSettings } from "@/lib/site-settings";
 import { getSiteTaxonomy, labelForPublicationTypeSlug } from "@/lib/site-taxonomy";
 import { sanitizeHtml } from "@/lib/sanitize";
-import { preferUnoptimizedImage } from "@/lib/image-delivery";
 import { resolvePublicationsForPublic } from "@/lib/cms-fallback";
-import { HeroDarkScrim } from "@/components/HeroDarkScrim";
+import { ArticleDetailShell } from "@/components/ArticleDetailShell";
+import { ArticleDownloadSection } from "@/components/ArticleDownloadSection";
+import { RichTextContent } from "@/components/RichTextContent";
 import { NewsArticleShareLinks } from "@/components/NewsArticleShareLinks";
 import { PublicationCard } from "@/components/PublicationCard";
+import { ARTICLE_PROSE_CLASS } from "@/lib/page-layout";
+import { cn } from "@/lib/utils";
 
 export const revalidate = 60;
 
@@ -143,98 +144,66 @@ export default async function PublicationDetailPage({ params }: Props) {
   const leadHtml = excerptToLeadHtml(item.excerpt);
 
   return (
-    <article className="min-h-screen bg-white">
-      <div className="relative aspect-[21/9] min-h-[220px] w-full overflow-hidden bg-slate-950">
-        <Image
-          src={imageUrl}
-          alt={item.title}
-          fill
-          unoptimized={preferUnoptimizedImage(imageUrl)}
-          className="object-cover object-center"
-          sizes="100vw"
-          priority
-        />
-        <HeroDarkScrim />
-        <div className="absolute inset-0 flex flex-col justify-end p-6 sm:p-10 lg:p-16">
-          <div className="mx-auto w-full max-w-3xl [text-shadow:0_1px_2px_rgba(0,0,0,0.2),0_2px_14px_rgba(0,0,0,0.22)]">
-            <p className="mb-3 text-[0.7rem] font-semibold uppercase tracking-[0.2em] text-white">{pageCopy.title}</p>
-            <h1 className="font-serif text-3xl font-semibold leading-[1.15] tracking-tight text-white sm:text-4xl lg:text-[2.35rem]">
-              {item.title}
-            </h1>
-            {dateStrHero ? (
-              <p className="mt-4 flex items-center gap-2 text-sm text-white/95">
-                <Calendar className="h-4 w-4 shrink-0 text-white" aria-hidden />
-                {dateStrHero}
-              </p>
-            ) : null}
-          </div>
+    <ArticleDetailShell
+      heroImage={imageUrl}
+      heroImageAlt={item.title}
+      eyebrow={pageCopy.title}
+      title={item.title}
+      dateLabel={dateStrHero}
+    >
+      <div className="grid gap-12 lg:grid-cols-12 lg:gap-14">
+        <div className="min-w-0 lg:col-span-8">
+          <nav aria-label="Breadcrumb" className="mb-10 border-b border-border/90 pb-6 text-sm text-black">
+            <Link href="/" className="transition-colors hover:text-accent-700">
+              {bc.home}
+            </Link>
+            <span className="mx-2 text-black">/</span>
+            <Link href="/publications" className="transition-colors hover:text-accent-700">
+              {bc.publications}
+            </Link>
+            <span className="mx-2 text-black">/</span>
+            <span className="line-clamp-1 text-black">{item.title}</span>
+          </nav>
+
+          {leadHtml ? (
+            <>
+              <div
+                className="article-lead text-xl font-medium leading-relaxed text-accent-950 [&_p]:mb-0"
+                dangerouslySetInnerHTML={{ __html: leadHtml }}
+              />
+              <hr className="my-10 border-0 border-t border-border" />
+            </>
+          ) : null}
+
+          {item.content?.trim() ? (
+            <RichTextContent
+              html={item.content}
+              className={cn(ARTICLE_PROSE_CLASS, leadHtml ? "mt-10" : "")}
+            />
+          ) : null}
+
+          {fileUrl ? (
+            <ArticleDownloadSection
+              bordered={Boolean(leadHtml || item.content?.trim())}
+              subheading="Full text as PDF — for research, teaching, and policy use."
+              items={[{ label: item.title, href: fileUrl }]}
+              downloadLabel="Download PDF"
+            />
+          ) : (
+            <p className="page-prose text-black">
+              A downloadable file is not linked for this publication yet. For a copy, please{" "}
+              <Link
+                href="/contact"
+                className="font-medium text-accent-800 underline decoration-accent-300 underline-offset-4 hover:text-accent-950"
+              >
+                contact us
+              </Link>
+              .
+            </p>
+          )}
         </div>
-      </div>
 
-      <div className="relative z-[1] -mt-6 bg-white sm:-mt-10">
-        <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6 sm:py-14 lg:px-8 lg:py-16">
-          <div className="grid gap-12 lg:grid-cols-12 lg:gap-14">
-            <div className="min-w-0 lg:col-span-8">
-              <nav aria-label="Breadcrumb" className="mb-10 border-b border-border/90 pb-6 text-sm text-black">
-                <Link href="/" className="transition-colors hover:text-accent-700">
-                  {bc.home}
-                </Link>
-                <span className="mx-2 text-black">/</span>
-                <Link href="/publications" className="transition-colors hover:text-accent-700">
-                  {bc.publications}
-                </Link>
-                <span className="mx-2 text-black">/</span>
-                <span className="line-clamp-1 text-black">{item.title}</span>
-              </nav>
-
-              {leadHtml ? (
-                <>
-                  <div
-                    className="article-lead text-xl font-medium leading-relaxed text-accent-950 [&_p]:mb-0"
-                    dangerouslySetInnerHTML={{ __html: leadHtml }}
-                  />
-                  <hr className="my-10 border-0 border-t border-border" />
-                </>
-              ) : null}
-
-              {fileUrl ? (
-                <div className={leadHtml ? "mt-14 border-t border-border pt-10" : ""}>
-                  <h3 className="page-heading text-lg text-black">Download</h3>
-                  <p className="mt-1 text-sm text-black">
-                    Full text as PDF — for research, teaching, and policy use.
-                  </p>
-                  <ul className="mt-6 space-y-4">
-                    <li>
-                      <div className="rounded-none border border-border/90 bg-white p-6 shadow-sm sm:p-8">
-                        <h4 className="page-heading text-xl text-black">{item.title}</h4>
-                        <a
-                          href={fileUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="mt-5 inline-flex items-center gap-2 rounded-none bg-accent-700 px-5 py-3 text-sm font-medium text-white transition-colors hover:bg-accent-800"
-                        >
-                          <Download className="h-4 w-4" aria-hidden />
-                          Download PDF
-                        </a>
-                      </div>
-                    </li>
-                  </ul>
-                </div>
-              ) : (
-                <p className="page-prose text-black">
-                  A downloadable file is not linked for this publication yet. For a copy, please{" "}
-                  <Link
-                    href="/contact"
-                    className="font-medium text-accent-800 underline decoration-accent-300 underline-offset-4 hover:text-accent-950"
-                  >
-                    contact us
-                  </Link>
-                  .
-                </p>
-              )}
-            </div>
-
-            <aside className="min-w-0 border-t border-border pt-10 lg:col-span-4 lg:border-l lg:border-t-0 lg:border-border lg:pl-10 lg:pt-0">
+        <aside className="min-w-0 border-t border-border pt-10 lg:col-span-4 lg:border-l lg:border-t-0 lg:border-border lg:pl-10 lg:pt-0">
               <div className="lg:sticky lg:top-28">
                 {dateStrSidebar ? <p className="text-lg font-bold text-accent-600">{dateStrSidebar}</p> : null}
 
@@ -285,8 +254,6 @@ export default async function PublicationDetailPage({ params }: Props) {
               </div>
             </section>
           ) : null}
-        </div>
-      </div>
-    </article>
+    </ArticleDetailShell>
   );
 }

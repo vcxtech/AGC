@@ -5,6 +5,7 @@ import { eventsContent, fallbackEvents } from "@/data/content";
 import { cmsStaticOrEmpty, getMergedPageContent } from "@/lib/page-content";
 import type { CmsEvent, CmsEventAgendaItem } from "@/lib/content";
 import { HomeScrollReveal } from "@/components/home/HomeScrollReveal";
+import { RichTextContent } from "@/components/RichTextContent";
 import { placeholderImages } from "@/data/images";
 import { resolveImageUrl } from "@/lib/media";
 import { EventRegistrationForm } from "@/components/EventRegistrationForm";
@@ -142,9 +143,10 @@ export default async function EventRegisterPage({ params }: Props) {
             ) : null}
 
             {event.description?.trim() ? (
-              <div className="prose prose-stone prose-lg mt-10 max-w-none whitespace-pre-line text-black prose-headings:font-semibold prose-a:text-accent-700">
-                {event.description.trim()}
-              </div>
+              <RichTextContent
+                html={event.description}
+                className="prose prose-stone prose-lg mt-10 max-w-none text-black prose-headings:font-semibold prose-a:text-accent-700"
+              />
             ) : null}
 
             {event.event_type ? (
@@ -177,7 +179,12 @@ export default async function EventRegisterPage({ params }: Props) {
                       {item.time ? <span className="shrink-0 text-sm font-semibold text-accent-800">{item.time}</span> : null}
                             <div>
                         <span className="font-medium">{item.title}</span>
-                        {item.description ? <p className="mt-1 text-sm text-black">{item.description}</p> : null}
+                        {item.description ? (
+                          <RichTextContent
+                            html={item.description}
+                            className="mt-1 text-sm text-black"
+                          />
+                        ) : null}
                             </div>
                           </li>
                         ))}

@@ -126,6 +126,7 @@ function deepMergeHome(base: HomePageCms, patch: Record<string, unknown>): HomeP
       if (typeof sp.image === "string") out.homeSpotlightStory.image = sp.image;
       if (typeof sp.ctaLabel === "string") out.homeSpotlightStory.ctaLabel = sp.ctaLabel;
       if (typeof sp.ctaHref === "string") out.homeSpotlightStory.ctaHref = sp.ctaHref;
+      if (typeof sp.bodyHtml === "string") out.homeSpotlightStory.bodyHtml = sp.bodyHtml;
       continue;
     }
     if (key === "homeReach" && typeof pv === "object" && !Array.isArray(pv)) {

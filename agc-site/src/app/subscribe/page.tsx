@@ -1,5 +1,6 @@
 import { PageHero } from "@/components/PageHero";
 import { HomeScrollReveal } from "@/components/home/HomeScrollReveal";
+import { RichTextContent } from "@/components/RichTextContent";
 import { placeholderImages } from "@/data/images";
 import { cmsStaticOrEmpty, getMergedPageContent } from "@/lib/page-content";
 import { resolveImageUrl } from "@/lib/media";
@@ -56,20 +57,11 @@ export default async function SubscribePage() {
                 <h2 className="mt-3 font-serif text-[1.85rem] font-semibold tracking-tight text-black sm:text-[2.2rem] lg:text-[2.55rem] lg:leading-tight">
                   {content.sectionHeading}
                 </h2>
-                <p className="page-prose mt-4 max-w-none text-black">
-                  {content.intro}
-                </p>
-                <p className="page-prose mt-4 max-w-none text-black">
-                  {content.requiredNote.split("*").length > 1 ? (
-                    <>
-                      Fields marked with{" "}
-                      <span className="font-semibold text-accent-800">*</span>{" "}
-                      are required.
-                    </>
-                  ) : (
-                    content.requiredNote
-                  )}
-                </p>
+                <RichTextContent html={content.intro} className="mt-4 max-w-none text-black" />
+                <RichTextContent
+                  html={content.requiredNote}
+                  className="mt-4 max-w-none text-black"
+                />
 
                 <div className="mt-10 grid gap-4 sm:grid-cols-2">
                   {content.topics.map((item) => (
@@ -78,9 +70,10 @@ export default async function SubscribePage() {
                       className="border border-border/70 bg-slate-50 p-4"
                     >
                       <h3 className="font-medium text-black">{item.title}</h3>
-                      <p className="mt-2 text-sm leading-relaxed text-slate-600">
-                        {item.text}
-                      </p>
+                      <RichTextContent
+                        html={item.text}
+                        className="mt-2 text-sm leading-relaxed text-slate-600"
+                      />
                     </article>
                   ))}
                 </div>

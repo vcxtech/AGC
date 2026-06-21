@@ -65,6 +65,7 @@ export interface CmsPublication {
   title: string;
   slug?: string;
   excerpt?: string;
+  content?: string;
   /** Publication type slugs (multi-select) */
   types?: string[];
   /** @deprecated legacy single type (fallback content only) */
@@ -385,6 +386,7 @@ export async function getPublications(limit = 20) {
         title: p.title,
         slug: p.slug ?? undefined,
         excerpt: p.excerpt ?? undefined,
+        content: p.content ?? undefined,
         types: Array.isArray(typesRaw) ? typesRaw : undefined,
         file: p.file ?? undefined,
         image: p.image ?? undefined,
@@ -409,6 +411,7 @@ export async function getPublicationBySlug(slug: string) {
       title: p.title,
       slug: p.slug ?? undefined,
       excerpt: p.excerpt ?? undefined,
+      content: p.content ?? undefined,
       types: Array.isArray(typesRaw) ? typesRaw : undefined,
       file: p.file ?? undefined,
       image: p.image ?? undefined,

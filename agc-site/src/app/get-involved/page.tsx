@@ -11,7 +11,10 @@ import { getInvolvedContent } from "@/data/content";
 import { placeholderImages } from "@/data/images";
 import { PageHero } from "@/components/PageHero";
 import { HomeScrollReveal } from "@/components/home/HomeScrollReveal";
+import { Button } from "@/components/Button";
 import { cmsStaticOrEmpty, getMergedPageContent } from "@/lib/page-content";
+import { RichTextContent } from "@/components/RichTextContent";
+import { RichTextBulletList } from "@/components/RichTextListItems";
 import { resolveImageUrl } from "@/lib/media";
 import { getSiteSettings } from "@/lib/site-settings";
 
@@ -101,7 +104,7 @@ export default async function GetInvolvedPage() {
               <h2 className="page-heading mt-2 text-2xl sm:text-3xl lg:text-4xl">
                 Join the work
               </h2>
-              <p className="page-prose mt-4 text-lg">{content.intro}</p>
+              <RichTextContent html={content.intro} className="mt-4 text-lg" />
             </div>
 
             <div className="mt-14 grid gap-6 lg:grid-cols-3 lg:gap-8">
@@ -117,19 +120,9 @@ export default async function GetInvolvedPage() {
                   <h3 className="mt-6 font-sans text-2xl font-semibold text-black sm:text-3xl">
                     {firstOpportunity.title}
                   </h3>
-                  <p className="page-prose mt-3">
-                    {firstOpportunity.description}
-                  </p>
+                  <RichTextContent html={firstOpportunity.description} className="mt-3" />
                   <ul className="mt-6 grid gap-2 sm:grid-cols-2">
-                    {firstOpportunity.items.map((item) => (
-                      <li
-                        key={item}
-                        className="flex items-center gap-2 text-black"
-                      >
-                        <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-accent-600" />
-                        {item}
-                      </li>
-                    ))}
+                    <RichTextBulletList items={firstOpportunity.items} />
                   </ul>
                 </div>
                 <span className="relative mt-8 inline-flex items-center gap-2 text-sm font-semibold text-accent-800 transition-all group-hover:gap-3">
@@ -162,19 +155,12 @@ export default async function GetInvolvedPage() {
                       <h3 className="mt-4 font-sans text-xl font-semibold text-black">
                         {opp.title}
                       </h3>
-                      <p className="page-prose-tight mt-2 text-sm">
-                        {opp.description}
-                      </p>
+                      <RichTextContent html={opp.description} className="mt-2 text-sm" />
                       <ul className="mt-4 space-y-1.5">
-                        {opp.items.map((item) => (
-                          <li
-                            key={item}
-                            className="flex items-center gap-2 text-sm text-black"
-                          >
-                            <span className="h-1 w-1 shrink-0 rounded-full bg-accent-600" />
-                            {item}
-                          </li>
-                        ))}
+                        <RichTextBulletList
+                          items={opp.items}
+                          itemClassName="text-sm text-black"
+                        />
                       </ul>
                       <span className="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-accent-800 transition-all group-hover:gap-3">
                         {opp.cta}
@@ -226,14 +212,18 @@ export default async function GetInvolvedPage() {
                       <span className="text-black">{siteSettings.address}</span>
                     </li>
                   </ul>
+                  <Button asChild href="/contact" variant="primary" className="mt-8">
+                    Contact us
+                  </Button>
                 </div>
                 <div>
                   <h2 className="page-heading text-xl sm:text-2xl">
                     {bottomSection.upcomingEvents.title}
                   </h2>
-                  <p className="page-prose mt-3">
-                    {bottomSection.upcomingEvents.description}
-                  </p>
+                  <RichTextContent
+                    html={bottomSection.upcomingEvents.description}
+                    className="mt-3"
+                  />
                   <ul className="mt-6 space-y-4">
                     {bottomSection.upcomingEvents.events.map((evt) => (
                       <li key={evt.label}>

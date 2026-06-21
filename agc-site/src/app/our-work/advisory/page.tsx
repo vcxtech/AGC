@@ -7,6 +7,7 @@ import { resolveImageUrl } from "@/lib/media";
 import { Button } from "@/components/Button";
 import { getBreadcrumbLabels } from "@/lib/breadcrumbs";
 import { ProgramsCarousel } from "@/components/ProgramsCarousel";
+import { RichTextContent } from "@/components/RichTextContent";
 import { Section } from "@/components/Section";
 
 export const metadata = {
@@ -85,9 +86,10 @@ export default async function AdvisoryPage() {
               <h2 className="font-serif text-[1.85rem] font-semibold tracking-tight text-black sm:text-[2.2rem] lg:text-[2.55rem] lg:leading-tight">
                 {content.mainTitle || AdvisoryHeading.title}
               </h2>
-              <p className="page-prose max-w-none text-black">
-                {content.description || AdvisoryHeading.description}
-              </p>
+              <RichTextContent
+                html={content.description || AdvisoryHeading.description}
+                className="max-w-none text-black"
+              />
 
               <ProgramsCarousel programs={advisory} />
             </div>

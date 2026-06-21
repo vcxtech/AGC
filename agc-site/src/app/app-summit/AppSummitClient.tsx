@@ -8,8 +8,11 @@ import { Button } from "@/components/Button";
 import { HomeScrollReveal } from "@/components/home/HomeScrollReveal";
 import type { AppSummitCmsContent } from "@/data/app-summit";
 import type { SiteSettings } from "@/lib/site-settings";
+import { RichTextContent } from "@/components/RichTextContent";
+import { RichTextListItems, RichTextBulletList } from "@/components/RichTextListItems";
+import { resolveRichHtml } from "@/lib/rich-text";
 
-/** Avoids the year (e.g. 2026) wrapping alone on its own line in the registration card */
+/** Avoids the year (e.g. 2026) wrapping alone on its own line in plain registration subtitles */
 function RegistrationCardSubtitle({ text }: { text: string }): ReactNode {
   const normalized = text
     .replace(/\b2025\b/g, "2026")
@@ -88,6 +91,14 @@ export function AppSummitClient({
   };
   const registration = (liveContent.registration ??
     content.registration) as AppSummitCmsContent["registration"];
+  const registrationTitle =
+    registration.title?.trim() || "Secure your spot";
+  const registrationSubtitle =
+    registration.subtitle?.trim() ||
+    "Secure your spot at APP Summit 2026";
+  const registrationFootnote =
+    registration.footnote?.trim() ||
+    "Sponsorship prospectus available. To partner with APPS 2026, contact the Secretariat directly.";
   const detailDate =
     liveContent.details?.date?.trim() ||
     content.details?.date?.trim() ||
@@ -171,6 +182,15 @@ export function AppSummitClient({
     "The second edition of APPS moves the conversation from broad democratic commitments to a focused and practical inquiry: how can political parties become credible, institutional drivers of economic transformation in Africa?",
     "APPS seeks to convene heads of state, political leaders, policymakers, economists, private sector actors, academia, civil society organisations and development partners to explore how party systems can contribute meaningfully to Africa's economic renewal.",
   ]);
+  const aboutBodyHtml = resolveRichHtml({
+    html: typeof contentMap.aboutBody === "string" ? contentMap.aboutBody : undefined,
+    paragraphs: aboutParagraphs,
+  });
+  const summit2026Html = resolveRichHtml({
+    html: typeof contentMap.summit2026Body === "string" ? contentMap.summit2026Body : undefined,
+    paragraphs: summit2026Paragraphs,
+  });
+  const inauguralParagraph = getString("inauguralParagraph", "");
   const sponsorshipIntro = getString(
     "sponsorshipIntro",
     "APPS 2026 provides strategic opportunities for corporate and institutional sponsorship through high-visibility brand exposure, partnership recognition, and direct engagement with policy influencers from across Africa.",
@@ -248,14 +268,10 @@ export function AppSummitClient({
                 <h2 className="mt-3 font-serif text-[2rem] font-semibold leading-tight text-black sm:text-[2.5rem]">
                   {aboutSectionHeading}
                 </h2>
-                {aboutParagraphs.map((paragraph, index) => (
-                  <p
-                    key={`${paragraph}-${index}`}
-                    className={`page-prose text-lg leading-relaxed ${index === 0 ? "mt-6" : "mt-4"}`}
-                  >
-                    {paragraph}
-                  </p>
-                ))}
+                <RichTextContent html={aboutBodyHtml} className="mt-6 text-lg leading-relaxed" />
+                {inauguralParagraph.trim() ? (
+                  <RichTextContent html={inauguralParagraph} className="mt-4 text-lg leading-relaxed" />
+                ) : null}
                 <ul className="mt-8 grid gap-4 sm:grid-cols-3">
                   <li className="rounded-none border border-border/80 bg-white p-4">
                     <CalendarDays className="h-5 w-5 text-accent-700" />
@@ -293,15 +309,19 @@ export function AppSummitClient({
               className="block w-full self-start"
             >
               <div className="rounded-none border border-border/90 bg-white p-6 shadow-sm sm:p-8">
-                <h3 className="page-heading text-xl">Secure your spot</h3>
-                <p className="page-prose mt-2 text-sm text-black">
-                  <RegistrationCardSubtitle
-                    text={
-                      registration.subtitle ??
-                      "Secure your spot at APP Summit 2026"
-                    }
+                <h3 className="page-heading text-xl">{registrationTitle}</h3>
+                {/<(?:p|h[1-6]|ul|ol|li|blockquote|br|strong|em|a)\b/i.test(
+                  registrationSubtitle,
+                ) ? (
+                  <RichTextContent
+                    html={registrationSubtitle}
+                    className="mt-2 text-sm text-black"
                   />
-                </p>
+                ) : (
+                  <p className="page-prose mt-2 text-sm text-black">
+                    <RegistrationCardSubtitle text={registrationSubtitle} />
+                  </p>
+                )}
                 <Button
                   asChild
                   href={registration.href}
@@ -310,17 +330,10 @@ export function AppSummitClient({
                 >
                   {registration.cta || "Register Now"}
                 </Button>
-                <p className="mt-5 text-xs leading-relaxed text-black">
-                  Sponsorship prospectus available. To partner with APPS 2026,
-                  contact the Secretariat via{" "}
-                  <a
-                    href={`mailto:${siteSettings.email.programs}`}
-                    className="font-medium underline"
-                  >
-                    {siteSettings.email.programs}
-                  </a>
-                  .
-                </p>
+                <RichTextContent
+                  html={registrationFootnote}
+                  className="mt-5 text-xs leading-relaxed text-black [&_a]:font-medium [&_a]:underline"
+                />
               </div>
             </HomeScrollReveal>
           </div>
@@ -376,15 +389,11 @@ export function AppSummitClient({
                 {focusHeading}
               </p>
               <ul className="mt-6 grid gap-x-10 gap-y-5 sm:grid-cols-2">
-                {keyFocusAreas.map((item) => (
-                  <li
-                    key={item}
-                    className="flex items-start gap-3 text-sm leading-relaxed sm:text-base"
-                  >
-                    <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-white" />
-                    <span>{item}</span>
-                  </li>
-                ))}
+                <RichTextBulletList
+                  items={keyFocusAreas}
+                  bulletClassName="bg-white"
+                  className="text-sm leading-relaxed sm:text-base text-white"
+                />
               </ul>
             </div>
           </div>
@@ -396,14 +405,7 @@ export function AppSummitClient({
           <h2 className="font-serif text-[1.9rem] font-semibold text-black sm:text-[2.3rem]">
             {summit2026Heading}
           </h2>
-          {summit2026Paragraphs.map((paragraph, index) => (
-            <p
-              key={`${paragraph}-${index}`}
-              className={`page-prose text-lg leading-relaxed ${index === 0 ? "mt-5" : "mt-4"}`}
-            >
-              {paragraph}
-            </p>
-          ))}
+          <RichTextContent html={summit2026Html} className="mt-5 text-lg leading-relaxed" />
         </div>
       </section>
 
@@ -412,16 +414,13 @@ export function AppSummitClient({
           <h2 className="font-serif text-[1.9rem] font-semibold text-black sm:text-[2.3rem]">
             {outcomesHeading}
           </h2>
-          <ul className="mt-6 grid gap-4 sm:grid-cols-2">
-            {expectedOutcomes.map((item) => (
-              <li
-                key={item}
-                className="rounded-none border border-border/80 bg-white p-5 text-sm leading-relaxed text-black"
-              >
-                {item}
-              </li>
-            ))}
-          </ul>
+          <RichTextListItems
+            items={expectedOutcomes}
+            as="ul"
+            listClassName="mt-6 grid gap-4 sm:grid-cols-2"
+            itemClassName="rounded-none border border-border/80 bg-white p-5 text-sm leading-relaxed text-black"
+            className="text-sm leading-relaxed text-black"
+          />
         </div>
       </section>
 
@@ -443,7 +442,7 @@ export function AppSummitClient({
                   {card.title}
                 </h3>
                 <p className="mt-3 text-sm leading-relaxed text-black">
-                  {card.body}
+                  <RichTextContent html={card.body} className="mt-2 text-sm text-black" />
                 </p>
               </div>
             ))}
@@ -465,19 +464,16 @@ export function AppSummitClient({
               <h2 className="font-serif text-[1.9rem] font-semibold sm:text-[2.3rem]">
                 {sponsorshipHeading}
               </h2>
-              <p className="mt-4 max-w-4xl text-sm leading-relaxed text-white/90 sm:text-base">
-                {sponsorshipIntro}
-              </p>
-              <ul className="mt-6 grid gap-x-10 gap-y-4 sm:grid-cols-2">
-                {sponsorshipPoints.map((point) => (
-                  <li
-                    key={point}
-                    className="text-sm leading-relaxed text-white/90"
-                  >
-                    {point}
-                  </li>
-                ))}
-              </ul>
+              <RichTextContent
+                html={sponsorshipIntro}
+                className="mt-4 max-w-4xl text-sm leading-relaxed text-white/90 sm:text-base [&_a]:text-white [&_a]:underline"
+              />
+              <RichTextListItems
+                items={sponsorshipPoints}
+                as="ul"
+                listClassName="mt-6 grid gap-x-10 gap-y-4 sm:grid-cols-2"
+                className="text-sm leading-relaxed text-white/90"
+              />
             </div>
           </div>
         </div>
@@ -494,7 +490,7 @@ export function AppSummitClient({
               <h2 className="font-serif text-3xl font-semibold text-black">
                 {finalCtaHeading}
               </h2>
-              <p className="page-prose mt-3 text-black">{finalCtaBody}</p>
+              <RichTextContent html={finalCtaBody} className="mt-3 text-black" />
               <div className="mt-6 flex flex-wrap gap-4">
                 <Button
                   asChild

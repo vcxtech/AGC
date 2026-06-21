@@ -11,6 +11,7 @@ import type { TaxonomyOption } from "@/data/taxonomy-defaults";
 import { ImagePicker, type MediaItem } from "@/components/ImagePicker";
 import { DocumentPicker, type DocumentItem } from "@/components/DocumentPicker";
 import { RichTextEditor } from "@/components/admin/RichTextEditor";
+import { CmsRichTextField } from "@/components/admin/CmsRichTextField";
 import { useImageFieldPreview } from "@/hooks/useImageFieldPreview";
 import { sanitizeHtml } from "@/lib/sanitize";
 
@@ -81,6 +82,7 @@ export function NewsForm({ categoryOptions, tagOptions, item }: NewsFormProps) {
   const [image, setImage] = useState(item?.image ?? "");
   const [pickerOpen, setPickerOpen] = useState(false);
   const [contentHtml, setContentHtml] = useState(item?.content ?? "");
+  const [excerptHtml, setExcerptHtml] = useState(item?.excerpt ?? "");
   const [showContentPreview, setShowContentPreview] = useState(false);
   const [documents, setDocuments] = useState<DocumentItem[]>(() => {
     const d = item?.downloadResources;
@@ -202,18 +204,14 @@ export function NewsForm({ categoryOptions, tagOptions, item }: NewsFormProps) {
           article page.
         </p>
         <div className="mt-4">
-          <label
-            htmlFor="excerpt"
-            className="block text-sm font-medium text-slate-700"
-          >
-            Short description
-          </label>
-          <textarea
-            id="excerpt"
+          <CmsRichTextField
+            label="Short description"
             name="excerpt"
-            defaultValue={item?.excerpt ?? ""}
-            rows={3}
-            className="mt-1 w-full rounded-lg border border-border px-4 py-2 text-slate-900"
+            editorId="news-excerpt"
+            initialHtml={excerptHtml}
+            onHtmlChange={setExcerptHtml}
+            hint="Used in listings and as the article lead on the detail page."
+            compact
           />
         </div>
       </div>

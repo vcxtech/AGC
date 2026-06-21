@@ -4,6 +4,7 @@ import { useState } from "react";
 import { PageHero } from "@/components/PageHero";
 import { HomeScrollReveal } from "@/components/home/HomeScrollReveal";
 import { Button } from "@/components/Button";
+import { RichTextContent } from "@/components/RichTextContent";
 import type { ApplicationsFormFields } from "@/data/applications-page";
 
 type BreadcrumbItem = { label: string; href?: string };
@@ -134,9 +135,7 @@ export function ApplicationsClient({
               <p className="text-[0.7rem] font-semibold uppercase tracking-[0.2em] text-black">
                 {formEyebrow}
               </p>
-              <p className="mt-2 page-prose max-w-xl text-[1.02rem]">
-                {applyIntro}
-              </p>
+              <RichTextContent html={applyIntro} className="mt-2 max-w-xl text-[1.02rem]" />
             </div>
 
             <div className="page-card p-8 sm:p-10">

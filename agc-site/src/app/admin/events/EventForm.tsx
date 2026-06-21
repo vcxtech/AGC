@@ -7,6 +7,7 @@ import { ImagePlus, Plus, Trash2 } from "lucide-react";
 import { AdminFormStickyActions } from "../_components/AdminFormStickyActions";
 import { createEvent, updateEvent } from "./actions";
 import { ImagePicker, type MediaItem } from "@/components/ImagePicker";
+import { CmsRichTextField } from "@/components/admin/CmsRichTextField";
 import { useImageFieldPreview } from "@/hooks/useImageFieldPreview";
 import { AdminFormPreviewLink } from "../_components/AdminFormPreviewLink";
 
@@ -77,6 +78,10 @@ export function EventForm({ item, teamOptions }: EventFormProps) {
   const isEdit = !!item;
   const action = isEdit ? updateEvent.bind(null, item.id) : createEvent;
   const [image, setImage] = useState(item?.image ?? "");
+  const [descriptionHtml, setDescriptionHtml] = useState(item?.description ?? "");
+  const [shortDescriptionHtml, setShortDescriptionHtml] = useState(
+    item?.shortDescription ?? "",
+  );
   const [pickerOpen, setPickerOpen] = useState(false);
   const { previewUrl: imagePreviewUrl, loading: imagePreviewLoading } = useImageFieldPreview(image);
 
@@ -155,30 +160,25 @@ export function EventForm({ item, teamOptions }: EventFormProps) {
           Use a short description for cards/lists and a full description for the main event page.
         </p>
         <div className="mt-4 grid gap-4">
-          <div>
-            <label htmlFor="shortDescription" className="block text-sm font-medium text-slate-700">
-              Short description
-            </label>
-            <textarea
-              id="shortDescription"
-              name="shortDescription"
-              defaultValue={item?.shortDescription ?? ""}
-              rows={3}
-              className="mt-1 w-full rounded-lg border border-border px-4 py-2 text-slate-900"
-            />
-          </div>
-          <div>
-            <label htmlFor="description" className="block text-sm font-medium text-slate-700">
-              Full description
-            </label>
-            <textarea
-              id="description"
-              name="description"
-              defaultValue={item?.description ?? ""}
-              rows={5}
-              className="mt-1 w-full rounded-lg border border-border px-4 py-2 text-slate-900"
-            />
-          </div>
+          <CmsRichTextField
+            label="Short description"
+            name="shortDescription"
+            editorId="event-short-description"
+            initialHtml={shortDescriptionHtml}
+            onHtmlChange={setShortDescriptionHtml}
+            hint="Shown on event cards and listings. Keep it concise."
+            compact
+            showPreviewToggle={false}
+          />
+          <CmsRichTextField
+            label="Full description"
+            name="description"
+            editorId="event-description"
+            initialHtml={descriptionHtml}
+            onHtmlChange={setDescriptionHtml}
+            hint="Rich text for the event detail and registration pages."
+            placeholder="Describe the event programme, audience, and outcomes…"
+          />
         </div>
       </div>
 
@@ -437,13 +437,15 @@ export function EventForm({ item, teamOptions }: EventFormProps) {
                     />
                   </div>
                   <div className="sm:col-span-3">
-                    <label className="block text-xs font-medium text-slate-600">Description (optional)</label>
-                    <textarea
-                      value={row.description}
-                      onChange={(e) => updateAgendaRow(index, "description", e.target.value)}
-                      rows={2}
-                      placeholder="Optional details"
-                      className="mt-1 w-full rounded-lg border border-border px-3 py-2 text-sm text-slate-900"
+                    <CmsRichTextField
+                      label="Description (optional)"
+                      editorId={`agenda-item-${index}-description`}
+                      initialHtml={row.description}
+                      onHtmlChange={(html) =>
+                        updateAgendaRow(index, "description", html)
+                      }
+                      compact
+                      showPreviewToggle={false}
                     />
                   </div>
                 </div>

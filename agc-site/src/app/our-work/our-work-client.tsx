@@ -8,6 +8,7 @@ import { HomeScrollReveal } from "@/components/home/HomeScrollReveal";
 import type { SiteBreadcrumbChrome } from "@/data/site-chrome";
 import type { WorkAreaCard } from "@/lib/our-work-cards";
 import { WorkAreaCardGrid } from "@/components/our-work/WorkAreaCardGrid";
+import { RichTextContent } from "@/components/RichTextContent";
 
 const tabIcons = {
   programs: LayoutGrid,
@@ -178,12 +179,11 @@ export function OurWorkClient({
             </h2>
             <div className="mt-6 space-y-4">
               {approachIntroParagraphs.map((paragraph, index) => (
-                <p
-                  key={`${paragraph}-${index}`}
+                <RichTextContent
+                  key={`approach-intro-${index}`}
+                  html={paragraph}
                   className="max-w-none text-lg font-medium leading-relaxed text-black sm:text-xl"
-                >
-                  {paragraph}
-                </p>
+                />
               ))}
             </div>
             <div
@@ -204,9 +204,10 @@ export function OurWorkClient({
                     <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-none bg-white/90 font-sans text-sm font-bold tabular-nums text-slate-900">
                       {i + 1}
                     </span>
-                    <span className="pt-0.5 text-sm leading-relaxed text-white sm:text-base">
-                      {obj}
-                    </span>
+                    <RichTextContent
+                      html={obj}
+                      className="pt-0.5 text-sm leading-relaxed text-white sm:text-base"
+                    />
                   </li>
                 ))}
               </ul>
@@ -229,9 +230,10 @@ export function OurWorkClient({
               <h2 className="mt-2 font-serif text-[1.85rem] font-medium tracking-tight text-black sm:text-[2.2rem] lg:text-[2.55rem] lg:leading-tight">
                 {workAreasEyebrow}
               </h2>
-              <p className="page-prose mt-2 font-medium text-black">
-                {activeContent.description}
-              </p>
+              <RichTextContent
+                html={activeContent.description}
+                className="mt-2 font-medium text-black"
+              />
             </div>
             <div
               className="mt-10 flex flex-wrap gap-2 sm:mt-12"

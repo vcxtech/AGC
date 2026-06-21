@@ -7,6 +7,7 @@ import { AdminFormStickyActions } from "../_components/AdminFormStickyActions";
 import { AdminFormPreviewLink } from "../_components/AdminFormPreviewLink";
 import { createAdvisory, updateAdvisory } from "./actions";
 import { ImagePicker, type MediaItem } from "@/components/ImagePicker";
+import { CmsRichTextField } from "@/components/admin/CmsRichTextField";
 
 type AdvisoryFormProps = {
   item?: {
@@ -37,6 +38,7 @@ export function AdvisoryForm({ item }: AdvisoryFormProps) {
   const action = isEdit ? updateAdvisory.bind(null, item.id) : createAdvisory;
   const [image, setImage] = useState(item?.image ?? "");
   const [pickerOpen, setPickerOpen] = useState(false);
+  const [descriptionHtml, setDescriptionHtml] = useState(item?.description ?? "");
 
   return (
     <form action={action} className="space-y-6">
@@ -51,16 +53,14 @@ export function AdvisoryForm({ item }: AdvisoryFormProps) {
         />
       </div>
 
-      <div>
-        <label htmlFor="description" className="block text-sm font-medium text-slate-700">Description</label>
-        <textarea
-          id="description"
-          name="description"
-          defaultValue={item?.description ?? ""}
-          rows={3}
-          className="mt-1 w-full rounded-lg border border-border px-4 py-2 text-slate-900"
-        />
-      </div>
+      <CmsRichTextField
+        label="Description"
+        name="description"
+        editorId="advisory-description"
+        initialHtml={descriptionHtml}
+        onHtmlChange={setDescriptionHtml}
+        compact
+      />
 
       <div>
         <label htmlFor="image" className="block text-sm font-medium text-slate-700">Image URL</label>

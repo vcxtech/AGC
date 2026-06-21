@@ -11,10 +11,19 @@ import {
   ImagePlus,
 } from "lucide-react";
 import { ImagePicker, type MediaItem } from "@/components/ImagePicker";
+import { PageContentJsonRichText } from "@/components/admin/PageContentJsonRichText";
+import { PageContentStringListRichText } from "@/components/admin/PageContentStringListRichText";
+import { CmsRichTextField } from "@/components/admin/CmsRichTextField";
+import { richTextFieldInitial } from "@/lib/rich-text";
 import { AdminFormStickyActions } from "../_components/AdminFormStickyActions";
 import { AdminFormPreviewLink } from "../_components/AdminFormPreviewLink";
 import { publicPathForPageSlug } from "@/lib/admin-public-preview";
 import { updatePageContent } from "./actions";
+
+function parseJsonStringList(value: unknown): string[] {
+  if (!Array.isArray(value)) return [];
+  return value.filter((x): x is string => typeof x === "string");
+}
 
 /** Root keys use the quick editor; nested paths support Get Involved sub-page heroes. */
 type PickerTarget = null | "heroImage" | "sectionImage" | { nested: string[] };
@@ -60,6 +69,8 @@ const fieldVisibilityConfig: Record<
   advisory: { showMainTitle: false, showDescription: false },
   projects: { showMainTitle: false, showDescription: false },
   training: { showMainTitle: false, showDescription: false },
+  "our-work-partnership": { showMainTitle: false, showDescription: false },
+  partnership: { showMainTitle: false, showDescription: false },
   publications: { showMainTitle: false, showDescription: false },
   "site-taxonomy": { showMainTitle: false, showDescription: false },
   "terms-of-service": { showMainTitle: false, showDescription: false },
@@ -114,6 +125,7 @@ export function PageContentForm({ item }: PageContentFormProps) {
   const [collapsedSections, setCollapsedSections] = useState<number[]>([]);
   const [draftRestored, setDraftRestored] = useState(false);
   const [lastSavedAt, setLastSavedAt] = useState<string | null>(null);
+  const [descriptionHtml, setDescriptionHtml] = useState(item.description ?? "");
 
   useEffect(() => {
     const t = window.setTimeout(() => {
@@ -343,7 +355,10 @@ export function PageContentForm({ item }: PageContentFormProps) {
       ? getNestedArray(["cards"])
       : [];
   const advisoryItems =
-    item.slug === "our-work-advisory" || item.slug === "advisory"
+    item.slug === "our-work-advisory" ||
+    item.slug === "advisory" ||
+    item.slug === "our-work-partnership" ||
+    item.slug === "partnership"
       ? getNestedArray(["cards"])
       : [];
   const researchItems =
@@ -628,21 +643,14 @@ export function PageContentForm({ item }: PageContentFormProps) {
       </div> */}
 
       {fieldVisibility.showDescription !== false && (
-        <div>
-          <label
-            htmlFor="description"
-            className="block text-sm font-medium text-slate-700"
-          >
-            Description
-          </label>
-          <textarea
-            id="description"
-            name="description"
-            defaultValue={item.description ?? ""}
-            rows={4}
-            className="mt-1 w-full rounded-lg border border-border px-4 py-2 text-slate-900"
-          />
-        </div>
+        <CmsRichTextField
+          label="Description"
+          name="description"
+          editorId={`${item.slug}-description`}
+          initialHtml={descriptionHtml}
+          onHtmlChange={setDescriptionHtml}
+          compact
+        />
       )}
 
       {showAboutExtendedFields ? (
@@ -787,20 +795,15 @@ export function PageContentForm({ item }: PageContentFormProps) {
                 />
               </div> */}
               <div className="sm:col-span-2">
-                <label className="block text-sm font-medium text-slate-700">
-                  Hero subtitle
-                </label>
-                <textarea
+                <PageContentJsonRichText
+                  label="Hero subtitle"
+                  editorId={`${item.slug}-hero-subtitle`}
                   value={
                     typeof parsedJson.heroSubtitle === "string"
                       ? parsedJson.heroSubtitle
                       : ""
                   }
-                  onChange={(e) =>
-                    updateJsonField("heroSubtitle", e.target.value)
-                  }
-                  rows={3}
-                  className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
+                  onChange={(html) => updateJsonField("heroSubtitle", html)}
                 />
               </div>
               <div>
@@ -838,33 +841,25 @@ export function PageContentForm({ item }: PageContentFormProps) {
                 />
               </div>
               <div className="sm:col-span-2">
-                <label className="block text-sm font-medium text-slate-700">
-                  Intro paragraph
-                </label>
-                <textarea
+                <PageContentJsonRichText
+                  label="Intro paragraph"
+                  editorId={`${item.slug}-intro`}
                   value={
                     typeof parsedJson.intro === "string" ? parsedJson.intro : ""
                   }
-                  onChange={(e) => updateJsonField("intro", e.target.value)}
-                  rows={3}
-                  className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
+                  onChange={(html) => updateJsonField("intro", html)}
                 />
               </div>
               <div className="sm:col-span-2">
-                <label className="block text-sm font-medium text-slate-700">
-                  Required note
-                </label>
-                <input
-                  type="text"
+                <PageContentJsonRichText
+                  label="Required note"
+                  editorId={`${item.slug}-required-note`}
                   value={
                     typeof parsedJson.requiredNote === "string"
                       ? parsedJson.requiredNote
                       : ""
                   }
-                  onChange={(e) =>
-                    updateJsonField("requiredNote", e.target.value)
-                  }
-                  className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
+                  onChange={(html) => updateJsonField("requiredNote", html)}
                 />
               </div>
               <div>
@@ -885,20 +880,15 @@ export function PageContentForm({ item }: PageContentFormProps) {
                 />
               </div>
               <div className="sm:col-span-2">
-                <label className="block text-sm font-medium text-slate-700">
-                  Support body
-                </label>
-                <textarea
+                <PageContentJsonRichText
+                  label="Support body"
+                  editorId={`${item.slug}-support-body`}
                   value={
                     typeof parsedJson.supportBody === "string"
                       ? parsedJson.supportBody
                       : ""
                   }
-                  onChange={(e) =>
-                    updateJsonField("supportBody", e.target.value)
-                  }
-                  rows={3}
-                  className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
+                  onChange={(html) => updateJsonField("supportBody", html)}
                 />
               </div>
             </div>
@@ -938,31 +928,26 @@ export function PageContentForm({ item }: PageContentFormProps) {
                         className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                       />
                     </div>
-                    <div>
-                      <label className="block text-xs font-medium text-slate-600">
-                        Description
-                      </label>
-                      <textarea
-                        value={
-                          typeof subscribeTopicItems[idx]?.text === "string"
-                            ? String(subscribeTopicItems[idx].text)
-                            : ""
-                        }
-                        onChange={(e) => {
-                          const nextTopics = [...subscribeTopicItems];
-                          nextTopics[idx] = {
-                            ...(nextTopics[idx] ?? {}),
-                            text: e.target.value,
-                          };
-                          updateJsonObject({
-                            ...parsedJson,
-                            topics: nextTopics,
-                          });
-                        }}
-                        rows={3}
-                        className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
-                      />
-                    </div>
+                    <PageContentJsonRichText
+                      label="Description"
+                      editorId={`${item.slug}-subscribe-topic-${idx}`}
+                      value={
+                        typeof subscribeTopicItems[idx]?.text === "string"
+                          ? String(subscribeTopicItems[idx].text)
+                          : ""
+                      }
+                      onChange={(html) => {
+                        const nextTopics = [...subscribeTopicItems];
+                        nextTopics[idx] = {
+                          ...(nextTopics[idx] ?? {}),
+                          text: html,
+                        };
+                        updateJsonObject({
+                          ...parsedJson,
+                          topics: nextTopics,
+                        });
+                      }}
+                    />
                   </div>
                 </div>
               ))}
@@ -990,11 +975,15 @@ export function PageContentForm({ item }: PageContentFormProps) {
       </div>
 
       <div>
+        <p className="mb-3 rounded-lg border border-accent-200/80 bg-accent-50/60 px-4 py-3 text-sm text-slate-700">
+          Edit page copy using the visual fields below. You do not need to edit raw JSON unless
+          your developer asked you to.
+        </p>
         <label
           htmlFor="contentJson"
-          className="block text-sm font-medium text-slate-700"
+          className="sr-only"
         >
-          Structured page data (advanced)
+          Structured page data
         </label>
         <div className="mb-2 flex flex-wrap items-center gap-2 text-xs text-slate-500">
           {draftRestored ? (
@@ -1015,7 +1004,10 @@ export function PageContentForm({ item }: PageContentFormProps) {
             Clear local draft
           </button>
         </div>
-        {item.slug.startsWith("our-work-") && (
+        {(item.slug.startsWith("our-work-") ||
+          ["programs", "projects", "research", "training", "advisory", "partnership"].includes(
+            item.slug,
+          )) && (
           <div className="mb-3 grid gap-3 rounded-lg border border-border bg-slate-50 p-3">
             <p className="text-xs font-semibold uppercase tracking-wide text-slate-600">
               Our Work helper
@@ -1050,21 +1042,16 @@ export function PageContentForm({ item }: PageContentFormProps) {
                 />
               </div>
             </div>
-            <div>
-              <label className="block text-xs font-medium text-slate-600">
-                Section description
-              </label>
-              <textarea
-                value={
-                  typeof parsedJson.description === "string"
-                    ? parsedJson.description
-                    : ""
-                }
-                onChange={(e) => updateJsonField("description", e.target.value)}
-                rows={3}
-                className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
-              />
-            </div>
+            <PageContentJsonRichText
+              label="Section description"
+              editorId={`${item.slug}-description`}
+              value={
+                typeof parsedJson.description === "string"
+                  ? parsedJson.description
+                  : ""
+              }
+              onChange={(html) => updateJsonField("description", html)}
+            />
           </div>
         )}
         {item.slug === "awpls" && (
@@ -1159,12 +1146,19 @@ export function PageContentForm({ item }: PageContentFormProps) {
                       >
                         <ImagePlus className="h-4 w-4" />
                       </button>
-                      j
                     </div>
                   </div>
                 ))}
               </div>
             </div>
+            <PageContentJsonRichText
+              label="Page description"
+              editorId={`${item.slug}-awpls-description`}
+              value={
+                typeof parsedJson.description === "string" ? parsedJson.description : ""
+              }
+              onChange={(html) => updateJsonField("description", html)}
+            />
             <div className="rounded-md border border-border bg-white p-3">
               <p className="text-xs font-semibold uppercase tracking-wide text-slate-600">
                 Main section text
@@ -1205,28 +1199,15 @@ export function PageContentForm({ item }: PageContentFormProps) {
                   />
                 </div>
                 <div className="sm:col-span-2">
-                  <label className="block text-xs font-medium text-slate-600">
-                    Top paragraphs (one per line)
-                  </label>
-                  <textarea
-                    value={
-                      Array.isArray(parsedJson.aboutParagraphs)
-                        ? parsedJson.aboutParagraphs
-                            .filter((x) => typeof x === "string")
-                            .join("\n")
-                        : ""
-                    }
-                    onChange={(e) =>
-                      updateJsonObject({
-                        ...parsedJson,
-                        aboutParagraphs: e.target.value
-                          .split("\n")
-                          .map((s) => s.trim())
-                          .filter(Boolean),
-                      })
-                    }
-                    rows={4}
-                    className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
+                  <PageContentJsonRichText
+                    label="Top body"
+                    editorId={`${item.slug}-awpls-about-body`}
+                    value={richTextFieldInitial(
+                      parsedJson.aboutBody,
+                      parsedJson.aboutParagraphs,
+                    )}
+                    onChange={(html) => updateJsonField("aboutBody", html)}
+                    hint="Replaces legacy line-based paragraphs when saved."
                   />
                 </div>
                 <div>
@@ -1264,20 +1245,15 @@ export function PageContentForm({ item }: PageContentFormProps) {
                   />
                 </div>
                 <div className="sm:col-span-2">
-                  <label className="block text-xs font-medium text-slate-600">
-                    Register card body
-                  </label>
-                  <textarea
+                  <PageContentJsonRichText
+                    label="Register card body"
+                    editorId={`${item.slug}-awpls-register-body`}
                     value={
                       typeof parsedJson.registerCardBody === "string"
                         ? parsedJson.registerCardBody
                         : ""
                     }
-                    onChange={(e) =>
-                      updateJsonField("registerCardBody", e.target.value)
-                    }
-                    rows={2}
-                    className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
+                    onChange={(html) => updateJsonField("registerCardBody", html)}
                   />
                 </div>
               </div>
@@ -1330,23 +1306,13 @@ export function PageContentForm({ item }: PageContentFormProps) {
                       }
                       className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                     />
-                    <label className="mt-2 block text-xs font-medium text-slate-600">
-                      Description
-                    </label>
-                    <textarea
-                      value={getNestedString([
-                        "whatIsCards",
-                        String(idx),
-                        "body",
-                      ])}
-                      onChange={(e) =>
-                        updateNestedString(
-                          ["whatIsCards", String(idx), "body"],
-                          e.target.value,
-                        )
+                    <PageContentJsonRichText
+                      label="Description"
+                      editorId={`${item.slug}-what-is-${idx}`}
+                      value={getNestedString(["whatIsCards", String(idx), "body"])}
+                      onChange={(html) =>
+                        updateNestedString(["whatIsCards", String(idx), "body"], html)
                       }
-                      rows={3}
-                      className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                     />
                   </div>
                 ))}
@@ -1372,28 +1338,13 @@ export function PageContentForm({ item }: PageContentFormProps) {
                   }
                   className="w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                 />
-                <label className="block text-xs font-medium text-slate-600">
-                  Targets points (one per line)
-                </label>
-                <textarea
-                  value={
-                    Array.isArray(parsedJson.targetsPoints)
-                      ? parsedJson.targetsPoints
-                          .filter((x) => typeof x === "string")
-                          .join("\n")
-                      : ""
+                <PageContentStringListRichText
+                  label="Targets points"
+                  editorIdPrefix={`${item.slug}-targets-points`}
+                  items={parseJsonStringList(parsedJson.targetsPoints)}
+                  onChange={(targetsPoints) =>
+                    updateJsonObject({ ...parsedJson, targetsPoints })
                   }
-                  onChange={(e) =>
-                    updateJsonObject({
-                      ...parsedJson,
-                      targetsPoints: e.target.value
-                        .split("\n")
-                        .map((s) => s.trim())
-                        .filter(Boolean),
-                    })
-                  }
-                  rows={4}
-                  className="w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                 />
                 <label className="block text-xs font-medium text-slate-600">
                   About 2026 heading
@@ -1410,28 +1361,15 @@ export function PageContentForm({ item }: PageContentFormProps) {
                   }
                   className="w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                 />
-                <label className="block text-xs font-medium text-slate-600">
-                  About 2026 paragraphs (one per line)
-                </label>
-                <textarea
-                  value={
-                    Array.isArray(parsedJson.summit2026Paragraphs)
-                      ? parsedJson.summit2026Paragraphs
-                          .filter((x) => typeof x === "string")
-                          .join("\n")
-                      : ""
-                  }
-                  onChange={(e) =>
-                    updateJsonObject({
-                      ...parsedJson,
-                      summit2026Paragraphs: e.target.value
-                        .split("\n")
-                        .map((s) => s.trim())
-                        .filter(Boolean),
-                    })
-                  }
-                  rows={4}
-                  className="w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
+                <PageContentJsonRichText
+                  label="About 2026 body"
+                  editorId={`${item.slug}-summit2026-body`}
+                  value={richTextFieldInitial(
+                    parsedJson.summit2026Body,
+                    parsedJson.summit2026Paragraphs,
+                  )}
+                  onChange={(html) => updateJsonField("summit2026Body", html)}
+                  hint="Replaces legacy line-based paragraphs when saved."
                 />
               </div>
             </div>
@@ -1455,43 +1393,23 @@ export function PageContentForm({ item }: PageContentFormProps) {
                   }
                   className="w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                 />
-                <label className="block text-xs font-medium text-slate-600">
-                  Deliverables points (one per line)
-                </label>
-                <textarea
-                  value={
-                    Array.isArray(parsedJson.deliverPoints)
-                      ? parsedJson.deliverPoints
-                          .filter((x) => typeof x === "string")
-                          .join("\n")
-                      : ""
+                <PageContentStringListRichText
+                  label="Deliverables points"
+                  editorIdPrefix={`${item.slug}-deliver-points`}
+                  items={parseJsonStringList(parsedJson.deliverPoints)}
+                  onChange={(deliverPoints) =>
+                    updateJsonObject({ ...parsedJson, deliverPoints })
                   }
-                  onChange={(e) =>
-                    updateJsonObject({
-                      ...parsedJson,
-                      deliverPoints: e.target.value
-                        .split("\n")
-                        .map((s) => s.trim())
-                        .filter(Boolean),
-                    })
-                  }
-                  rows={6}
-                  className="w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                 />
-                <label className="block text-xs font-medium text-slate-600">
-                  Deliver closing paragraph
-                </label>
-                <textarea
+                <PageContentJsonRichText
+                  label="Deliver closing paragraph"
+                  editorId={`${item.slug}-deliver-closing`}
                   value={
                     typeof parsedJson.deliverClosingParagraph === "string"
                       ? parsedJson.deliverClosingParagraph
                       : ""
                   }
-                  onChange={(e) =>
-                    updateJsonField("deliverClosingParagraph", e.target.value)
-                  }
-                  rows={2}
-                  className="w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
+                  onChange={(html) => updateJsonField("deliverClosingParagraph", html)}
                 />
                 <div className="grid gap-3 sm:grid-cols-2">
                   <div>
@@ -1529,20 +1447,15 @@ export function PageContentForm({ item }: PageContentFormProps) {
                     />
                   </div>
                 </div>
-                <label className="block text-xs font-medium text-slate-600">
-                  Final CTA body
-                </label>
-                <textarea
+                <PageContentJsonRichText
+                  label="Final CTA body"
+                  editorId={`${item.slug}-final-cta-body`}
                   value={
                     typeof parsedJson.finalCtaBody === "string"
                       ? parsedJson.finalCtaBody
                       : ""
                   }
-                  onChange={(e) =>
-                    updateJsonField("finalCtaBody", e.target.value)
-                  }
-                  rows={2}
-                  className="w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
+                  onChange={(html) => updateJsonField("finalCtaBody", html)}
                 />
               </div>
             </div>
@@ -1558,48 +1471,26 @@ export function PageContentForm({ item }: PageContentFormProps) {
               <strong>Admin → About settings</strong>. Use fields here for lead
               paragraphs, delivery cards, and partnerships copy/images.
             </p>
-            <div>
-              <label className="block text-xs font-medium text-slate-600">
-                Lead paragraphs (one per line)
-              </label>
-              <textarea
-                value={
-                  Array.isArray(parsedJson.leadParagraphs)
-                    ? parsedJson.leadParagraphs
-                        .filter((x) => typeof x === "string")
-                        .join("\n")
-                    : ""
-                }
-                onChange={(e) =>
-                  updateJsonObject({
-                    ...parsedJson,
-                    leadParagraphs: e.target.value
-                      .split("\n")
-                      .map((s) => s.trim())
-                      .filter(Boolean),
-                  })
-                }
-                rows={4}
-                className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 font-mono text-xs"
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-medium text-slate-600">
-                Partnerships and network text
-              </label>
-              <textarea
-                value={
-                  typeof parsedJson.partnershipsText === "string"
-                    ? parsedJson.partnershipsText
-                    : ""
-                }
-                onChange={(e) =>
-                  updateJsonField("partnershipsText", e.target.value)
-                }
-                rows={4}
-                className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
-              />
-            </div>
+            <PageContentJsonRichText
+              label="Lead body"
+              editorId={`${item.slug}-lead-body`}
+              value={richTextFieldInitial(
+                parsedJson.leadBody,
+                parsedJson.leadParagraphs,
+              )}
+              onChange={(html) => updateJsonField("leadBody", html)}
+              hint="Replaces legacy lead paragraphs when saved."
+            />
+            <PageContentJsonRichText
+              label="Partnerships and network text"
+              editorId={`${item.slug}-partnerships-text`}
+              value={
+                typeof parsedJson.partnershipsText === "string"
+                  ? parsedJson.partnershipsText
+                  : ""
+              }
+              onChange={(html) => updateJsonField("partnershipsText", html)}
+            />
             <div className="rounded-md border border-border bg-white p-3">
               <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-600">
                 Delivery cards (4)
@@ -1665,21 +1556,13 @@ export function PageContentForm({ item }: PageContentFormProps) {
                         </button>
                       </div>
                     </div>
-                    <textarea
-                      value={getNestedString([
-                        "deliveryPoints",
-                        String(index),
-                        "body",
-                      ])}
-                      onChange={(e) =>
-                        updateNestedString(
-                          ["deliveryPoints", String(index), "body"],
-                          e.target.value,
-                        )
+                    <PageContentJsonRichText
+                      label="Card body"
+                      editorId={`${item.slug}-delivery-${index}`}
+                      value={getNestedString(["deliveryPoints", String(index), "body"])}
+                      onChange={(html) =>
+                        updateNestedString(["deliveryPoints", String(index), "body"], html)
                       }
-                      rows={3}
-                      placeholder="Card description"
-                      className="mt-2 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                     />
                   </div>
                 ))}
@@ -1873,28 +1756,15 @@ export function PageContentForm({ item }: PageContentFormProps) {
                     className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                   />
                 </div>
-                <div>
-                  <label className="block text-xs font-medium text-slate-600">
-                    Approach intro paragraphs (one per line)
-                  </label>
-                  <textarea
-                    value={getNestedStringArray([
-                      "approachIntroParagraphs",
-                    ]).join("\n")}
-                    onChange={(e) =>
-                      updateNestedStringArray(
-                        ["approachIntroParagraphs"],
-                        e.target.value
-                          .split("\n")
-                          .map((line) => line.trim())
-                          .filter(Boolean),
-                      )
-                    }
-                    rows={6}
-                    className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
-                    placeholder="Each line becomes a paragraph."
-                  />
-                </div>
+                <PageContentStringListRichText
+                  label="Approach intro paragraphs"
+                  editorIdPrefix={`${item.slug}-approach-intro`}
+                  items={getNestedStringArray(["approachIntroParagraphs"])}
+                  onChange={(items) =>
+                    updateNestedStringArray(["approachIntroParagraphs"], items)
+                  }
+                  hint="Each item is one paragraph on the Our Work page."
+                />
                 <div>
                   <label className="block text-xs font-medium text-slate-600">
                     Objectives lead text
@@ -1911,29 +1781,14 @@ export function PageContentForm({ item }: PageContentFormProps) {
                     className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                   />
                 </div>
-                <div>
-                  <label className="block text-xs font-medium text-slate-600">
-                    Objectives points (one per line)
-                  </label>
-                  <textarea
-                    value={getNestedStringArray([
-                      "approach",
-                      "objectives",
-                    ]).join("\n")}
-                    onChange={(e) =>
-                      updateNestedStringArray(
-                        ["approach", "objectives"],
-                        e.target.value
-                          .split("\n")
-                          .map((line) => line.trim())
-                          .filter(Boolean),
-                      )
-                    }
-                    rows={7}
-                    className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
-                    placeholder="Each line becomes one point card."
-                  />
-                </div>
+                <PageContentStringListRichText
+                  label="Objectives points"
+                  editorIdPrefix={`${item.slug}-approach-objectives`}
+                  items={getNestedStringArray(["approach", "objectives"])}
+                  onChange={(items) =>
+                    updateNestedStringArray(["approach", "objectives"], items)
+                  }
+                />
                 <div>
                   <label className="block text-xs font-medium text-slate-600">
                     Objectives block background image
@@ -2016,24 +1871,19 @@ export function PageContentForm({ item }: PageContentFormProps) {
                         Remove
                       </button>
                     </div>
-                    <textarea
+                    <PageContentJsonRichText
+                      label="Card description"
+                      editorId={`${item.slug}-advisory-card-${idx}`}
                       value={
-                        typeof card.description === "string"
-                          ? card.description
-                          : ""
+                        typeof card.description === "string" ? card.description : ""
                       }
-                      onChange={(e) =>
+                      onChange={(html) =>
                         updateNestedArray(["advisory", "cards"], (arr) =>
                           arr.map((c, i) =>
-                            i === idx
-                              ? { ...c, description: e.target.value }
-                              : c,
+                            i === idx ? { ...c, description: html } : c,
                           ),
                         )
                       }
-                      rows={3}
-                      placeholder="Card description"
-                      className="mt-2 w-full rounded-md border border-border px-2 py-1 text-xs"
                     />
                   </div>
                 ))}
@@ -2129,23 +1979,18 @@ export function PageContentForm({ item }: PageContentFormProps) {
                           className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                         />
                       </div>
-                      <div>
-                        <label className="block text-xs font-medium text-slate-600">
-                          Description
-                        </label>
-                        <textarea
-                          value={
-                            typeof program.description === "string"
-                              ? program.description
-                              : ""
-                          }
-                          onChange={(e) =>
-                            updateProgram(index, "description", e.target.value)
-                          }
-                          rows={4}
-                          className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
-                        />
-                      </div>
+                      <PageContentJsonRichText
+                        label="Description"
+                        editorId={`${item.slug}-program-${index}`}
+                        value={
+                          typeof program.description === "string"
+                            ? program.description
+                            : ""
+                        }
+                        onChange={(html) =>
+                          updateProgram(index, "description", html)
+                        }
+                      />
                       <div>
                         <label className="block text-xs font-medium text-slate-600">
                           Background image
@@ -2281,23 +2126,18 @@ export function PageContentForm({ item }: PageContentFormProps) {
                           className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                         />
                       </div>
-                      <div>
-                        <label className="block text-xs font-medium text-slate-600">
-                          Description
-                        </label>
-                        <textarea
-                          value={
-                            typeof project.description === "string"
-                              ? project.description
-                              : ""
-                          }
-                          onChange={(e) =>
-                            updateProject(index, "description", e.target.value)
-                          }
-                          rows={4}
-                          className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
-                        />
-                      </div>
+                      <PageContentJsonRichText
+                        label="Description"
+                        editorId={`${item.slug}-project-${index}`}
+                        value={
+                          typeof project.description === "string"
+                            ? project.description
+                            : ""
+                        }
+                        onChange={(html) =>
+                          updateProject(index, "description", html)
+                        }
+                      />
                       <div>
                         <label className="block text-xs font-medium text-slate-600">
                           Background image
@@ -2345,15 +2185,22 @@ export function PageContentForm({ item }: PageContentFormProps) {
             </div>
           </div>
         )}
-        {(item.slug === "our-work-advisory" || item.slug === "advisory") && (
+        {(item.slug === "our-work-advisory" ||
+          item.slug === "advisory" ||
+          item.slug === "our-work-partnership" ||
+          item.slug === "partnership") && (
           <div className="mb-3 grid gap-3 rounded-lg border border-border bg-slate-50 p-3">
             <p className="text-xs font-semibold uppercase tracking-wide text-slate-600">
-              Advisory page helper
+              {item.slug === "our-work-partnership" || item.slug === "partnership"
+                ? "Partnership page helper"
+                : "Advisory page helper"}
             </p>
             <p className="text-[11px] text-slate-500">
               Edit the carousel items shown on{" "}
               <code className="rounded bg-slate-100 px-0.5">
-                /our-work/advisory
+                {item.slug === "our-work-partnership" || item.slug === "partnership"
+                  ? "/our-work/partnership"
+                  : "/our-work/advisory"}
               </code>
               .
             </p>
@@ -2427,27 +2274,16 @@ export function PageContentForm({ item }: PageContentFormProps) {
                           className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                         />
                       </div>
-                      <div>
-                        <label className="block text-xs font-medium text-slate-600">
-                          Description
-                        </label>
-                        <textarea
-                          value={
-                            typeof item.description === "string"
-                              ? item.description
-                              : ""
-                          }
-                          onChange={(e) =>
-                            updateAdvisoryItem(
-                              index,
-                              "description",
-                              e.target.value,
-                            )
-                          }
-                          rows={4}
-                          className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
-                        />
-                      </div>
+                      <PageContentJsonRichText
+                        label="Description"
+                        editorId={`${item.slug}-carousel-${index}`}
+                        value={
+                          typeof item.description === "string" ? item.description : ""
+                        }
+                        onChange={(html) =>
+                          updateAdvisoryItem(index, "description", html)
+                        }
+                      />
                       <div>
                         <label className="block text-xs font-medium text-slate-600">
                           Background image
@@ -2577,27 +2413,16 @@ export function PageContentForm({ item }: PageContentFormProps) {
                           className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                         />
                       </div>
-                      <div>
-                        <label className="block text-xs font-medium text-slate-600">
-                          Description
-                        </label>
-                        <textarea
-                          value={
-                            typeof item.description === "string"
-                              ? item.description
-                              : ""
-                          }
-                          onChange={(e) =>
-                            updateResearchItem(
-                              index,
-                              "description",
-                              e.target.value,
-                            )
-                          }
-                          rows={4}
-                          className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
-                        />
-                      </div>
+                      <PageContentJsonRichText
+                        label="Description"
+                        editorId={`${item.slug}-research-${index}`}
+                        value={
+                          typeof item.description === "string" ? item.description : ""
+                        }
+                        onChange={(html) =>
+                          updateResearchItem(index, "description", html)
+                        }
+                      />
                       <div>
                         <label className="block text-xs font-medium text-slate-600">
                           Background image
@@ -2727,27 +2552,16 @@ export function PageContentForm({ item }: PageContentFormProps) {
                           className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                         />
                       </div>
-                      <div>
-                        <label className="block text-xs font-medium text-slate-600">
-                          Description
-                        </label>
-                        <textarea
-                          value={
-                            typeof item.description === "string"
-                              ? item.description
-                              : ""
-                          }
-                          onChange={(e) =>
-                            updateTrainingItem(
-                              index,
-                              "description",
-                              e.target.value,
-                            )
-                          }
-                          rows={4}
-                          className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
-                        />
-                      </div>
+                      <PageContentJsonRichText
+                        label="Description"
+                        editorId={`${item.slug}-training-${index}`}
+                        value={
+                          typeof item.description === "string" ? item.description : ""
+                        }
+                        onChange={(html) =>
+                          updateTrainingItem(index, "description", html)
+                        }
+                      />
                       <div>
                         <label className="block text-xs font-medium text-slate-600">
                           Background image
@@ -2975,19 +2789,14 @@ export function PageContentForm({ item }: PageContentFormProps) {
             <p className="text-xs font-semibold uppercase tracking-wide text-slate-600">
               Get Involved helper
             </p>
-            <div>
-              <label className="block text-xs font-medium text-slate-600">
-                Page intro
-              </label>
-              <textarea
-                value={
-                  typeof parsedJson.intro === "string" ? parsedJson.intro : ""
-                }
-                onChange={(e) => updateJsonField("intro", e.target.value)}
-                rows={3}
-                className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
-              />
-            </div>
+            <PageContentJsonRichText
+              label="Page intro"
+              editorId={`${item.slug}-get-involved-intro`}
+              value={
+                typeof parsedJson.intro === "string" ? parsedJson.intro : ""
+              }
+              onChange={(html) => updateJsonField("intro", html)}
+            />
             <p className="text-xs text-slate-500">
               Detail pages (<code>/get-involved/join-us</code>,{" "}
               <code>/get-involved/partnership</code>,{" "}
@@ -3036,6 +2845,21 @@ export function PageContentForm({ item }: PageContentFormProps) {
                 />
               </div>
             </div>
+            <PageContentJsonRichText
+              label="Upcoming events intro"
+              editorId={`${item.slug}-upcoming-events-description`}
+              value={getNestedString([
+                "bottomSection",
+                "upcomingEvents",
+                "description",
+              ])}
+              onChange={(html) =>
+                updateNestedString(
+                  ["bottomSection", "upcomingEvents", "description"],
+                  html,
+                )
+              }
+            />
             <div className="rounded-md border border-border bg-white p-3">
               <div className="mb-2 flex items-center justify-between">
                 <p className="text-xs font-semibold uppercase tracking-wide text-slate-600">
@@ -3105,24 +2929,19 @@ export function PageContentForm({ item }: PageContentFormProps) {
                         Remove
                       </button>
                     </div>
-                    <textarea
+                    <PageContentJsonRichText
+                      label="Description"
+                      editorId={`${item.slug}-opportunity-${idx}`}
                       value={
-                        typeof opp.description === "string"
-                          ? opp.description
-                          : ""
+                        typeof opp.description === "string" ? opp.description : ""
                       }
-                      onChange={(e) =>
+                      onChange={(html) =>
                         updateNestedArray(["opportunities"], (arr) =>
                           arr.map((o, i) =>
-                            i === idx
-                              ? { ...o, description: e.target.value }
-                              : o,
+                            i === idx ? { ...o, description: html } : o,
                           ),
                         )
                       }
-                      rows={2}
-                      placeholder="Description"
-                      className="mt-2 w-full rounded-md border border-border px-2 py-1 text-xs"
                     />
                     <div className="mt-2 grid gap-2 sm:grid-cols-3">
                       <input
@@ -3327,52 +3146,58 @@ export function PageContentForm({ item }: PageContentFormProps) {
                 </div>
               ))}
             </div>
-            <div className="grid gap-2 sm:grid-cols-2">
-              {(
-                [
-                  ["intro", "Intro"],
-                  ["description", "Description"],
-                  ["panelText", "Side panel text"],
-                  ["inquiryBody", "Inquiry body"],
-                  ["quickContactBody", "Quick contact body"],
-                ] as const
-              ).map(([key, label]) => (
-                <div key={key}>
-                  <label className="block text-xs font-medium text-slate-600">
-                    {label}
-                  </label>
-                  <textarea
-                    value={
-                      typeof parsedJson[key] === "string"
-                        ? String(parsedJson[key])
-                        : ""
-                    }
-                    onChange={(e) => updateJsonField(key, e.target.value)}
-                    rows={3}
-                    className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
-                  />
-                </div>
-              ))}
-            </div>
-            <div>
-              <label className="block text-xs font-medium text-slate-600">
-                Opportunities list (one per line)
-              </label>
-              <textarea
-                value={getNestedStringArray(["items"]).join("\n")}
-                onChange={(e) =>
-                  updateNestedStringArray(
-                    ["items"],
-                    e.target.value
-                      .split("\n")
-                      .map((line) => line.trim())
-                      .filter(Boolean),
-                  )
+            <div className="grid gap-3 sm:grid-cols-2">
+              <PageContentJsonRichText
+                label="Intro"
+                editorId={`${item.slug}-join-us-intro`}
+                value={typeof parsedJson.intro === "string" ? parsedJson.intro : ""}
+                onChange={(html) => updateJsonField("intro", html)}
+              />
+              <PageContentJsonRichText
+                label="Description"
+                editorId={`${item.slug}-join-us-description`}
+                value={
+                  typeof parsedJson.description === "string"
+                    ? String(parsedJson.description)
+                    : ""
                 }
-                rows={5}
-                className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 font-mono text-xs"
+                onChange={(html) => updateJsonField("description", html)}
+              />
+              <PageContentJsonRichText
+                label="Side panel text"
+                editorId={`${item.slug}-join-us-panel`}
+                value={
+                  typeof parsedJson.panelText === "string" ? String(parsedJson.panelText) : ""
+                }
+                onChange={(html) => updateJsonField("panelText", html)}
+              />
+              <PageContentJsonRichText
+                label="Inquiry body"
+                editorId={`${item.slug}-join-us-inquiry`}
+                value={
+                  typeof parsedJson.inquiryBody === "string"
+                    ? String(parsedJson.inquiryBody)
+                    : ""
+                }
+                onChange={(html) => updateJsonField("inquiryBody", html)}
+              />
+              <PageContentJsonRichText
+                label="Quick contact body"
+                editorId={`${item.slug}-join-us-quick-contact`}
+                value={
+                  typeof parsedJson.quickContactBody === "string"
+                    ? String(parsedJson.quickContactBody)
+                    : ""
+                }
+                onChange={(html) => updateJsonField("quickContactBody", html)}
               />
             </div>
+            <PageContentStringListRichText
+              label="Opportunities list"
+              editorIdPrefix={`${item.slug}-opportunity-items`}
+              items={getNestedStringArray(["items"])}
+              onChange={(items) => updateNestedStringArray(["items"], items)}
+            />
             <div className="rounded-md border border-border bg-white p-3">
               <label className="block text-xs font-medium text-slate-600">
                 Right-side panel image
@@ -3451,30 +3276,33 @@ export function PageContentForm({ item }: PageContentFormProps) {
                 </div>
               ))}
             </div>
-            <div className="grid gap-2 sm:grid-cols-2">
-              {(
-                [
-                  ["intro", "Intro paragraph"],
-                  ["description", "Supporting paragraph"],
-                  ["footerBody", "Footer body"],
-                ] as const
-              ).map(([key, label]) => (
-                <div key={key}>
-                  <label className="block text-xs font-medium text-slate-600">
-                    {label}
-                  </label>
-                  <textarea
-                    value={
-                      typeof parsedJson[key] === "string"
-                        ? String(parsedJson[key])
-                        : ""
-                    }
-                    onChange={(e) => updateJsonField(key, e.target.value)}
-                    rows={3}
-                    className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
-                  />
-                </div>
-              ))}
+            <div className="grid gap-3 sm:grid-cols-2">
+              <PageContentJsonRichText
+                label="Intro paragraph"
+                editorId={`${item.slug}-partnership-intro`}
+                value={typeof parsedJson.intro === "string" ? parsedJson.intro : ""}
+                onChange={(html) => updateJsonField("intro", html)}
+              />
+              <PageContentJsonRichText
+                label="Supporting paragraph"
+                editorId={`${item.slug}-partnership-description`}
+                value={
+                  typeof parsedJson.description === "string"
+                    ? String(parsedJson.description)
+                    : ""
+                }
+                onChange={(html) => updateJsonField("description", html)}
+              />
+              <PageContentJsonRichText
+                label="Footer body"
+                editorId={`${item.slug}-partnership-footer`}
+                value={
+                  typeof parsedJson.footerBody === "string"
+                    ? String(parsedJson.footerBody)
+                    : ""
+                }
+                onChange={(html) => updateJsonField("footerBody", html)}
+              />
             </div>
             <div className="rounded-md border border-border bg-white p-3">
               <div className="mb-2 flex items-center justify-between">
@@ -3551,24 +3379,19 @@ export function PageContentForm({ item }: PageContentFormProps) {
                         </button>
                       </div>
                     </div>
-                    <textarea
+                    <PageContentJsonRichText
+                      label="Pillar description"
+                      editorId={`${item.slug}-partnership-pillar-${idx}`}
                       value={
-                        typeof card.description === "string"
-                          ? card.description
-                          : ""
+                        typeof card.description === "string" ? card.description : ""
                       }
-                      onChange={(e) =>
+                      onChange={(html) =>
                         updateNestedArray(["cards"], (arr) =>
                           arr.map((x, i) =>
-                            i === idx
-                              ? { ...x, description: e.target.value }
-                              : x,
+                            i === idx ? { ...x, description: html } : x,
                           ),
                         )
                       }
-                      rows={3}
-                      placeholder="Pillar description"
-                      className="mt-2 w-full rounded-md border border-border px-2 py-1.5 text-xs"
                     />
                   </div>
                 ))}
@@ -3616,50 +3439,30 @@ export function PageContentForm({ item }: PageContentFormProps) {
                 </div>
               ))}
             </div>
-            <div className="grid gap-2 sm:grid-cols-2">
-              {(
-                [
-                  ["intro", "Intro"],
-                  ["description", "Description"],
-                  // ["readyBody", "Ready body"],
-                ] as const
-              ).map(([key, label]) => (
-                <div key={key}>
-                  <label className="block text-xs font-medium text-slate-600">
-                    {label}
-                  </label>
-                  <textarea
-                    value={
-                      typeof parsedJson[key] === "string"
-                        ? String(parsedJson[key])
-                        : ""
-                    }
-                    onChange={(e) => updateJsonField(key, e.target.value)}
-                    rows={3}
-                    className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
-                  />
-                </div>
-              ))}
-            </div>
-            <div>
-              <label className="block text-xs font-medium text-slate-600">
-                Ways to contribute list (one per line)
-              </label>
-              <textarea
-                value={getNestedStringArray(["items"]).join("\n")}
-                onChange={(e) =>
-                  updateNestedStringArray(
-                    ["items"],
-                    e.target.value
-                      .split("\n")
-                      .map((line) => line.trim())
-                      .filter(Boolean),
-                  )
+            <div className="grid gap-3 sm:grid-cols-2">
+              <PageContentJsonRichText
+                label="Intro"
+                editorId={`${item.slug}-volunteer-intro`}
+                value={typeof parsedJson.intro === "string" ? parsedJson.intro : ""}
+                onChange={(html) => updateJsonField("intro", html)}
+              />
+              <PageContentJsonRichText
+                label="Description"
+                editorId={`${item.slug}-volunteer-description`}
+                value={
+                  typeof parsedJson.description === "string"
+                    ? String(parsedJson.description)
+                    : ""
                 }
-                rows={5}
-                className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 font-mono text-xs"
+                onChange={(html) => updateJsonField("description", html)}
               />
             </div>
+            <PageContentStringListRichText
+              label="Ways to contribute list"
+              editorIdPrefix={`${item.slug}-volunteer-items`}
+              items={getNestedStringArray(["items"])}
+              onChange={(items) => updateNestedStringArray(["items"], items)}
+            />
             <div className="rounded-md border border-border bg-white p-3">
               <label className="block text-xs font-medium text-slate-600">
                 Right-side impact panel image
@@ -4164,164 +3967,69 @@ export function PageContentForm({ item }: PageContentFormProps) {
               </div>
             </div>
             <div className="grid gap-3 sm:grid-cols-2">
-              <div>
-                <label className="block text-xs font-medium text-slate-600">
-                  Key focus areas (one per line)
-                </label>
-                <textarea
-                  value={
-                    Array.isArray(parsedJson.keyFocusAreas)
-                      ? parsedJson.keyFocusAreas
-                          .filter((x) => typeof x === "string")
-                          .join("\n")
-                      : ""
-                  }
-                  onChange={(e) =>
-                    updateJsonObject({
-                      ...parsedJson,
-                      keyFocusAreas: e.target.value
-                        .split("\n")
-                        .map((s) => s.trim())
-                        .filter(Boolean),
-                    })
-                  }
-                  rows={6}
-                  className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 font-mono text-xs"
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-medium text-slate-600">
-                  Expected outcomes (one per line)
-                </label>
-                <textarea
-                  value={
-                    Array.isArray(parsedJson.expectedOutcomes)
-                      ? parsedJson.expectedOutcomes
-                          .filter((x) => typeof x === "string")
-                          .join("\n")
-                      : ""
-                  }
-                  onChange={(e) =>
-                    updateJsonObject({
-                      ...parsedJson,
-                      expectedOutcomes: e.target.value
-                        .split("\n")
-                        .map((s) => s.trim())
-                        .filter(Boolean),
-                    })
-                  }
-                  rows={6}
-                  className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 font-mono text-xs"
-                />
-              </div>
-            </div>
-            <div>
-              <label className="block text-xs font-medium text-slate-600">
-                Sponsorship points (one per line)
-              </label>
-              <textarea
-                value={
-                  Array.isArray(parsedJson.sponsorshipPoints)
-                    ? parsedJson.sponsorshipPoints
-                        .filter((x) => typeof x === "string")
-                        .join("\n")
-                    : ""
+              <PageContentStringListRichText
+                label="Key focus areas"
+                editorIdPrefix={`${item.slug}-key-focus-areas`}
+                items={parseJsonStringList(parsedJson.keyFocusAreas)}
+                onChange={(keyFocusAreas) =>
+                  updateJsonObject({ ...parsedJson, keyFocusAreas })
                 }
-                onChange={(e) =>
-                  updateJsonObject({
-                    ...parsedJson,
-                    sponsorshipPoints: e.target.value
-                      .split("\n")
-                      .map((s) => s.trim())
-                      .filter(Boolean),
-                  })
+              />
+              <PageContentStringListRichText
+                label="Expected outcomes"
+                editorIdPrefix={`${item.slug}-expected-outcomes`}
+                items={parseJsonStringList(parsedJson.expectedOutcomes)}
+                onChange={(expectedOutcomes) =>
+                  updateJsonObject({ ...parsedJson, expectedOutcomes })
                 }
-                rows={4}
-                className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 font-mono text-xs"
               />
             </div>
-            <div>
-              <label className="block text-xs font-medium text-slate-600">
-                About intro (APPS vision & aims)
-              </label>
-              <textarea
-                value={
-                  typeof parsedJson.intro === "string" ? parsedJson.intro : ""
-                }
-                onChange={(e) => updateJsonField("intro", e.target.value)}
-                rows={4}
-                className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-medium text-slate-600">
-                About section paragraphs (one per line)
-              </label>
-              <textarea
-                value={
-                  Array.isArray(parsedJson.aboutParagraphs)
-                    ? parsedJson.aboutParagraphs
-                        .filter((x) => typeof x === "string")
-                        .join("\n")
-                    : ""
-                }
-                onChange={(e) =>
-                  updateJsonObject({
-                    ...parsedJson,
-                    aboutParagraphs: e.target.value
-                      .split("\n")
-                      .map((s) => s.trim())
-                      .filter(Boolean),
-                  })
-                }
-                rows={7}
-                className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
-                placeholder="Each line becomes a paragraph in the About APP Summit section."
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-medium text-slate-600">
-                Inaugural edition paragraph
-              </label>
-              <textarea
-                value={
-                  typeof parsedJson.inauguralParagraph === "string"
-                    ? parsedJson.inauguralParagraph
-                    : ""
-                }
-                onChange={(e) =>
-                  updateJsonField("inauguralParagraph", e.target.value)
-                }
-                rows={4}
-                className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-medium text-slate-600">
-                APPS 2026 section paragraphs (one per line)
-              </label>
-              <textarea
-                value={
-                  Array.isArray(parsedJson.summit2026Paragraphs)
-                    ? parsedJson.summit2026Paragraphs
-                        .filter((x) => typeof x === "string")
-                        .join("\n")
-                    : ""
-                }
-                onChange={(e) =>
-                  updateJsonObject({
-                    ...parsedJson,
-                    summit2026Paragraphs: e.target.value
-                      .split("\n")
-                      .map((s) => s.trim())
-                      .filter(Boolean),
-                  })
-                }
-                rows={6}
-                className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
-                placeholder="Each line becomes a paragraph in the APPS 2026 section."
-              />
-            </div>
+            <PageContentStringListRichText
+              label="Sponsorship points"
+              editorIdPrefix={`${item.slug}-sponsorship-points`}
+              items={parseJsonStringList(parsedJson.sponsorshipPoints)}
+              onChange={(sponsorshipPoints) =>
+                updateJsonObject({ ...parsedJson, sponsorshipPoints })
+              }
+            />
+            <PageContentJsonRichText
+              label="About intro (APPS vision & aims)"
+              editorId={`${item.slug}-app-summit-intro`}
+              value={
+                typeof parsedJson.intro === "string" ? parsedJson.intro : ""
+              }
+              onChange={(html) => updateJsonField("intro", html)}
+            />
+            <PageContentJsonRichText
+              label="About section body"
+              editorId={`${item.slug}-apps-about-body`}
+              value={richTextFieldInitial(
+                parsedJson.aboutBody,
+                parsedJson.aboutParagraphs,
+              )}
+              onChange={(html) => updateJsonField("aboutBody", html)}
+              hint="Replaces legacy line-based paragraphs when saved."
+            />
+            <PageContentJsonRichText
+              label="Inaugural edition paragraph"
+              editorId={`${item.slug}-apps-inaugural`}
+              value={
+                typeof parsedJson.inauguralParagraph === "string"
+                  ? parsedJson.inauguralParagraph
+                  : ""
+              }
+              onChange={(html) => updateJsonField("inauguralParagraph", html)}
+            />
+            <PageContentJsonRichText
+              label="APPS 2026 section body"
+              editorId={`${item.slug}-apps-summit2026-body`}
+              value={richTextFieldInitial(
+                parsedJson.summit2026Body,
+                parsedJson.summit2026Paragraphs,
+              )}
+              onChange={(html) => updateJsonField("summit2026Body", html)}
+              hint="Replaces legacy line-based paragraphs when saved."
+            />
             <div className="grid gap-3 sm:grid-cols-3">
               <div>
                 <label className="block text-xs font-medium text-slate-600">
@@ -4369,6 +4077,19 @@ export function PageContentForm({ item }: PageContentFormProps) {
             <div className="grid gap-3 sm:grid-cols-2">
               <div>
                 <label className="block text-xs font-medium text-slate-600">
+                  Registration card title
+                </label>
+                <input
+                  type="text"
+                  value={getNestedString(["registration", "title"])}
+                  onChange={(e) =>
+                    updateNestedString(["registration", "title"], e.target.value)
+                  }
+                  className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-slate-600">
                   Registration CTA label
                 </label>
                 <input
@@ -4378,6 +4099,16 @@ export function PageContentForm({ item }: PageContentFormProps) {
                     updateNestedString(["registration", "cta"], e.target.value)
                   }
                   className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
+                />
+              </div>
+              <div className="sm:col-span-2">
+                <PageContentJsonRichText
+                  label="Registration card subtitle"
+                  editorId={`${item.slug}-registration-subtitle`}
+                  value={getNestedString(["registration", "subtitle"])}
+                  onChange={(html) =>
+                    updateNestedString(["registration", "subtitle"], html)
+                  }
                 />
               </div>
               <div>
@@ -4391,6 +4122,16 @@ export function PageContentForm({ item }: PageContentFormProps) {
                     updateNestedString(["registration", "href"], e.target.value)
                   }
                   className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
+                />
+              </div>
+              <div className="sm:col-span-2">
+                <PageContentJsonRichText
+                  label="Registration card footnote"
+                  editorId={`${item.slug}-registration-footnote`}
+                  value={getNestedString(["registration", "footnote"])}
+                  onChange={(html) =>
+                    updateNestedString(["registration", "footnote"], html)
+                  }
                 />
               </div>
             </div>
@@ -4471,20 +4212,15 @@ export function PageContentForm({ item }: PageContentFormProps) {
                       }
                       className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                     />
-                    <label className="mt-2 block text-xs font-medium text-slate-600">
-                      Description
-                    </label>
-                    <textarea
+                    <PageContentJsonRichText
+                      label="Description"
+                      editorId={`${item.slug}-${card.bodyKey}`}
                       value={
                         typeof parsedJson[card.bodyKey] === "string"
                           ? String(parsedJson[card.bodyKey])
                           : ""
                       }
-                      onChange={(e) =>
-                        updateJsonField(card.bodyKey, e.target.value)
-                      }
-                      rows={3}
-                      className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
+                      onChange={(html) => updateJsonField(card.bodyKey, html)}
                     />
                   </div>
                 ))}
@@ -4496,20 +4232,15 @@ export function PageContentForm({ item }: PageContentFormProps) {
               </p>
               <div className="grid gap-3 sm:grid-cols-2">
                 <div className="sm:col-span-2">
-                  <label className="block text-xs font-medium text-slate-600">
-                    Sponsorship intro
-                  </label>
-                  <textarea
+                  <PageContentJsonRichText
+                    label="Sponsorship intro"
+                    editorId={`${item.slug}-sponsorship-intro`}
                     value={
                       typeof parsedJson.sponsorshipIntro === "string"
                         ? parsedJson.sponsorshipIntro
                         : ""
                     }
-                    onChange={(e) =>
-                      updateJsonField("sponsorshipIntro", e.target.value)
-                    }
-                    rows={3}
-                    className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
+                    onChange={(html) => updateJsonField("sponsorshipIntro", html)}
                   />
                 </div>
                 <div>
@@ -4547,20 +4278,15 @@ export function PageContentForm({ item }: PageContentFormProps) {
                   />
                 </div>
                 <div className="sm:col-span-2">
-                  <label className="block text-xs font-medium text-slate-600">
-                    Final CTA body
-                  </label>
-                  <textarea
+                  <PageContentJsonRichText
+                    label="Final CTA body"
+                    editorId={`${item.slug}-apps-final-cta-body`}
                     value={
                       typeof parsedJson.finalCtaBody === "string"
                         ? parsedJson.finalCtaBody
                         : ""
                     }
-                    onChange={(e) =>
-                      updateJsonField("finalCtaBody", e.target.value)
-                    }
-                    rows={3}
-                    className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
+                    onChange={(html) => updateJsonField("finalCtaBody", html)}
                   />
                 </div>
                 <div className="sm:col-span-2">
@@ -4825,25 +4551,13 @@ export function PageContentForm({ item }: PageContentFormProps) {
                 />
               </div>
               <div className="mt-2">
-                <label className="block text-xs font-medium text-slate-600">
-                  Focus areas (one per line)
-                </label>
-                <textarea
-                  value={getNestedStringArray([
-                    "purposeSection",
-                    "focusAreas",
-                  ]).join("\n")}
-                  onChange={(e) =>
-                    updateNestedStringArray(
-                      ["purposeSection", "focusAreas"],
-                      e.target.value
-                        .split("\n")
-                        .map((s) => s.trim())
-                        .filter(Boolean),
-                    )
+                <PageContentStringListRichText
+                  label="Focus areas"
+                  editorIdPrefix={`${item.slug}-purpose-focus-areas`}
+                  items={getNestedStringArray(["purposeSection", "focusAreas"])}
+                  onChange={(items) =>
+                    updateNestedStringArray(["purposeSection", "focusAreas"], items)
                   }
-                  rows={6}
-                  className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 font-mono text-xs"
                 />
               </div>
             </div>
@@ -4919,25 +4633,19 @@ export function PageContentForm({ item }: PageContentFormProps) {
                 />
               </div>
               <div className="mt-2">
-                <label className="block text-xs font-medium text-slate-600">
-                  Discussion points (one per line)
-                </label>
-                <textarea
-                  value={getNestedStringArray([
+                <PageContentStringListRichText
+                  label="Discussion points"
+                  editorIdPrefix={`${item.slug}-action-discussion-points`}
+                  items={getNestedStringArray([
                     "actionSection",
                     "discussionPoints",
-                  ]).join("\n")}
-                  onChange={(e) =>
+                  ])}
+                  onChange={(items) =>
                     updateNestedStringArray(
                       ["actionSection", "discussionPoints"],
-                      e.target.value
-                        .split("\n")
-                        .map((s) => s.trim())
-                        .filter(Boolean),
+                      items,
                     )
                   }
-                  rows={5}
-                  className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 font-mono text-xs"
                 />
               </div>
             </div>
@@ -4996,25 +4704,13 @@ export function PageContentForm({ item }: PageContentFormProps) {
                 />
               </div>
               <div className="mt-2">
-                <label className="block text-xs font-medium text-slate-600">
-                  Topics (one per line)
-                </label>
-                <textarea
-                  value={getNestedStringArray([
-                    "lookingAheadSection",
-                    "topics",
-                  ]).join("\n")}
-                  onChange={(e) =>
-                    updateNestedStringArray(
-                      ["lookingAheadSection", "topics"],
-                      e.target.value
-                        .split("\n")
-                        .map((s) => s.trim())
-                        .filter(Boolean),
-                    )
+                <PageContentStringListRichText
+                  label="Topics"
+                  editorIdPrefix={`${item.slug}-looking-ahead-topics`}
+                  items={getNestedStringArray(["lookingAheadSection", "topics"])}
+                  onChange={(items) =>
+                    updateNestedStringArray(["lookingAheadSection", "topics"], items)
                   }
-                  rows={5}
-                  className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 font-mono text-xs"
                 />
               </div>
               <div className="mt-2">
@@ -5174,28 +4870,70 @@ export function PageContentForm({ item }: PageContentFormProps) {
                   />
                 </div>
                 <div className="sm:col-span-2">
+                  <PageContentJsonRichText
+                    label="Top section body"
+                    editorId={`${item.slug}-aypf-about-body`}
+                    value={richTextFieldInitial(
+                      parsedJson.aboutBody,
+                      parsedJson.aboutParagraphs,
+                    )}
+                    onChange={(html) => updateJsonField("aboutBody", html)}
+                    hint="Replaces legacy line-based paragraphs when saved."
+                  />
+                </div>
+              </div>
+            </div>
+            <div className="rounded-md border border-border bg-white p-3">
+              <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-600">
+                Sidebar register card
+              </p>
+              <div className="grid gap-3 sm:grid-cols-2">
+                <div>
                   <label className="block text-xs font-medium text-slate-600">
-                    Top section paragraphs (one per line)
+                    Card heading
                   </label>
-                  <textarea
+                  <input
+                    type="text"
                     value={
-                      Array.isArray(parsedJson.aboutParagraphs)
-                        ? parsedJson.aboutParagraphs
-                            .filter((x) => typeof x === "string")
-                            .join("\n")
+                      typeof parsedJson.registerCardHeading === "string"
+                        ? parsedJson.registerCardHeading
                         : ""
                     }
                     onChange={(e) =>
-                      updateJsonObject({
-                        ...parsedJson,
-                        aboutParagraphs: e.target.value
-                          .split("\n")
-                          .map((s) => s.trim())
-                          .filter(Boolean),
-                      })
+                      updateJsonField("registerCardHeading", e.target.value)
                     }
-                    rows={4}
                     className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-slate-600">
+                    Card CTA label
+                  </label>
+                  <input
+                    type="text"
+                    value={
+                      typeof parsedJson.registerCardCtaLabel === "string"
+                        ? parsedJson.registerCardCtaLabel
+                        : ""
+                    }
+                    onChange={(e) =>
+                      updateJsonField("registerCardCtaLabel", e.target.value)
+                    }
+                    className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
+                  />
+                </div>
+                <div className="sm:col-span-2">
+                  <PageContentJsonRichText
+                    label="Card body"
+                    editorId={`${item.slug}-aypf-register-card-body`}
+                    value={
+                      typeof parsedJson.registerCardBody === "string"
+                        ? parsedJson.registerCardBody
+                        : ""
+                    }
+                    onChange={(html) =>
+                      updateJsonField("registerCardBody", html)
+                    }
                   />
                 </div>
               </div>
@@ -5220,43 +4958,23 @@ export function PageContentForm({ item }: PageContentFormProps) {
                   }
                   className="w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                 />
-                <label className="block text-xs font-medium text-slate-600">
-                  Focus intro
-                </label>
-                <textarea
+                <PageContentJsonRichText
+                  label="Focus intro"
+                  editorId={`${item.slug}-aypf-focus-intro`}
                   value={
                     typeof parsedJson.focusIntro === "string"
                       ? parsedJson.focusIntro
                       : ""
                   }
-                  onChange={(e) =>
-                    updateJsonField("focusIntro", e.target.value)
-                  }
-                  rows={3}
-                  className="w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
+                  onChange={(html) => updateJsonField("focusIntro", html)}
                 />
-                <label className="block text-xs font-medium text-slate-600">
-                  Focus points (one per line)
-                </label>
-                <textarea
-                  value={
-                    Array.isArray(parsedJson.focusAreas)
-                      ? parsedJson.focusAreas
-                          .filter((x) => typeof x === "string")
-                          .join("\n")
-                      : ""
+                <PageContentStringListRichText
+                  label="Focus points"
+                  editorIdPrefix={`${item.slug}-aypf-focus-areas`}
+                  items={parseJsonStringList(parsedJson.focusAreas)}
+                  onChange={(focusAreas) =>
+                    updateJsonObject({ ...parsedJson, focusAreas })
                   }
-                  onChange={(e) =>
-                    updateJsonObject({
-                      ...parsedJson,
-                      focusAreas: e.target.value
-                        .split("\n")
-                        .map((s) => s.trim())
-                        .filter(Boolean),
-                    })
-                  }
-                  rows={5}
-                  className="w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                 />
                 <label className="block text-xs font-medium text-slate-600">
                   AYPF 2026 heading
@@ -5273,20 +4991,17 @@ export function PageContentForm({ item }: PageContentFormProps) {
                   }
                   className="w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                 />
-                <label className="block text-xs font-medium text-slate-600">
-                  AYPF 2026 paragraph
-                </label>
-                <textarea
+                <PageContentJsonRichText
+                  label="AYPF 2026 body"
+                  editorId={`${item.slug}-aypf-summit2026`}
                   value={
-                    typeof parsedJson.summit2026Paragraphs === "string"
-                      ? parsedJson.summit2026Paragraphs
-                      : ""
+                    typeof parsedJson.summit2026Body === "string"
+                      ? parsedJson.summit2026Body
+                      : typeof parsedJson.summit2026Paragraphs === "string"
+                        ? parsedJson.summit2026Paragraphs
+                        : ""
                   }
-                  onChange={(e) =>
-                    updateJsonField("summit2026Paragraphs", e.target.value)
-                  }
-                  rows={4}
-                  className="w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
+                  onChange={(html) => updateJsonField("summit2026Body", html)}
                 />
                 <label className="block text-xs font-medium text-slate-600">
                   Objectives heading
@@ -5303,28 +5018,13 @@ export function PageContentForm({ item }: PageContentFormProps) {
                   }
                   className="w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                 />
-                <label className="block text-xs font-medium text-slate-600">
-                  Objectives points (one per line)
-                </label>
-                <textarea
-                  value={
-                    Array.isArray(parsedJson.objectives)
-                      ? parsedJson.objectives
-                          .filter((x) => typeof x === "string")
-                          .join("\n")
-                      : ""
+                <PageContentStringListRichText
+                  label="Objectives points"
+                  editorIdPrefix={`${item.slug}-aypf-objectives`}
+                  items={parseJsonStringList(parsedJson.objectives)}
+                  onChange={(objectives) =>
+                    updateJsonObject({ ...parsedJson, objectives })
                   }
-                  onChange={(e) =>
-                    updateJsonObject({
-                      ...parsedJson,
-                      objectives: e.target.value
-                        .split("\n")
-                        .map((s) => s.trim())
-                        .filter(Boolean),
-                    })
-                  }
-                  rows={5}
-                  className="w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                 />
                 <label className="block text-xs font-medium text-slate-600">
                   Strategic priorities heading
@@ -5372,23 +5072,20 @@ export function PageContentForm({ item }: PageContentFormProps) {
                       }
                       className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                     />
-                    <label className="mt-2 block text-xs font-medium text-slate-600">
-                      Description
-                    </label>
-                    <textarea
+                    <PageContentJsonRichText
+                      label="Description"
+                      editorId={`${item.slug}-aypf-priority-${idx}`}
                       value={getNestedString([
                         "strategicPriorities",
                         String(idx),
                         "body",
                       ])}
-                      onChange={(e) =>
+                      onChange={(html) =>
                         updateNestedString(
                           ["strategicPriorities", String(idx), "body"],
-                          e.target.value,
+                          html,
                         )
                       }
-                      rows={3}
-                      className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                     />
                   </div>
                 ))}
@@ -5434,47 +5131,25 @@ export function PageContentForm({ item }: PageContentFormProps) {
                   />
                 </div>
                 <div className="sm:col-span-2">
-                  <label className="block text-xs font-medium text-slate-600">
-                    Intro line
-                  </label>
-                  <textarea
+                  <PageContentJsonRichText
+                    label="Intro line"
+                    editorId={`${item.slug}-aypf-register-intro`}
                     value={
                       typeof parsedJson.registerIntro === "string"
                         ? parsedJson.registerIntro
                         : ""
                     }
-                    onChange={(e) =>
-                      updateJsonField("registerIntro", e.target.value)
-                    }
-                    rows={2}
-                    className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
+                    onChange={(html) => updateJsonField("registerIntro", html)}
                   />
                 </div>
-                <div className="sm:col-span-2">
-                  <label className="block text-xs font-medium text-slate-600">
-                    Benefits (one per line)
-                  </label>
-                  <textarea
-                    value={
-                      Array.isArray(parsedJson.registerBenefits)
-                        ? parsedJson.registerBenefits
-                            .filter((x) => typeof x === "string")
-                            .join("\n")
-                        : ""
-                    }
-                    onChange={(e) =>
-                      updateJsonObject({
-                        ...parsedJson,
-                        registerBenefits: e.target.value
-                          .split("\n")
-                          .map((s) => s.trim())
-                          .filter(Boolean),
-                      })
-                    }
-                    rows={4}
-                    className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
-                  />
-                </div>
+                <PageContentStringListRichText
+                  label="Benefits"
+                  editorIdPrefix={`${item.slug}-aypf-register-benefits`}
+                  items={parseJsonStringList(parsedJson.registerBenefits)}
+                  onChange={(registerBenefits) =>
+                    updateJsonObject({ ...parsedJson, registerBenefits })
+                  }
+                />
               </div>
             </div>
           </div>
@@ -5886,6 +5561,12 @@ export function PageContentForm({ item }: PageContentFormProps) {
                 />
               </div>
             </div>
+            <PageContentJsonRichText
+              label="Apply intro (above form)"
+              editorId={`${item.slug}-apply-intro`}
+              value={quickValues.applyIntro}
+              onChange={(html) => updateJsonField("applyIntro", html)}
+            />
           </div>
         )}
         {/* {(item.slug === "privacy-policy" ||
@@ -6062,32 +5743,17 @@ export function PageContentForm({ item }: PageContentFormProps) {
                               placeholder="Section content"
                               className="mt-2 w-full rounded-md border border-border px-2 py-1 text-xs"
                             />
-                            <textarea
-                              value={
-                                Array.isArray(sec.items)
-                                  ? sec.items
-                                      .filter((x) => typeof x === "string")
-                                      .join("\n")
-                                  : ""
-                              }
-                              onChange={(e) =>
+                            <PageContentStringListRichText
+                              label="Bullet items"
+                              editorIdPrefix={`legal-section-${idx}-items`}
+                              items={parseJsonStringList(sec.items)}
+                              onChange={(items) =>
                                 updateNestedArray(["sections"], (arr) =>
                                   arr.map((s, i) =>
-                                    i === idx
-                                      ? {
-                                          ...s,
-                                          items: e.target.value
-                                            .split("\n")
-                                            .map((line) => line.trim())
-                                            .filter(Boolean),
-                                        }
-                                      : s,
+                                    i === idx ? { ...s, items } : s,
                                   ),
                                 )
                               }
-                              rows={3}
-                              placeholder="Bullet items (one per line)"
-                              className="mt-2 w-full rounded-md border border-border px-2 py-1 text-xs"
                             />
                           </>
                         )}
@@ -6306,51 +5972,31 @@ export function PageContentForm({ item }: PageContentFormProps) {
                                 </button>
                               </div>
                             </div>
-                            <textarea
+                            <PageContentJsonRichText
+                              label="Section content"
+                              editorId={`legal-section-${idx}-content`}
                               value={
-                                typeof sec.content === "string"
-                                  ? sec.content
-                                  : ""
+                                typeof sec.content === "string" ? sec.content : ""
                               }
-                              onChange={(e) =>
+                              onChange={(html) =>
                                 updateNestedArray(["sections"], (arr) =>
                                   arr.map((s, i) =>
-                                    i === idx
-                                      ? { ...s, content: e.target.value }
-                                      : s,
+                                    i === idx ? { ...s, content: html } : s,
                                   ),
                                 )
                               }
-                              rows={3}
-                              placeholder="Section content"
-                              className="mt-2 w-full rounded-md border border-border px-2 py-1 text-xs"
                             />
-                            <textarea
-                              value={
-                                Array.isArray(sec.items)
-                                  ? sec.items
-                                      .filter((x) => typeof x === "string")
-                                      .join("\n")
-                                  : ""
-                              }
-                              onChange={(e) =>
+                            <PageContentStringListRichText
+                              label="Bullet items"
+                              editorIdPrefix={`legal-section-${idx}-items`}
+                              items={parseJsonStringList(sec.items)}
+                              onChange={(items) =>
                                 updateNestedArray(["sections"], (arr) =>
                                   arr.map((s, i) =>
-                                    i === idx
-                                      ? {
-                                          ...s,
-                                          items: e.target.value
-                                            .split("\n")
-                                            .map((line) => line.trim())
-                                            .filter(Boolean),
-                                        }
-                                      : s,
+                                    i === idx ? { ...s, items } : s,
                                   ),
                                 )
                               }
-                              rows={3}
-                              placeholder="Bullet items (one per line)"
-                              className="mt-2 w-full rounded-md border border-border px-2 py-1 text-xs"
                             />
                           </>
                         )}
@@ -6425,35 +6071,32 @@ export function PageContentForm({ item }: PageContentFormProps) {
               className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm text-slate-900"
             />
           </div>
-          <div>
-            <label className="block text-xs font-semibold uppercase tracking-wide text-slate-600">
-              Apply intro
-            </label>
-            <input
-              type="text"
-              value={quickValues.applyIntro}
-              onChange={(e) => updateJsonField("applyIntro", e.target.value)}
-              placeholder="Applications page helper text"
-              className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm text-slate-900"
-            />
-          </div>
         </div>
-        <textarea
-          id="contentJson"
-          name="contentJson"
-          value={jsonText}
-          onChange={(e) => setJsonText(e.target.value)}
-          rows={18}
-          className="mt-1 w-full rounded-lg border border-border px-4 py-2 font-mono text-sm text-slate-900"
-          placeholder='{"heroImage":"media-...","intro":"..."}'
-        />
-        <p className="mt-1 text-xs text-slate-500">
-          Edit extra fields and media links here when needed. Use a media ID
-          such as <code>media-…</code> or a path like <code>/uploads/…</code>.
-        </p>
-        {jsonError ? (
-          <p className="mt-2 text-xs text-red-600">{jsonError}</p>
-        ) : null}
+        <details className="group mt-6 rounded-lg border border-border bg-slate-50/80">
+          <summary className="cursor-pointer list-none px-4 py-3 text-sm font-medium text-slate-700 marker:content-none [&::-webkit-details-marker]:hidden">
+            <span className="inline-flex items-center gap-2">
+              <ChevronRight className="h-4 w-4 transition-transform group-open:rotate-90" />
+              Advanced: raw JSON (optional)
+            </span>
+          </summary>
+          <div className="border-t border-border px-4 pb-4 pt-2">
+            <textarea
+              id="contentJson"
+              name="contentJson"
+              value={jsonText}
+              onChange={(e) => setJsonText(e.target.value)}
+              rows={18}
+              className="mt-1 w-full rounded-lg border border-border px-4 py-2 font-mono text-sm text-slate-900"
+              placeholder='{"heroImage":"media-...","intro":"..."}'
+            />
+            <p className="mt-1 text-xs text-slate-500">
+              For developers only. Visual fields above update this JSON automatically on save.
+            </p>
+            {jsonError ? (
+              <p className="mt-2 text-xs text-red-600">{jsonError}</p>
+            ) : null}
+          </div>
+        </details>
       </div>
 
       <AdminFormStickyActions>

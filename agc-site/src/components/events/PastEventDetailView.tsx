@@ -9,6 +9,7 @@ import type {
 } from "@/lib/content";
 import { eventsContent, siteConfig } from "@/data/content";
 import { HomeScrollReveal } from "@/components/home/HomeScrollReveal";
+import { RichTextContent } from "@/components/RichTextContent";
 import { getYouTubeEmbedSrc } from "@/lib/youtube-embed";
 import { preferUnoptimizedImage } from "@/lib/image-delivery";
 
@@ -272,9 +273,10 @@ export function PastEventDetailView({
             ) : null}
 
             {event.description?.trim() ? (
-              <div className="prose prose-stone prose-lg mt-12 max-w-none whitespace-pre-line text-black prose-headings:font-semibold prose-a:text-accent-700">
-                {event.description.trim()}
-              </div>
+              <RichTextContent
+                html={event.description}
+                className="prose prose-stone prose-lg mt-12 max-w-none text-black prose-headings:font-semibold prose-a:text-accent-700"
+              />
             ) : null}
 
             {(event.event_type || speakers.length > 0 || agenda.length > 0) && (
@@ -324,9 +326,10 @@ export function PastEventDetailView({
                               {item.title}
                             </span>
                             {item.description ? (
-                              <p className="mt-1 text-sm text-black">
-                                {item.description}
-                              </p>
+                              <RichTextContent
+                                html={item.description}
+                                className="mt-1 text-sm text-black"
+                              />
                             ) : null}
                           </div>
                         </li>

@@ -7,6 +7,7 @@ import { resolveImageUrl } from "@/lib/media";
 import { Button } from "@/components/Button";
 import { getBreadcrumbLabels } from "@/lib/breadcrumbs";
 import { ProgramsCarousel } from "@/components/ProgramsCarousel";
+import { RichTextContent } from "@/components/RichTextContent";
 import { Section } from "@/components/Section";
 
 export const metadata = {
@@ -25,6 +26,9 @@ type ProjectsWorkMerged = typeof workContent.projects & {
   heroImage?: string;
   cards?: ProjectItem[];
 };
+
+const PROJECTS_SECTION_DESCRIPTION =
+  "Our projects are targeted initiatives developed in response to specific governance needs and opportunities. Each project is designed with clear objectives, defined outputs, and measurable outcomes, allowing for focused delivery within particular contexts. These interventions often contribute to broader programme goals while generating practical insights that inform future policy and institutional development.";
 
 export default async function ProjectsPage() {
   const [merged, bc] = await Promise.all([
@@ -78,15 +82,10 @@ export default async function ProjectsPage() {
               <h2 className="font-serif text-[1.85rem] font-semibold tracking-tight text-black sm:text-[2.2rem] lg:text-[2.55rem] lg:leading-tight">
                 Projects
               </h2>
-              <p className="page-prose max-w-none text-black">
-                Our projects are targeted initiatives developed in response to
-                specific governance needs and opportunities. Each project is
-                designed with clear objectives, defined outputs, and measurable
-                outcomes, allowing for focused delivery within particular
-                contexts. These interventions often contribute to broader
-                programme goals while generating practical insights that inform
-                future policy and institutional development.
-              </p>
+              <RichTextContent
+                html={content.description?.trim() || PROJECTS_SECTION_DESCRIPTION}
+                className="max-w-none text-black"
+              />
 
               <ProgramsCarousel programs={projects} />
             </div>

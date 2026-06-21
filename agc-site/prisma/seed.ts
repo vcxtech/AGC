@@ -226,8 +226,8 @@ async function main() {
       contentJson: termsOfService,
     },
     {
-      slug: "our-work-programs",
-      title: "Our Work — Programs",
+      slug: "programs",
+      title: "Programs",
       status: "published",
       contentJson: {
         ...workContent.programs,
@@ -253,8 +253,8 @@ async function main() {
       },
     },
     {
-      slug: "our-work-research",
-      title: "Our Work — Research",
+      slug: "research",
+      title: "Research",
       status: "published",
       contentJson: {
         ...workContent.research,
@@ -262,8 +262,8 @@ async function main() {
       },
     },
     {
-      slug: "our-work-training",
-      title: "Our Work — Training",
+      slug: "training",
+      title: "Capacity Building",
       status: "published",
       contentJson: {
         ...workContent.training,
@@ -271,8 +271,8 @@ async function main() {
       },
     },
     {
-      slug: "our-work-projects",
-      title: "Our Work — Projects",
+      slug: "projects",
+      title: "Projects",
       status: "published",
       contentJson: {
         ...workContent.projects,
@@ -280,11 +280,20 @@ async function main() {
       },
     },
     {
-      slug: "our-work-advisory",
-      title: "Our Work — Advisory",
+      slug: "advisory",
+      title: "Advisory",
       status: "published",
       contentJson: {
         ...workContent.advisory,
+        heroImage: "/uploads/placeholder.svg",
+      },
+    },
+    {
+      slug: "our-work-partnership",
+      title: "Partnership",
+      status: "published",
+      contentJson: {
+        ...workContent.partnership,
         heroImage: "/uploads/placeholder.svg",
       },
     },

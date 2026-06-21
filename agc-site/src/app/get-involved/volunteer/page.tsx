@@ -6,6 +6,7 @@ import { Button } from "@/components/Button";
 import { getMergedPageContent } from "@/lib/page-content";
 import { resolveImageUrl } from "@/lib/media";
 import { getSiteSettings } from "@/lib/site-settings";
+import { RichTextContent } from "@/components/RichTextContent";
 
 export const metadata = {
   title: "Volunteer",
@@ -139,10 +140,8 @@ export default async function VolunteerPage() {
                 <h2 className="mt-3 font-serif text-[1.85rem] font-semibold tracking-tight text-black sm:text-[2.2rem] lg:text-[2.55rem] lg:leading-tight">
                   {sectionHeading}
                 </h2>
-                <p className="mt-4 page-prose text-[1.08rem] leading-relaxed">
-                  {intro}
-                </p>
-                <p className="mt-6 page-prose">{description}</p>
+                <RichTextContent html={intro} className="mt-4 text-[1.08rem] leading-relaxed" />
+                <RichTextContent html={description} className="mt-6" />
               </div>
               <div className="self-start">
                 <div
@@ -178,7 +177,7 @@ export default async function VolunteerPage() {
                     <span className="font-sans text-2xl font-semibold tabular-nums text-accent-800">
                       {String(i + 1).padStart(2, "0")}
                     </span>
-                    <span className="page-prose flex-1 pt-1">{item}</span>
+                    <RichTextContent html={item} className="page-prose flex-1 pt-1" />
                   </li>
                 ))}
               </ul>

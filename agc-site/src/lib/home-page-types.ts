@@ -22,6 +22,8 @@ export type HomePageCms = {
     label: string;
     headline: string;
     paragraphs: string[];
+    /** Rich HTML body when migrated from line-based paragraphs. */
+    bodyHtml?: string;
     name: string;
     role: string;
     /** Legacy; no longer shown when `image` is set. */

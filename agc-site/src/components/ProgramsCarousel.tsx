@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { placeholderImages } from "@/data/images";
+import { RichTextContent } from "@/components/RichTextContent";
 
 type Program = {
   id?: number;
@@ -57,9 +58,10 @@ export function ProgramsCarousel({ programs }: ProgramsCarouselProps) {
             <h2 className="max-w-[18ch] font-serif text-[1.35rem] font-semibold leading-[1.08] text-white sm:max-w-[30ch] sm:text-[2.2rem] lg:text-[2.45rem] xl:text-[2.75rem]">
               {current.title}
             </h2>
-            <p className="mt-3 max-w-[60ch] text-[0.82rem] leading-relaxed text-white/95 sm:mt-5 sm:text-base lg:text-[1.05rem]">
-              {current.description}
-            </p>
+            <RichTextContent
+              html={current.description}
+              className="mt-3 max-w-[60ch] text-[0.82rem] leading-relaxed text-white/95 sm:mt-5 sm:text-base lg:text-[1.05rem] [&_a]:text-white [&_a]:underline"
+            />
           </div>
 
           <div className="flex-1" />

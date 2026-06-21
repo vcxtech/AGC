@@ -1,8 +1,6 @@
-import Image from "next/image";
-import { notFound } from "next/navigation";
 import Link from "next/link";
+import { notFound } from "next/navigation";
 import type { Metadata } from "next";
-import { Calendar, Download } from "lucide-react";
 import { newsContent, fallbackNews } from "@/data/content";
 import { placeholderImages } from "@/data/images";
 import { getNews, getNewsBySlug } from "@/lib/content";
@@ -17,13 +15,15 @@ import {
 } from "@/lib/news";
 import type { CmsNews } from "@/lib/content";
 import { sanitizeHtml } from "@/lib/sanitize";
-import { preferUnoptimizedImage } from "@/lib/image-delivery";
+import { resolveNewsForPublic } from "@/lib/cms-fallback";
 import { getSiteTaxonomy } from "@/lib/site-taxonomy";
 import { normalizeNewsDownloads } from "@/lib/news-downloads";
-import { resolveNewsForPublic } from "@/lib/cms-fallback";
-import { HeroDarkScrim } from "@/components/HeroDarkScrim";
+import { ArticleDetailShell } from "@/components/ArticleDetailShell";
+import { ArticleDownloadSection } from "@/components/ArticleDownloadSection";
 import { NewsArticleShareLinks } from "@/components/NewsArticleShareLinks";
 import { NewsCard } from "@/components/NewsCard";
+import { ARTICLE_PROSE_CLASS } from "@/lib/page-layout";
+import { cn } from "@/lib/utils";
 
 export const revalidate = 60;
 
@@ -177,175 +177,53 @@ export default async function NewsDetailPage({ params }: Props) {
   const tagSlugs = getNewsTagSlugs(item);
 
   return (
-    <article className="min-h-screen bg-white">
-      <div className="relative aspect-[21/9] min-h-[220px] w-full overflow-hidden bg-slate-950">
-        <Image
-          src={imageUrl}
-          alt={item.title}
-          fill
-          unoptimized={preferUnoptimizedImage(imageUrl)}
-          className="object-cover object-center"
-          sizes="100vw"
-          priority
-        />
-        <HeroDarkScrim />
-        <div className="absolute inset-0 flex flex-col justify-end px-4 pb-8 pt-0 sm:px-6 sm:pb-10 lg:px-8 lg:pb-12 xl:px-12 2xl:px-16">
-          <div className="mx-auto w-full max-w-none [text-shadow:0_1px_2px_rgba(0,0,0,0.2),0_2px_14px_rgba(0,0,0,0.22)]">
-            <p className="mb-3 text-[0.7rem] font-semibold uppercase tracking-[0.2em] text-white">
-              {pageCopy.title}
-            </p>
-            <h1 className="font-serif text-3xl font-semibold leading-[1.15] tracking-tight text-white sm:text-4xl lg:text-[2.35rem]">
-              {item.title}
-            </h1>
-            {dateStrHero ? (
-              <p className="mt-4 flex items-center gap-2 text-sm text-white/95">
-                <Calendar className="h-4 w-4 shrink-0 text-white" aria-hidden />
-                {dateStrHero}
-              </p>
-            ) : null}
-          </div>
-        </div>
-      </div>
+    <ArticleDetailShell
+      heroImage={imageUrl}
+      heroImageAlt={item.title}
+      eyebrow={pageCopy.title}
+      title={item.title}
+      dateLabel={dateStrHero}
+    >
+      <div className="grid gap-12 lg:grid-cols-12 lg:gap-14">
+        <div className="min-w-0 lg:col-span-8">
+          <nav
+            aria-label="Breadcrumb"
+            className="mb-10 border-b border-border/90 pb-6 text-sm text-black"
+          >
+            <Link href="/" className="transition-colors hover:text-accent-700">
+              {bc.home}
+            </Link>
+            <span className="mx-2 text-black">/</span>
+            <Link href="/news" className="transition-colors hover:text-accent-700">
+              {bc.news}
+            </Link>
+            <span className="mx-2 text-black">/</span>
+            <span className="line-clamp-1 text-black">{item.title}</span>
+          </nav>
 
-      <div className="relative z-[1] -mt-6 bg-white sm:-mt-10">
-        <div className="mx-auto w-full max-w-none px-4 py-8 sm:px-6 sm:py-10 lg:px-8 lg:py-12 xl:px-12 2xl:px-16">
-          <div className="grid gap-12 lg:grid-cols-12 lg:gap-14">
-            <div className="min-w-0 lg:col-span-8">
-              <nav
-                aria-label="Breadcrumb"
-                className="mb-10 border-b border-border/90 pb-6 text-sm text-black"
-              >
-                <Link
-                  href="/"
-                  className="transition-colors hover:text-accent-700"
-                >
-                  {bc.home}
-                </Link>
-                <span className="mx-2 text-black">/</span>
-                <Link
-                  href="/news"
-                  className="transition-colors hover:text-accent-700"
-                >
-                  {bc.news}
-                </Link>
-                <span className="mx-2 text-black">/</span>
-                <span className="line-clamp-1 text-black">{item.title}</span>
-              </nav>
-
-              {leadHtml ? (
-                <>
-                  <div
-                    className="article-lead text-xl font-medium leading-relaxed text-accent-950 [&_p]:mb-0"
-                    dangerouslySetInnerHTML={{ __html: leadHtml }}
-                  />
-                  <hr className="my-10 border-0 border-t border-border" />
-                </>
-              ) : null}
-
-              {/* <div
-                className="prose prose-lg max-w-4xl
-                  prose-headings:page-heading prose-headings:mt-8 prose-headings:mb-6 prose-headings:text-black prose-headings:font-semibold prose-headings:leading-snug prose-headings:text-left
-                  prose-h1:text-3xl prose-h2:text-2xl prose-h3:text-xl
-                  prose-p:page-prose prose-p:mb-7 prose-p:text-black prose-p:leading-[1.75] prose-p:tracking-normal prose-p:text-justify
-                  prose-a:text-accent-800 prose-a:font-medium prose-a:no-underline hover:prose-a:underline prose-a:decoration-accent-400
-                  prose-strong:text-black prose-strong:font-semibold
-                  prose-em:text-black prose-em:italic
-                  prose-li:text-black prose-li:leading-relaxed prose-li:text-justify
-                  prose-ul:my-6 prose-ol:my-6 prose-li:mb-3
-                  prose-blockquote:border-l-4 prose-blockquote:border-l-accent-600 prose-blockquote:bg-stone-50/80 prose-blockquote:px-6 prose-blockquote:py-4 prose-blockquote:not-italic prose-blockquote:text-black prose-blockquote:text-base prose-blockquote:leading-relaxed prose-blockquote:text-justify
-                  prose-hr:my-8 prose-hr:border-border
-                  prose-code:text-sm prose-code:bg-stone-100 prose-code:px-2 prose-code:py-1 prose-code:rounded prose-code:text-black"
-                dangerouslySetInnerHTML={{ __html: bodyHtml }}
-              /> */}
-              {/* <div
-                className="prose prose-neutral max-w-3xl mx-auto
-                prose-p:text-gray-800
-                prose-p:leading-8
-                prose-p:mb-6
-                prose-p:text-left
-                prose-headings:text-gray-900
-                prose-headings:font-semibold
-                prose-headings:tracking-tight
-                prose-h1:text-4xl
-                prose-h2:text-3xl
-                prose-h3:text-2xl
-                prose-a:text-[#1A2E4C]
-                prose-a:no-underline
-                hover:prose-a:underline
-                prose-strong:text-black
-                prose-blockquote:border-l-4
-                prose-blockquote:border-[#1A2E4C]
-                prose-blockquote:pl-4
-                prose-blockquote:italic
-                prose-img:rounded-xl"
-                dangerouslySetInnerHTML={{ __html: bodyHtml }}
-              /> */}
+          {leadHtml ? (
+            <>
               <div
-                className="prose prose-neutral max-w-3xl mx-auto
-                prose-p:text-gray-800
-                prose-p:leading-8
-                prose-p:mb-6
-                prose-p:text-left
-                prose-headings:text-gray-900
-                prose-headings:font-semibold
-                prose-headings:tracking-tight
-                prose-h1:text-4xl
-                prose-h2:text-3xl
-                prose-h3:text-2xl
-                prose-a:text-[#1A2E4C]
-                prose-a:no-underline
-                hover:prose-a:underline
-                prose-strong:text-black
-                prose-blockquote:border-l-4
-                prose-blockquote:border-[#1A2E4C]
-                prose-blockquote:pl-4
-                prose-blockquote:italic
-                prose-img:rounded-xl
-                
-                /* ADD THESE CLASSES BELOW */
-                [&_p:empty]:min-h-[1.5rem] 
-                [&_p_br]:block 
-                [&_p_br]:content-[''] 
-                [&_p_br]:mt-4"
-                dangerouslySetInnerHTML={{ __html: bodyHtml }}
+                className="article-lead text-xl font-medium leading-relaxed text-accent-950 [&_p]:mb-0"
+                dangerouslySetInnerHTML={{ __html: leadHtml }}
               />
+              <hr className="my-10 border-0 border-t border-border" />
+            </>
+          ) : null}
 
-              {documentDownloads.length > 0 ? (
-                <div className="mt-14 border-t border-border pt-10">
-                  <h3 className="page-heading text-lg text-black">Documents</h3>
-                  <p className="mt-1 text-sm text-black">
-                    Download PDFs and resources linked to this article.
-                  </p>
-                  <ul className="mt-6 space-y-4">
-                    {documentDownloads.map((doc) => (
-                      <li key={`${doc.label}-${doc.href}`}>
-                        <div className="rounded-none border border-border/90 bg-white p-6 shadow-sm sm:p-8">
-                          <h4 className="page-heading text-xl text-black">
-                            {doc.label}
-                          </h4>
-                          {doc.description ? (
-                            <p className="mt-2 page-prose text-[0.98rem] text-black">
-                              {doc.description}
-                            </p>
-                          ) : null}
-                          <a
-                            href={doc.href}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="mt-5 inline-flex items-center gap-2 rounded-none bg-accent-700 px-5 py-3 text-sm font-medium text-white transition-colors hover:bg-accent-800"
-                          >
-                            <Download className="h-4 w-4" aria-hidden />
-                            Download
-                          </a>
-                        </div>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              ) : null}
-            </div>
+          <div
+            className={cn(ARTICLE_PROSE_CLASS)}
+            dangerouslySetInnerHTML={{ __html: bodyHtml }}
+          />
 
-            <aside className="min-w-0 border-t border-border pt-10 lg:col-span-4 lg:border-l lg:border-t-0 lg:border-border lg:pl-10 lg:pt-0">
+          <ArticleDownloadSection
+            heading="Documents"
+            subheading="Download PDFs and resources linked to this article."
+            items={documentDownloads}
+          />
+        </div>
+
+        <aside className="min-w-0 border-t border-border pt-10 lg:col-span-4 lg:border-l lg:border-t-0 lg:border-border lg:pl-10 lg:pt-0">
               <div className="lg:sticky lg:top-28">
                 {dateStrSidebar ? (
                   <p className="text-lg font-bold text-accent-600">
@@ -428,8 +306,6 @@ export default async function NewsDetailPage({ params }: Props) {
               </div>
             </section>
           ) : null}
-        </div>
-      </div>
-    </article>
+    </ArticleDetailShell>
   );
 }

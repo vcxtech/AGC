@@ -84,6 +84,7 @@ model Publication {
   title         String    @db.VarChar(255)
   slug          String?   @unique @db.VarChar(255)
   excerpt       String?   @db.Text
+  content       String?   @db.Text
   types         Json?
   file          String?   @db.VarChar(500)
   image         String?   @db.VarChar(500)

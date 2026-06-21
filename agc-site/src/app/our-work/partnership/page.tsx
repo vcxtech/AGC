@@ -9,6 +9,8 @@ import { getBreadcrumbLabels } from "@/lib/breadcrumbs";
 import { getPartners } from "@/lib/content";
 import { PartnerGrid } from "@/components/our-work/PartnerGrid";
 import { ProgramsCarousel } from "@/components/ProgramsCarousel";
+import { RichTextContent } from "@/components/RichTextContent";
+import { PAGE_GUTTER_CLASS } from "@/lib/page-layout";
 import { Section } from "@/components/Section";
 
 export const metadata = {
@@ -18,6 +20,9 @@ export const metadata = {
 
 type PartnershipCard = { id: number; title: string; description: string };
 type PartnershipWorkMerged = typeof workContent.partnership & { heroImage?: string; cards?: PartnershipCard[] };
+
+const PARTNERSHIP_SECTION_DESCRIPTION =
+  "Partnerships are central to AGC’s approach. We collaborate with regional and international institutions, development partners, academia, civil society, and the private sector to advance shared governance objectives. Through these collaborations, we leverage complementary expertise, expand our reach, and support coordinated responses to governance challenges across different contexts.";
 
 export default async function PartnershipWorkPage() {
   const [merged, bc, partnerRows] = await Promise.all([
@@ -66,14 +71,12 @@ export default async function PartnershipWorkPage() {
 
       <HomeScrollReveal variant="fadeUp" start="top 88%" className="block w-full">
         <Section className="bg-white">
-          <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className={`mx-auto w-full max-w-none ${PAGE_GUTTER_CLASS}`}>
             <div className="space-y-8">
-              <p className="page-prose max-w-none text-black">
-                Partnerships are central to AGC’s approach. We collaborate with regional and international
-                institutions, development partners, academia, civil society, and the private sector to advance shared
-                governance objectives. Through these collaborations, we leverage complementary expertise, expand our
-                reach, and support coordinated responses to governance challenges across different contexts.
-              </p>
+              <RichTextContent
+                html={content.description?.trim() || PARTNERSHIP_SECTION_DESCRIPTION}
+                className="max-w-none text-black"
+              />
 
               <ProgramsCarousel programs={partnershipCards} />
             </div>

@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import { ImagePlus } from "lucide-react";
 import { ImagePicker, type MediaItem } from "@/components/ImagePicker";
+import { CmsRichTextField } from "@/components/admin/CmsRichTextField";
 import { updateAboutSettings } from "./actions";
 import { preferUnoptimizedImage } from "@/lib/image-delivery";
 import { aboutContent as aboutDefaults } from "@/data/content";
@@ -102,6 +103,43 @@ export function AboutSettingsForm({
   const [mediaMap, setMediaMap] = useState<Record<string, string>>({});
   const [draftRestored] = useState(!!initialDraft);
   const [lastSavedAt, setLastSavedAt] = useState<string | null>(null);
+  const [introHtml, setIntroHtml] = useState(
+    initialDraft?.intro ?? content.intro ?? "",
+  );
+  const [descriptionHtml, setDescriptionHtml] = useState(
+    initialDraft?.description ?? content.description ?? "",
+  );
+  const [missionHtml, setMissionHtml] = useState(
+    initialDraft?.mission ?? content.mission ?? "",
+  );
+  const [strategicContentHtml, setStrategicContentHtml] = useState(
+    initialDraft?.strategicContent ?? content.strategicObjectives.content ?? "",
+  );
+  const [strategicPrinciplesHtml, setStrategicPrinciplesHtml] = useState(
+    initialDraft?.strategicPrinciples ??
+      content.strategicObjectives.principles ??
+      "",
+  );
+  const [strategicAgendaHtml, setStrategicAgendaHtml] = useState(
+    initialDraft?.strategicAgenda2063 ??
+      content.strategicObjectives.agenda2063 ??
+      "",
+  );
+  const [partnershipsHtml, setPartnershipsHtml] = useState(
+    initialDraft?.partnershipsText ?? content.partnershipsText ?? "",
+  );
+  const [deliveryBody1Html, setDeliveryBody1Html] = useState(
+    initialDraft?.deliveryBody1 ?? content.deliveryPoints?.[0]?.body ?? "",
+  );
+  const [deliveryBody2Html, setDeliveryBody2Html] = useState(
+    initialDraft?.deliveryBody2 ?? content.deliveryPoints?.[1]?.body ?? "",
+  );
+  const [deliveryBody3Html, setDeliveryBody3Html] = useState(
+    initialDraft?.deliveryBody3 ?? content.deliveryPoints?.[2]?.body ?? "",
+  );
+  const [deliveryBody4Html, setDeliveryBody4Html] = useState(
+    initialDraft?.deliveryBody4 ?? content.deliveryPoints?.[3]?.body ?? "",
+  );
 
   useEffect(() => {
     let mounted = true;
@@ -285,13 +323,28 @@ export function AboutSettingsForm({
           />
           <textarea
             name="leadParagraphs"
-            defaultValue={
-              initialDraft?.leadParagraphs ??
-              (content.leadParagraphs ?? []).join("\n")
-            }
-            rows={6}
-            className="rounded-lg border border-border px-4 py-2"
-            placeholder="Lead paragraphs (one per line)"
+            defaultValue=""
+            className="hidden"
+            aria-hidden
+            tabIndex={-1}
+          />
+          <CmsRichTextField
+            label="Lead copy (primary)"
+            name="intro"
+            editorId="about-intro"
+            initialHtml={introHtml}
+            onHtmlChange={setIntroHtml}
+            hint="Main “Who we are” paragraphs — headings and lists supported."
+            placeholder="Describe who AGC is and what you do…"
+          />
+          <CmsRichTextField
+            label="Supporting copy (optional)"
+            name="description"
+            editorId="about-description"
+            initialHtml={descriptionHtml}
+            onHtmlChange={setDescriptionHtml}
+            hint="Additional context shown after the lead copy."
+            placeholder="Optional second block…"
           />
           <div>
             {/* <div className="flex gap-2">
@@ -323,6 +376,58 @@ export function AboutSettingsForm({
               </div>
             ) : null}
           </div>
+        </div>
+      </section>
+
+      <section className="rounded-2xl border border-border bg-white p-6 shadow-sm">
+        <h2 className="font-serif text-lg font-semibold text-slate-900">
+          Mission and strategic objectives
+        </h2>
+        <p className="mt-1 text-sm text-slate-600">
+          Shown on the public About page below the lead copy.
+        </p>
+        <div className="mt-4 grid gap-4">
+          <CmsRichTextField
+            label="Mission"
+            name="mission"
+            editorId="about-mission"
+            initialHtml={missionHtml}
+            onHtmlChange={setMissionHtml}
+            placeholder="Our mission is…"
+          />
+          <input
+            name="strategicTitle"
+            defaultValue={
+              initialDraft?.strategicTitle ??
+              content.strategicObjectives.title ??
+              ""
+            }
+            className="rounded-lg border border-border px-4 py-2"
+            placeholder="Strategic objectives heading"
+          />
+          <CmsRichTextField
+            label="Strategic objectives — overview"
+            name="strategicContent"
+            editorId="about-strategic-content"
+            initialHtml={strategicContentHtml}
+            onHtmlChange={setStrategicContentHtml}
+          />
+          <CmsRichTextField
+            label="Principles"
+            name="strategicPrinciples"
+            editorId="about-strategic-principles"
+            initialHtml={strategicPrinciplesHtml}
+            onHtmlChange={setStrategicPrinciplesHtml}
+            compact
+          />
+          <CmsRichTextField
+            label="Agenda 2063 alignment"
+            name="strategicAgenda2063"
+            editorId="about-strategic-agenda"
+            initialHtml={strategicAgendaHtml}
+            onHtmlChange={setStrategicAgendaHtml}
+            compact
+          />
         </div>
       </section>
 
@@ -392,15 +497,30 @@ export function AboutSettingsForm({
                   className="rounded-lg border border-border px-4 py-2"
                   placeholder="Card title"
                 />
-                <textarea
+                <CmsRichTextField
+                  label="Card description"
                   name={`deliveryBody${card.n}`}
-                  defaultValue={
-                    (initialDraft?.[`deliveryBody${card.n}`] ??
-                      card.body) as string
+                  editorId={`about-delivery-body-${card.n}`}
+                  initialHtml={
+                    card.n === 1
+                      ? deliveryBody1Html
+                      : card.n === 2
+                        ? deliveryBody2Html
+                        : card.n === 3
+                          ? deliveryBody3Html
+                          : deliveryBody4Html
                   }
-                  rows={3}
-                  className="rounded-lg border border-border px-4 py-2"
-                  placeholder="Card description"
+                  onHtmlChange={
+                    card.n === 1
+                      ? setDeliveryBody1Html
+                      : card.n === 2
+                        ? setDeliveryBody2Html
+                        : card.n === 3
+                          ? setDeliveryBody3Html
+                          : setDeliveryBody4Html
+                  }
+                  compact
+                  showPreviewToggle={false}
                 />
                 <div className="flex gap-2">
                   <input
@@ -432,14 +552,13 @@ export function AboutSettingsForm({
             className="rounded-lg border border-border px-4 py-2"
             placeholder="Partnerships heading"
           />
-          <textarea
+          <CmsRichTextField
+            label="Partnerships and network"
             name="partnershipsText"
-            defaultValue={
-              initialDraft?.partnershipsText ?? content.partnershipsText ?? ""
-            }
-            rows={5}
-            className="rounded-lg border border-border px-4 py-2"
-            placeholder="Partnerships and network text"
+            editorId="about-partnerships"
+            initialHtml={partnershipsHtml}
+            onHtmlChange={setPartnershipsHtml}
+            placeholder="Describe institutional partnerships…"
           />
         </div>
       </section>

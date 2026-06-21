@@ -7,6 +7,7 @@ import { resolveImageUrl } from "@/lib/media";
 import { Button } from "@/components/Button";
 import { getBreadcrumbLabels } from "@/lib/breadcrumbs";
 import { ProgramsCarousel } from "@/components/ProgramsCarousel";
+import { RichTextContent } from "@/components/RichTextContent";
 import { Section } from "@/components/Section";
 
 export const metadata = {
@@ -25,6 +26,9 @@ type TrainingWorkMerged = typeof workContent.training & {
   heroImage?: string;
   cards?: TrainingItem[];
 };
+
+const TRAINING_SECTION_DESCRIPTION =
+  "AGC delivers training and capacity-building initiatives designed to equip leaders, practitioners, and emerging actors with the skills and knowledge required to navigate governance challenges. Our programmes combine theoretical grounding with practical application, offering participants opportunities to engage with real-world policy issues, develop leadership capabilities, and strengthen their contributions to governance processes.";
 
 const TRAINING_FALLBACK_CARDS: TrainingItem[] = [
   {
@@ -105,15 +109,10 @@ export default async function TrainingWorkPage() {
               <h2 className="font-serif text-[1.85rem] font-semibold tracking-tight text-black sm:text-[2.2rem] lg:text-[2.55rem] lg:leading-tight">
                 {displayTitle}
               </h2>
-              <p className="page-prose max-w-none text-black">
-                AGC delivers training and capacity-building initiatives designed
-                to equip leaders, practitioners, and emerging actors with the
-                skills and knowledge required to navigate governance challenges.
-                Our programmes combine theoretical grounding with practical
-                application, offering participants opportunities to engage with
-                real-world policy issues, develop leadership capabilities, and
-                strengthen their contributions to governance processes.
-              </p>
+              <RichTextContent
+                html={content.description?.trim() || TRAINING_SECTION_DESCRIPTION}
+                className="max-w-none text-black"
+              />
 
               <ProgramsCarousel programs={training} />
             </div>

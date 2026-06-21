@@ -9,6 +9,7 @@ import { AdminFormPreviewLink } from "../_components/AdminFormPreviewLink";
 import { createPublication, updatePublication } from "./actions";
 import type { TaxonomyOption } from "@/data/taxonomy-defaults";
 import { ImagePicker, type MediaItem } from "@/components/ImagePicker";
+import { CmsRichTextField } from "@/components/admin/CmsRichTextField";
 
 type PublicationFormProps = {
   typeOptions: TaxonomyOption[];
@@ -17,6 +18,7 @@ type PublicationFormProps = {
     title: string;
     slug: string | null;
     excerpt: string | null;
+    content?: string | null;
     types: unknown;
     file: string | null;
     image: string | null;
@@ -43,6 +45,8 @@ export function PublicationForm({ typeOptions, item }: PublicationFormProps) {
   const isEdit = !!item;
   const action = isEdit ? updatePublication.bind(null, item.id) : createPublication;
   const [image, setImage] = useState(item?.image ?? "");
+  const [excerptHtml, setExcerptHtml] = useState(item?.excerpt ?? "");
+  const [contentHtml, setContentHtml] = useState(item?.content ?? "");
   const [pickerOpen, setPickerOpen] = useState(false);
 
   const rawTypes = item?.types as string[] | null | undefined;
@@ -76,18 +80,25 @@ export function PublicationForm({ typeOptions, item }: PublicationFormProps) {
         />
       </div>
 
-      <div>
-        <label htmlFor="excerpt" className="block text-sm font-medium text-slate-700">
-          Excerpt
-        </label>
-        <textarea
-          id="excerpt"
-          name="excerpt"
-          defaultValue={item?.excerpt ?? ""}
-          rows={3}
-          className="mt-1 w-full rounded-lg border border-border px-4 py-2 text-slate-900"
-        />
-      </div>
+      <CmsRichTextField
+        label="Excerpt / summary"
+        name="excerpt"
+        editorId="publication-excerpt"
+        initialHtml={excerptHtml}
+        onHtmlChange={setExcerptHtml}
+        hint="Shown as the lead on the publication detail page."
+        compact
+      />
+
+      <CmsRichTextField
+        label="Full article (optional)"
+        name="content"
+        editorId="publication-content"
+        initialHtml={contentHtml}
+        onHtmlChange={setContentHtml}
+        hint="Use when the publication has web copy in addition to or instead of a PDF."
+        placeholder="Write the publication summary or full text…"
+      />
 
       <fieldset className="rounded-lg border border-border p-4">
         <legend className="px-1 text-sm font-medium text-slate-700">Types (select any that apply)</legend>

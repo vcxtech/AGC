@@ -5,11 +5,15 @@ import { cmsStaticOrEmpty, getMergedPageContent } from "@/lib/page-content";
 import { PageHero } from "@/components/PageHero";
 import { HomeScrollReveal } from "@/components/home/HomeScrollReveal";
 import { EventsPageCategoryFilters } from "@/components/events/EventsPageCategoryFilters";
+import { ListingPageSection } from "@/components/layout/ListingPageSection";
+import { EmptyListingCard } from "@/components/layout/EmptyListingCard";
+import { getSiteSettings } from "@/lib/site-settings";
 import type { CmsEvent } from "@/lib/content";
 import { resolveImageUrl } from "@/lib/media";
 import { resolveEventsForPublic } from "@/lib/cms-fallback";
 import { CmsDraftNotice } from "@/components/CmsDraftNotice";
 import { getBreadcrumbLabels } from "@/lib/breadcrumbs";
+import { RichTextContent } from "@/components/RichTextContent";
 
 export const metadata = {
   title: "Events",
@@ -20,30 +24,19 @@ export const metadata = {
 export const revalidate = 30;
 
 function EventsPageIntro({ intro }: { intro: string }) {
-  const paragraphs = intro
-    .split(/\n\n+/)
-    .map((p) => p.trim())
-    .filter(Boolean);
-  if (paragraphs.length === 0) return null;
-  return (
-    <div className="space-y-4">
-      {paragraphs.map((para, i) => (
-        <p key={i} className="page-prose text-lg text-black">
-          {para}
-        </p>
-      ))}
-    </div>
-  );
+  if (!intro.trim()) return null;
+  return <RichTextContent html={intro} className="text-lg text-black" />;
 }
 
 export default async function EventsPage() {
-  const [cmsEvents, merged, bc] = await Promise.all([
+  const [cmsEvents, merged, bc, siteSettings] = await Promise.all([
     getEvents(),
     getMergedPageContent<typeof eventsContent>(
       "events",
       cmsStaticOrEmpty(eventsContent),
     ),
     getBreadcrumbLabels(),
+    getSiteSettings(),
   ]);
   const content = merged as unknown as typeof eventsContent & {
     heroImage?: string;
@@ -88,54 +81,44 @@ export default async function EventsPage() {
         start="top 88%"
         className="block w-full"
       >
-        <section className="w-full border-t border-border/80 bg-white py-8 sm:py-12 lg:py-14">
-          <div className="mx-auto w-full max-w-none px-6 sm:px-8 lg:px-11 xl:px-16 2xl:px-18">
-            <div className="max-w-none space-y-4">
-              <p className="text-sm font-medium text-accent-800">Convenings</p>
-              <h2 className="font-serif text-[1.85rem] font-semibold tracking-tight text-black sm:text-[2.2rem] lg:text-[2.55rem] lg:leading-tight">
-                Events
-              </h2>
-              <EventsPageIntro intro={introBody} />
-              {eventsDraftsOnly && (
-                <CmsDraftNotice
-                  entityLabel="events"
-                  adminHref="/admin/events"
-                />
-              )}
-            </div>
-
-            {events.length > 0 && (
-              <EventsPageCategoryFilters
-                upcoming={upcoming}
-                past={past}
-                tabs={
-                  content.eventCategoryFilters ??
-                  eventsContent.eventCategoryFilters
-                }
-                filterAriaLabel={
-                  content.filterAriaLabel ?? eventsContent.filterAriaLabel
-                }
+        <ListingPageSection>
+          <div className="max-w-none space-y-4">
+            <p className="text-sm font-medium text-accent-800">Convenings</p>
+            <h2 className="font-serif text-[1.85rem] font-semibold tracking-tight text-black sm:text-[2.2rem] lg:text-[2.55rem] lg:leading-tight">
+              Events
+            </h2>
+            <EventsPageIntro intro={introBody} />
+            {eventsDraftsOnly && (
+              <CmsDraftNotice
+                entityLabel="events"
+                adminHref="/admin/events"
               />
             )}
-
-            {events.length === 0 && (
-              <div className="mt-16 page-card p-12 text-center">
-                <div className="mx-auto max-w-none text-left">
-                  <EventsPageIntro intro={introBody} />
-                </div>
-                <p className="page-prose mt-6">
-                  {content.emptyContact ?? eventsContent.emptyContact}
-                </p>
-                <a
-                  href="mailto:programs@africagovernancecentre.org"
-                  className="mt-6 inline-block font-medium text-accent-600 transition-colors hover:text-accent-700"
-                >
-                  programs@africagovernancecentre.org
-                </a>
-              </div>
-            )}
           </div>
-        </section>
+
+          {events.length > 0 && (
+            <EventsPageCategoryFilters
+              upcoming={upcoming}
+              past={past}
+              tabs={
+                content.eventCategoryFilters ??
+                eventsContent.eventCategoryFilters
+              }
+              filterAriaLabel={
+                content.filterAriaLabel ?? eventsContent.filterAriaLabel
+              }
+            />
+          )}
+
+          {events.length === 0 && (
+            <EmptyListingCard
+              className="mt-16 text-left"
+              intro={introBody}
+              programsEmail={siteSettings.email.programs}
+              contactLabel="Contact programs team"
+            />
+          )}
+        </ListingPageSection>
       </HomeScrollReveal>
     </>
   );

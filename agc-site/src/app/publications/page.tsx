@@ -5,7 +5,8 @@ import type { CmsPublication } from "@/lib/content";
 import { PageHero } from "@/components/PageHero";
 import { HomeScrollReveal } from "@/components/home/HomeScrollReveal";
 import { PublicationsListingSection } from "@/components/PublicationsListingSection";
-import { Button } from "@/components/Button";
+import { ListingPageSection } from "@/components/layout/ListingPageSection";
+import { EmptyListingCard } from "@/components/layout/EmptyListingCard";
 import { resolveImageUrl } from "@/lib/media";
 import { getSiteTaxonomy } from "@/lib/site-taxonomy";
 import { cmsStaticOrEmpty, getMergedPageContent } from "@/lib/page-content";
@@ -77,40 +78,26 @@ export default async function PublicationsPage() {
       />
 
       <HomeScrollReveal variant="slideRight" start="top 88%" className="block w-full">
-        <section className="border-t border-border/80 bg-white py-16 sm:py-20 lg:py-24">
-          <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
-            {items.length > 0 ? (
-              <PublicationsListingSection
-                items={itemsWithImages}
-                publicationTypes={taxonomy.publicationTypes}
-                labels={listingLabels}
-                intro={content.intro?.trim() ? <p className="page-prose max-w-2xl">{content.intro}</p> : undefined}
-                draftsNotice={
-                  publicationsDraftsOnly ? (
-                    <CmsDraftNotice entityLabel="publications" adminHref="/admin/publications" />
-                  ) : undefined
-                }
-              />
-            ) : (
-              <div className="page-card max-w-2xl p-8">
-                <p className="page-prose">{content.intro}</p>
-                <p className="page-prose mt-6">
-                  Stay up-to-date with our latest publications. Subscribe to our newsletter or contact{" "}
-                  <a
-                    href={`mailto:${siteSettings.email.programs}`}
-                    className="font-medium text-accent-600 hover:underline"
-                  >
-                    {siteSettings.email.programs}
-                  </a>{" "}
-                  to receive updates.
-                </p>
-                <Button asChild href="/contact" variant="outline" className="mt-6">
-                  Contact Us
-                </Button>
-              </div>
-            )}
-          </div>
-        </section>
+        <ListingPageSection>
+          {items.length > 0 ? (
+            <PublicationsListingSection
+              items={itemsWithImages}
+              publicationTypes={taxonomy.publicationTypes}
+              labels={listingLabels}
+              intro={content.intro?.trim() ? <p className="page-prose max-w-2xl">{content.intro}</p> : undefined}
+              draftsNotice={
+                publicationsDraftsOnly ? (
+                  <CmsDraftNotice entityLabel="publications" adminHref="/admin/publications" />
+                ) : undefined
+              }
+            />
+          ) : (
+            <EmptyListingCard
+              intro={content.intro}
+              programsEmail={siteSettings.email.programs}
+            />
+          )}
+        </ListingPageSection>
       </HomeScrollReveal>
     </>
   );

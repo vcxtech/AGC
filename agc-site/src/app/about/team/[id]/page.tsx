@@ -10,6 +10,8 @@ import { resolveImageUrl } from "@/lib/media";
 import { getSiteSettings } from "@/lib/site-settings";
 import { getBreadcrumbLabels } from "@/lib/breadcrumbs";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
+import { RichTextContent } from "@/components/RichTextContent";
+import { richTextToPlain } from "@/lib/rich-text";
 import { cmsStaticOrEmpty, getMergedPageContent } from "@/lib/page-content";
 import { normalizeTeamTabs } from "@/lib/team-tabs";
 
@@ -25,7 +27,7 @@ function profileSummary(member: Pick<CmsTeamMemberPublic, "name" | "role" | "bio
   }
   const bio = member.bio?.trim();
   if (!bio) return `${member.name} contributes to programmes and partnerships at ${orgName}.`;
-  const firstPara = bio.split(/\n\n+/)[0]?.trim() ?? bio;
+  const firstPara = richTextToPlain(bio).split(/\n\n+/)[0]?.trim() ?? richTextToPlain(bio);
   if (firstPara.length <= 280) return firstPara.endsWith(".") ? firstPara : `${firstPara}.`;
   return `${firstPara.slice(0, 277).trim()}…`;
 }
@@ -37,7 +39,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const member = await getPublishedTeamMember(num);
   if (!member) return { title: "Team" };
   const desc =
-    member.bio?.replace(/\s+/g, " ").trim().slice(0, 155) ??
+    richTextToPlain(member.bio, 155) ||
     `${member.name} — ${member.role ?? "Africa Governance Centre"}`;
   return {
     title: member.name,
@@ -148,16 +150,10 @@ export default async function TeamMemberProfilePage({ params }: Props) {
             <p className="mt-5 font-sans text-lg leading-relaxed text-[#002147] md:text-xl">{summary}</p>
             <hr className="my-10 border-border" />
             {member.bio?.trim() ? (
-              <div className="space-y-5 font-sans text-base leading-[1.75] text-stone-700">
-                {member.bio
-                  .trim()
-                  .split(/\n\n+/)
-                  .map((block) => block.trim())
-                  .filter(Boolean)
-                  .map((para, idx) => (
-                    <p key={idx}>{para}</p>
-                  ))}
-              </div>
+              <RichTextContent
+                html={member.bio}
+                className="font-sans text-base leading-[1.75] text-stone-700"
+              />
             ) : (
               <p className="font-sans text-stone-600">A full biography will appear here when available.</p>
             )}

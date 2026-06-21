@@ -55,8 +55,10 @@ export const appSummitContent = {
     participants: "Heads of State, Ministers & senior party officials",
   },
   registration: {
-    title: "Quick Registration",
+    title: "Secure your spot",
     subtitle: "Secure your spot at APP Summit 2026",
+    footnote:
+      "Sponsorship prospectus available. To partner with APPS 2026, contact the Secretariat via the Programs inbox.",
     cta: "Register Now",
     href: "/contact",
   },

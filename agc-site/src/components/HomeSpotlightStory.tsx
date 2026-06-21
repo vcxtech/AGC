@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import type { HomePageCms } from "@/lib/home-page-data";
 import { preferUnoptimizedImage } from "@/lib/image-delivery";
+import { RichTextContent } from "@/components/RichTextContent";
 
 export function HomeSpotlightStory({
   story,
@@ -17,6 +18,7 @@ export function HomeSpotlightStory({
   const name = s.name?.trim();
   const label = s.label?.trim();
   const paragraphs = s.paragraphs.filter((paragraph) => paragraph.trim());
+  const bodyHtml = s.bodyHtml?.trim();
   const hasAuthorInfo = Boolean(name || role);
 
   return (
@@ -46,10 +48,12 @@ export function HomeSpotlightStory({
                 {headline}
               </h2>
             ) : null} */}
-            <div className="mt-6 space-y-4 text-[17px] font-medium leading-relaxed text-black">
-              {paragraphs.map((p, i) => (
-                <p key={i}>{p}</p>
-              ))}
+            <div className="mt-6 text-[17px] font-medium leading-relaxed text-black">
+              {bodyHtml ? (
+                <RichTextContent html={bodyHtml} />
+              ) : (
+                paragraphs.map((p, i) => <p key={i}>{p}</p>)
+              )}
             </div>
             {hasAuthorInfo ? (
               <div className="mt-8 border-t border-border pt-6">

@@ -49,6 +49,7 @@ export async function createPublication(formData: FormData) {
     title: formData.get("title"),
     slug: formData.get("slug") || undefined,
     excerpt: formData.get("excerpt") || undefined,
+    content: formData.get("content") || undefined,
     types: formData.getAll("types").filter((x): x is string => typeof x === "string"),
     file: formData.get("file") || undefined,
     image: formData.get("image") || undefined,
@@ -62,7 +63,7 @@ export async function createPublication(formData: FormData) {
     redirect(`/admin/publications/new?error=${encodeURIComponent(parsed.error.issues[0]?.message ?? "Invalid input")}`);
   }
 
-  const { title, slug, excerpt, types: typeSlugs, file, image, datePublished, author, status } = parsed.data;
+  const { title, slug, excerpt, content, types: typeSlugs, file, image, datePublished, author, status } = parsed.data;
   const finalSlug = slug?.trim() || slugify(title);
   if (!finalSlug) {
     redirect(`/admin/publications/new?error=${encodeURIComponent("Please provide a valid slug.")}`);
@@ -79,6 +80,7 @@ export async function createPublication(formData: FormData) {
         title,
         slug: finalSlug,
         excerpt: excerpt || null,
+        content: content || null,
         types: types.length > 0 ? (types as unknown as Prisma.InputJsonValue) : Prisma.DbNull,
         file: file || null,
         image: image || null,
@@ -108,6 +110,7 @@ export async function updatePublication(id: number, formData: FormData) {
     title: formData.get("title"),
     slug: formData.get("slug") || undefined,
     excerpt: formData.get("excerpt") || undefined,
+    content: formData.get("content") || undefined,
     types: formData.getAll("types").filter((x): x is string => typeof x === "string"),
     file: formData.get("file") || undefined,
     image: formData.get("image") || undefined,
@@ -121,7 +124,7 @@ export async function updatePublication(id: number, formData: FormData) {
     redirect(`/admin/publications/${id}/edit?error=${encodeURIComponent(parsed.error.issues[0]?.message ?? "Invalid input")}`);
   }
 
-  const { title, slug, excerpt, types: typeSlugs, file, image, datePublished, author, status } = parsed.data;
+  const { title, slug, excerpt, content, types: typeSlugs, file, image, datePublished, author, status } = parsed.data;
   const finalSlug = slug?.trim() || slugify(title);
   if (!finalSlug) {
     redirect(`/admin/publications/${id}/edit?error=${encodeURIComponent("Please provide a valid slug.")}`);
@@ -138,6 +141,7 @@ export async function updatePublication(id: number, formData: FormData) {
         title,
         slug: finalSlug,
         excerpt: excerpt || null,
+        content: content || null,
         types: types.length > 0 ? (types as unknown as Prisma.InputJsonValue) : Prisma.DbNull,
         file: file || null,
         image: image || null,

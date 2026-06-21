@@ -7,6 +7,7 @@ import { getMergedPageContent } from "@/lib/page-content";
 import { resolveImageUrl } from "@/lib/media";
 import { getSiteSettings } from "@/lib/site-settings";
 import { JoinUsInquiryForm } from "@/components/JoinUsInquiryForm";
+import { RichTextContent } from "@/components/RichTextContent";
 
 export const metadata = {
   title: "Work with us",
@@ -65,8 +66,8 @@ export default async function JoinUsPage() {
                 <h2 className="mt-3 font-serif text-[1.85rem] font-semibold tracking-tight text-black sm:text-[2.2rem] lg:text-[2.55rem] lg:leading-tight">
                   {getString("sectionHeading", "Work with us")}
                 </h2>
-                <p className="mt-4 page-prose text-[1.08rem] leading-relaxed">{c.intro}</p>
-                <p className="mt-6 page-prose">{c.description}</p>
+                <RichTextContent html={c.intro} className="mt-4 text-[1.08rem] leading-relaxed" />
+                <RichTextContent html={c.description} className="mt-6" />
 
                 <div className="mt-12">
                   <h2 className="text-xs font-semibold uppercase tracking-wider text-accent-800">
@@ -78,7 +79,7 @@ export default async function JoinUsPage() {
                         <span className="font-sans text-2xl font-semibold tabular-nums text-accent-800">
                           {String(i + 1).padStart(2, "0")}
                         </span>
-                        <span className="page-prose flex-1 pt-1">{item}</span>
+                        <RichTextContent html={item} className="page-prose flex-1 pt-1" />
                       </li>
                     ))}
                   </ul>
@@ -98,9 +99,10 @@ export default async function JoinUsPage() {
                       <p className="text-xs font-semibold uppercase tracking-[0.14em] text-accent-800">
                         {getString("panelEyebrow", "Work with us")}
                       </p>
-                      <p className="mt-2 text-sm text-black">
-                        {getString("panelText", "Join research, policy, programme, and capacity-building teams.")}
-                      </p>
+                      <RichTextContent
+                        html={getString("panelText", "Join research, policy, programme, and capacity-building teams.")}
+                        className="mt-2 text-sm text-black"
+                      />
                     </div>
                   </div>
                 </div>
@@ -121,9 +123,10 @@ export default async function JoinUsPage() {
                 <h2 className="page-heading mt-3 text-2xl text-black">
                   {getString("inquiryHeading", "Tell us you're interested")}
                 </h2>
-                <p className="mt-2 text-black">
-                  {getString("inquiryBody", "Use the form for a structured inquiry or use the contact options on the right.")}
-                </p>
+                <RichTextContent
+                  html={getString("inquiryBody", "Use the form for a structured inquiry or use the contact options on the right.")}
+                  className="mt-2 text-black"
+                />
                 <div className="mt-8">
                   <JoinUsInquiryForm programsEmail={siteSettings.email.programs} />
                 </div>
@@ -132,12 +135,13 @@ export default async function JoinUsPage() {
                 <p className="text-xs font-semibold uppercase tracking-[0.14em] text-accent-800">
                   {getString("quickContactEyebrow", "Quick contact")}
                 </p>
-                <p className="mt-3 text-sm leading-relaxed text-black">
-                  {getString(
+                <RichTextContent
+                  html={getString(
                     "quickContactBody",
                     "We're always interested in people passionate about governance, policy, and Africa's economic transformation."
                   )}
-                </p>
+                  className="mt-3 text-sm leading-relaxed text-black"
+                />
                 <div className="mt-5 flex flex-col gap-3">
                   <Button asChild href={c.contactHref} variant="primary" className="rounded-none! justify-center">
                     {c.cta}

@@ -7,6 +7,8 @@ import { getMergedPageContent } from "@/lib/page-content";
 import { cardImageUrlOrNull } from "@/lib/image-delivery";
 import { resolveImageUrl } from "@/lib/media";
 import { getSiteSettings } from "@/lib/site-settings";
+import { RichTextContent } from "@/components/RichTextContent";
+import { richTextToPlain } from "@/lib/rich-text";
 
 /** Always read fresh CMS + media resolution so hero image updates are not stuck behind static cache. */
 export const dynamic = "force-dynamic";
@@ -65,11 +67,15 @@ export default async function PrivacyPolicyPage() {
         <section className="w-full border-t border-border/80 bg-white py-8 sm:py-12 lg:py-14">
         <div className="mx-auto w-full max-w-none px-6 sm:px-8 lg:px-11 xl:px-16 2xl:px-24">
           <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_340px]">
-          <p className="border-l-[3px] border-accent-600 py-2 pl-5 text-sm page-prose leading-relaxed">
-            This policy describes how we handle personal data when you use our website, register for events, or contact
-              us. For questions, use the details at the end of this page.{" "}
-              {introSectionText}
+          <div className="border-l-[3px] border-accent-600 py-2 pl-5 text-sm page-prose leading-relaxed">
+            <p>
+              This policy describes how we handle personal data when you use our website, register for events, or contact
+              us. For questions, use the details at the end of this page.
             </p>
+            {introSectionText ? (
+              <RichTextContent html={introSectionText} className="mt-3 text-sm" />
+            ) : null}
+          </div>
             <div
               className="relative min-h-[220px] overflow-hidden border border-border/80 bg-black"
               style={{
@@ -128,10 +134,11 @@ export default async function PrivacyPolicyPage() {
               const subs =
                 "subsections" in section && Array.isArray(section.subsections) ? section.subsections : [];
               const lead = "content" in section ? section.content?.trim() ?? "" : "";
+              const leadPlain = richTextToPlain(lead);
               const itemList = "items" in section && Array.isArray(section.items) ? section.items : [];
               const useSubGrid = subs.length >= 2;
               const useItemGrid = itemList.length >= 5;
-              const isCompact = subs.length === 0 && itemList.length === 0 && lead.length < 260;
+              const isCompact = subs.length === 0 && itemList.length === 0 && leadPlain.length < 260;
               const spanFull = subs.length > 0;
 
               return (
@@ -157,7 +164,7 @@ export default async function PrivacyPolicyPage() {
                     }}
                   />
                   <h2 className="page-heading text-xl text-black sm:text-2xl">{section.title}</h2>
-                  {lead ? <p className="mt-4 page-prose text-[0.98rem]">{section.content}</p> : null}
+                  {lead ? <RichTextContent html={lead} className="mt-4 text-[0.98rem]" /> : null}
 
                   {subs.length > 0 ? (
                     <div
@@ -177,7 +184,7 @@ export default async function PrivacyPolicyPage() {
                           className="min-w-0 border border-border/70 bg-stone-50/40 px-5 py-6 sm:px-6"
                         >
                       <h3 className="text-xs font-semibold uppercase tracking-wider text-accent-800">{sub.title}</h3>
-                      <p className="mt-3 page-prose text-[0.95rem]">{sub.content}</p>
+                      <RichTextContent html={sub.content} className="mt-3 text-[0.95rem]" />
                       {sub.items && (
                             <ul className="mt-4 list-none space-y-2 border-l-2 border-border pl-4 text-[0.95rem] text-black">
                               {sub.items.map((item: string) => (
@@ -185,7 +192,10 @@ export default async function PrivacyPolicyPage() {
                                   key={item}
                                   className="relative before:absolute before:-left-3 before:top-2.5 before:h-1 before:w-1 before:rounded-full before:bg-accent-600"
                                 >
-                              {item}
+                              <RichTextContent
+                                html={item}
+                                className="text-[0.95rem] text-black"
+                              />
                             </li>
                           ))}
                         </ul>
@@ -208,7 +218,10 @@ export default async function PrivacyPolicyPage() {
                           key={item}
                           className="relative before:absolute before:-left-3 before:top-2.5 before:h-1 before:w-1 before:rounded-full before:bg-accent-600"
                         >
-                        {item}
+                        <RichTextContent
+                          html={item}
+                          className="text-[0.95rem] text-black"
+                        />
                       </li>
                     ))}
                   </ul>

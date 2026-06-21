@@ -62,7 +62,7 @@ export function Header({
       {showTopbar && <HeaderTopbar siteSettings={siteSettings} />}
 
       <div className="wpo-site-header overflow-visible bg-white">
-        <nav className="w-full overflow-visible px-4 py-0 sm:px-6 lg:px-8 xl:px-12 2xl:px-16">
+        <nav className="w-full overflow-visible px-6 py-0 sm:px-8 lg:px-11 xl:px-16 2xl:px-24">
           <div className="flex min-h-[4rem] flex-wrap items-center justify-between gap-x-3 gap-y-3 overflow-visible py-2 lg:min-h-[3.75rem] lg:flex-nowrap lg:gap-x-4 lg:py-1.5">
             <Link
               href="/"

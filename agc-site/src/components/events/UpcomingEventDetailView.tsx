@@ -6,6 +6,7 @@ import type { CmsEvent } from "@/lib/content";
 import { eventsContent } from "@/data/content";
 import { formatEventTimeRangeLower } from "@/lib/event-display";
 import { HomeScrollReveal } from "@/components/home/HomeScrollReveal";
+import { RichTextContent } from "@/components/RichTextContent";
 import { preferUnoptimizedImage } from "@/lib/image-delivery";
 
 const baseUrl = (
@@ -209,9 +210,10 @@ export function UpcomingEventDetailView({
             ) : null}
 
             {event.description?.trim() ? (
-              <div className="prose prose-stone prose-lg mt-12 max-w-none whitespace-pre-line text-black prose-headings:font-semibold prose-a:text-accent-700">
-                {event.description.trim()}
-              </div>
+              <RichTextContent
+                html={event.description}
+                className="prose prose-stone prose-lg mt-12 max-w-none text-black prose-headings:font-semibold prose-a:text-accent-700"
+              />
             ) : null}
 
             {event.event_type ? (
