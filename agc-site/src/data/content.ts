@@ -994,8 +994,14 @@ export const navLinks = [
   { href: "/contact", label: "Contact" },
 ];
 
-/** Our Work uses tabs on `/our-work` (Programs / Projects / Advisory). No header dropdown. */
-export const ourWorkSubLinks: { href: string; label: string }[] = [];
+/** Our Work header dropdown (desktop + mobile drawer). Main hub still uses tabs on `/our-work`. */
+export const ourWorkSubLinks: { href: string; label: string }[] = [
+  { href: "/our-work/programs", label: "Programs" },
+  { href: "/our-work/projects", label: "Projects" },
+  { href: "/our-work/advisory", label: "Advisory" },
+  { href: "/our-work/research", label: "Research" },
+  { href: "/publications", label: "Publications" },
+];
 
 export const getInvolvedSubLinks = [
   { href: "/get-involved/volunteer", label: "Volunteer" },
