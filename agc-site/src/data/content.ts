@@ -5,12 +5,19 @@ import { placeholderImages } from "@/data/images";
  * Scraped and structured from africagovernancecentre.org
  */
 
+/** Canonical org intro — used on About, homepage, SEO meta, and structured data. */
+export const ORG_INTRO_PARAGRAPHS = [
+  "The Africa Governance Centre (AGC) is an independent policy, advocacy, and research think tank working to strengthen governance systems across Africa. We focus on advancing democratic governance, economic transformation, political cooperation, institutional development, and regulatory strengthening across the continent.",
+  "Since its establishment, the Centre has convened strategic stakeholder dialogues, developed policy recommendations, and supported evidence-based governance reforms at local, regional, and continental levels.",
+] as const;
+
+export const ORG_SEO_DESCRIPTION = ORG_INTRO_PARAGRAPHS[0];
+
 export const siteConfig = {
   name: "Africa Governance Centre",
   logo: "",
   footerLogo: "",
-  tagline:
-    "Research and partnerships for fairer institutions—so everyday people can rely on schools, services, and economies that work.",
+  tagline: ORG_SEO_DESCRIPTION,
   email: {
     programs: "programs@africagovernancecentre.org",
     media: "media@africagovernancecentre.org",

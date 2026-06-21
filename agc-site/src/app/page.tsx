@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { workContent, fallbackNews, fallbackEvents } from "@/data/content";
+import type { Metadata } from "next";
+import { workContent, fallbackNews, fallbackEvents, ORG_SEO_DESCRIPTION } from "@/data/content";
 import { placeholderImages } from "@/data/images";
 import { getHomePageCms } from "@/lib/home-page-data";
 import { getEvents, getNews } from "@/lib/content";
@@ -17,8 +18,25 @@ import { resolveImageUrl } from "@/lib/media";
 import { resolveEventsForPublic, resolveNewsForPublic } from "@/lib/cms-fallback";
 import { CmsDraftNotice } from "@/components/CmsDraftNotice";
 import { HomeScrollReveal } from "@/components/home/HomeScrollReveal";
+import { getSiteSettings } from "@/lib/site-settings";
 
 export const revalidate = 30;
+
+export async function generateMetadata(): Promise<Metadata> {
+  const siteSettings = await getSiteSettings();
+  const description = siteSettings.tagline?.trim() || ORG_SEO_DESCRIPTION;
+  return {
+    description,
+    openGraph: {
+      title: `${siteSettings.name} | Governance Excellence Across Africa`,
+      description,
+      url: "/",
+    },
+    alternates: {
+      canonical: "/",
+    },
+  };
+}
 
 type OurWorkCms = typeof workContent & {
   heroImage?: string;

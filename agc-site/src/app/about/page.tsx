@@ -1,4 +1,4 @@
-import { aboutContent } from "@/data/content";
+import { aboutContent, ORG_INTRO_PARAGRAPHS } from "@/data/content";
 import { placeholderImages } from "@/data/images";
 import { getTeam } from "@/lib/content";
 import { cmsStaticOrEmpty, getMergedPageContent } from "@/lib/page-content";
@@ -19,11 +19,6 @@ export const metadata = {
 };
 
 export const revalidate = 60;
-
-const ABOUT_LEAD_PARAGRAPHS = [
-  "The Africa Governance Centre (AGC) is an independent policy, advocacy, and research think tank working to strengthen governance systems across Africa. We focus on advancing democratic governance, economic transformation, political cooperation, institutional development, and regulatory strengthening across the continent.",
-  "Since its establishment, the Centre has convened strategic stakeholder dialogues, developed policy recommendations, and supported evidence-based governance reforms at local, regional, and continental levels.",
-];
 
 const ABOUT_DELIVERY_POINTS = [
   {
@@ -126,7 +121,7 @@ export default async function AboutPage() {
       ? (contentMap.leadParagraphs as string[]).filter(
           (item) => item.trim().length > 0,
         )
-      : ABOUT_LEAD_PARAGRAPHS;
+      : ORG_INTRO_PARAGRAPHS;
   const partnershipsText =
     typeof contentMap.partnershipsText === "string" &&
     contentMap.partnershipsText.trim().length > 0

@@ -40,9 +40,11 @@ export async function generateMetadata(): Promise<Metadata> {
       type: "website",
       siteName: siteSettings.name,
       locale: "en",
+      description: siteSettings.tagline,
     },
     twitter: {
       card: "summary_large_image",
+      description: siteSettings.tagline,
     },
   };
 }
