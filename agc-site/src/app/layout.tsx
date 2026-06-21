@@ -24,27 +24,37 @@ const sourceSerif = Source_Serif_4({
   display: "swap",
 });
 
-const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://www.africagovernancecentre.org";
+const baseUrl =
+  process.env.NEXT_PUBLIC_SITE_URL || "https://www.africagovernancecentre.org";
 
 export async function generateMetadata(): Promise<Metadata> {
   const siteSettings = await getSiteSettings();
+  const description = siteSettings.tagline;
+
   return {
     metadataBase: new URL(baseUrl),
     title: {
       default: `${siteSettings.name} | Governance Excellence Across Africa`,
       template: `%s | ${siteSettings.name}`,
     },
-    description: siteSettings.tagline,
-    keywords: ["Africa", "governance", "think tank", "policy", "economic transformation", "capacity building"],
+    description,
+    keywords: [
+      "Africa",
+      "governance",
+      "think tank",
+      "policy",
+      "economic transformation",
+      "capacity building",
+    ],
     openGraph: {
       type: "website",
       siteName: siteSettings.name,
+      description,
       locale: "en",
-      description: siteSettings.tagline,
     },
     twitter: {
       card: "summary_large_image",
-      description: siteSettings.tagline,
+      description,
     },
   };
 }
@@ -55,7 +65,8 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   const siteSettings = await getSiteSettings();
-  const brandLogoSrc = (await resolveImageUrl(siteSettings.logo || undefined)) || "/logo.png";
+  const brandLogoSrc =
+    (await resolveImageUrl(siteSettings.logo || undefined)) || "/logo.png";
   const footerLogoResolved =
     siteSettings.footerLogo?.trim() !== ""
       ? await resolveImageUrl(siteSettings.footerLogo)
@@ -63,7 +74,9 @@ export default async function RootLayout({
   const footerLogoSrc = footerLogoResolved || brandLogoSrc;
   return (
     <html lang="en" className={`${manrope.variable} ${sourceSerif.variable}`}>
-      <body className={`min-h-screen flex flex-col antialiased ${manrope.className}`}>
+      <body
+        className={`min-h-screen flex flex-col antialiased ${manrope.className}`}
+      >
         <a
           href="#main-content"
           className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[100] focus:rounded-lg focus:bg-accent-500 focus:px-4 focus:py-2 focus:text-white focus:outline-none"
@@ -72,8 +85,14 @@ export default async function RootLayout({
         </a>
         <JsonLd siteSettings={siteSettings} />
         <Analytics />
-        <SiteChrome siteSettings={siteSettings} brandLogoSrc={brandLogoSrc} footerLogoSrc={footerLogoSrc}>
-          <main id="main-content" className="flex-1">{children}</main>
+        <SiteChrome
+          siteSettings={siteSettings}
+          brandLogoSrc={brandLogoSrc}
+          footerLogoSrc={footerLogoSrc}
+        >
+          <main id="main-content" className="flex-1">
+            {children}
+          </main>
         </SiteChrome>
       </body>
     </html>

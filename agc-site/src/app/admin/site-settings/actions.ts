@@ -284,6 +284,8 @@ export async function updateSiteSettings(formData: FormData) {
   }
 
   updateTag("site-settings");
+  // Root layout metadata (description, og tags) comes from site settings — invalidate layout, not just "/".
+  revalidatePath("/", "layout");
   revalidatePath("/");
   revalidatePath("/admin");
   revalidatePath("/admin/site-settings");
