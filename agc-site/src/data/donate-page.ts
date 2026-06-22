@@ -53,7 +53,7 @@ export const donatePageContent: DonatePageContent = {
   successMessage:
     "Your donation has been received. A receipt will be sent to your email shortly. Your support strengthens governance research, policy dialogue, and capacity building across Africa.",
   footnote:
-    "Africa Governance Centre is an independent think tank. Donations support our research, convenings, and policy engagement. For questions about giving, contact programs@africagovernancecentre.org.",
+    "Africa Governance Centre is an independent think tank. Donations support our research, convenings, and policy engagement. For questions about giving, contact <a href=\"mailto:secretariat@africagovernancecentre.org\">secretariat@africagovernancecentre.org</a>.",
   impactItems: [
     "Evidence-based policy research and publications",
     "High-level governance dialogues and summits",

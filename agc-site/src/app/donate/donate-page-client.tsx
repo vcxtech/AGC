@@ -1,11 +1,17 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { Heart, Loader2 } from "lucide-react";
+import {
+  BookOpen,
+  GraduationCap,
+  Heart,
+  Loader2,
+  Megaphone,
+  Users,
+} from "lucide-react";
 import { PageHero } from "@/components/PageHero";
 import { HomeScrollReveal } from "@/components/home/HomeScrollReveal";
 import { RichTextContent } from "@/components/RichTextContent";
-import { RichTextListItems } from "@/components/RichTextListItems";
 import type { DonatePageContent } from "@/data/donate-page";
 import type { PublicDonationSettings } from "@/lib/donation-settings";
 import type { SiteSettings } from "@/lib/site-settings";
@@ -19,6 +25,8 @@ declare global {
     PaystackPop?: new () => PaystackPopInstance;
   }
 }
+
+const IMPACT_ICONS = [BookOpen, Users, GraduationCap, Megaphone] as const;
 
 type DonatePageClientProps = {
   content: DonatePageContent;
@@ -204,23 +212,55 @@ export function DonatePageClient({
         <section className="w-full border-t border-border/80 bg-white py-8 sm:py-12 lg:py-14">
           <div className="mx-auto w-full max-w-none px-6 sm:px-8 lg:px-11 xl:px-16 2xl:px-24">
             <div className="grid gap-10 lg:grid-cols-[1fr_1.1fr] lg:gap-14 xl:gap-16">
-              <div>
-                <p className="text-sm font-medium text-accent-800">{content.sectionEyebrow}</p>
-                <h2 className="mt-2 font-serif text-[1.85rem] font-semibold tracking-tight text-black sm:text-[2.2rem] lg:text-[2.55rem] lg:leading-tight">
+              <div className="lg:sticky lg:top-24 lg:self-start">
+                <p className="text-sm font-semibold uppercase tracking-[0.2em] text-accent-800">
+                  {content.sectionEyebrow}
+                </p>
+                <h2 className="mt-3 font-serif text-[1.85rem] font-semibold tracking-tight text-black sm:text-[2.2rem] lg:text-[2.55rem] lg:leading-tight">
                   {content.sectionHeading}
                 </h2>
-                <RichTextContent html={content.intro} className="mt-4 max-w-none text-black" />
+                <RichTextContent
+                  html={content.intro}
+                  className="page-prose mt-5 max-w-none text-black"
+                />
 
                 {content.impactItems?.length ? (
-                  <RichTextListItems
-                    items={content.impactItems}
-                    as="ul"
-                    listClassName="mt-8 space-y-3"
-                    className="text-sm text-slate-800"
-                  />
+                  <div className="mt-10">
+                    <h3 className="text-xs font-semibold uppercase tracking-[0.14em] text-accent-800">
+                      Where your gift goes
+                    </h3>
+                    <ul className="mt-5 grid gap-3 sm:grid-cols-2">
+                      {content.impactItems
+                        .filter((item) => item?.trim())
+                        .map((item, index) => {
+                          const Icon = IMPACT_ICONS[index % IMPACT_ICONS.length];
+                          return (
+                            <li
+                              key={`${index}-${item.slice(0, 24)}`}
+                              className="flex gap-3 border border-border/70 bg-slate-50/80 p-4 transition-colors hover:border-accent-200/70 hover:bg-accent-50/40"
+                            >
+                              <div className="flex h-10 w-10 shrink-0 items-center justify-center bg-accent-100 text-accent-700">
+                                <Icon className="h-5 w-5" strokeWidth={1.75} aria-hidden />
+                              </div>
+                              <RichTextContent
+                                html={item}
+                                className="page-prose flex-1 pt-1.5 text-sm leading-snug text-slate-800"
+                              />
+                            </li>
+                          );
+                        })}
+                    </ul>
+                  </div>
                 ) : null}
 
-                <RichTextContent html={content.footnote} className="mt-8 text-sm text-slate-600" />
+                {content.footnote?.trim() ? (
+                  <div className="mt-10 border-l-4 border-accent-600 bg-slate-50/70 px-5 py-4">
+                    <RichTextContent
+                      html={content.footnote}
+                      className="text-sm leading-relaxed text-slate-700"
+                    />
+                  </div>
+                ) : null}
               </div>
 
               <div className="rounded-none border border-border/80 bg-white p-6 shadow-sm sm:p-8">
