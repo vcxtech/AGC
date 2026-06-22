@@ -19,7 +19,7 @@ export default async function AdminSiteSettingsPage({
     <div>
       <AdminPageHeader
         title="Site Settings"
-        description="Edit global organization details used across public and admin UI (name, contact, socials, metadata)."
+        description="Global organization details used site-wide: address, phone, office hours, emails, logos, and navigation copy. These appear on Contact, Get Involved, footer, map, and form notifications."
       />
       {saved ? (
         <div className="mb-4 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">

@@ -35,7 +35,7 @@ export default async function AdminPagesPage() {
       <div>
         <AdminPageHeader
           title="Page Content"
-          description="Edit hero text, blocks, and settings per page. Draft pages keep built-in defaults on the live site until you publish."
+          description="Edit hero text and page copy per route. Global address, phone, and emails are under Site Settings. Home, About, and Donation gateway have their own admin screens."
         />
         <AdminFormErrorSuspense />
         <AdminFormSuccessSuspense />

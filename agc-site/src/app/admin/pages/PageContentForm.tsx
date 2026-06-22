@@ -108,6 +108,8 @@ export function PageContentForm({ item, donationUnavailableMessage }: PageConten
   const showAboutExtendedFields = item.slug === "about";
   const showSubscribeFields = item.slug === "subscribe";
   const showContactFields = item.slug === "contact";
+  const showNewsFields = item.slug === "news";
+  const showPublicationsFields = item.slug === "publications";
   const showDonateFields = item.slug === "donate";
   const action = updatePageContent.bind(null, item.slug);
   const initialJson = useMemo(
@@ -974,7 +976,8 @@ export function PageContentForm({ item, donationUnavailableMessage }: PageConten
               <a href="/admin/site-settings" className="font-medium text-accent-700 hover:underline">
                 Site Settings
               </a>{" "}
-              (they also appear in the footer and map).
+              (footer, map, get-involved). Form notification emails use the{" "}
+              <strong>Programs email</strong> from Site Settings, not division lines below.
             </p>
             <div className="mt-4 grid gap-4 sm:grid-cols-2">
               <div className="sm:col-span-2">
@@ -1183,6 +1186,220 @@ export function PageContentForm({ item, donationUnavailableMessage }: PageConten
         </>
       ) : null}
 
+      {showNewsFields ? (
+        <>
+          <div className="rounded-xl border border-border bg-slate-50 p-4">
+            <p className="text-sm font-semibold uppercase tracking-wide text-slate-600">
+              News listing helper
+            </p>
+            <p className="mt-1 text-xs text-slate-500">
+              Hero and filter labels for <code className="rounded bg-slate-100 px-0.5">/news</code>.
+              Individual articles are managed under{" "}
+              <a href="/admin/news" className="font-medium text-accent-700 hover:underline">
+                Admin → News
+              </a>
+              . Empty-state contact email uses{" "}
+              <a href="/admin/site-settings" className="font-medium text-accent-700 hover:underline">
+                Site Settings
+              </a>{" "}
+              (Programs email).
+            </p>
+            <div className="mt-4 grid gap-4 sm:grid-cols-2">
+              <div className="sm:col-span-2">
+                <label className="block text-sm font-medium text-slate-700">Hero image</label>
+                <div className="mt-1 flex gap-2">
+                  <input
+                    type="text"
+                    value={quickValues.heroImage}
+                    onChange={(e) => updateJsonField("heroImage", e.target.value)}
+                    className="w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
+                    placeholder="media-... or /uploads/..."
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setPickerTarget("heroImage")}
+                    className="inline-flex shrink-0 items-center gap-1 rounded-md border border-border bg-white px-3 py-2 text-sm text-slate-700 hover:bg-slate-100"
+                    title="Pick from Media Library"
+                  >
+                    <ImagePlus className="h-4 w-4" />
+                    Library
+                  </button>
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700">Hero title</label>
+                <input
+                  type="text"
+                  value={typeof parsedJson.title === "string" ? parsedJson.title : ""}
+                  onChange={(e) => updateJsonField("title", e.target.value)}
+                  className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700">Hero subtitle</label>
+                <input
+                  type="text"
+                  value={typeof parsedJson.subtitle === "string" ? parsedJson.subtitle : ""}
+                  onChange={(e) => updateJsonField("subtitle", e.target.value)}
+                  className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
+                />
+              </div>
+              <div className="sm:col-span-2">
+                <PageContentJsonRichText
+                  label="Listing intro"
+                  editorId={`${item.slug}-intro`}
+                  value={typeof parsedJson.intro === "string" ? parsedJson.intro : ""}
+                  onChange={(html) => updateJsonField("intro", html)}
+                />
+              </div>
+              {(
+                [
+                  ["filterLabel", "Filter toolbar label"],
+                  ["textSearch", "Search placeholder"],
+                  ["theme", "Theme filter label"],
+                  ["region", "Region filter label"],
+                  ["country", "Country filter label"],
+                  ["programme", "Programme filter label"],
+                  ["reset", "Reset button"],
+                  ["previous", "Previous page"],
+                  ["next", "Next page"],
+                  ["allOption", "“All” option label"],
+                ] as const
+              ).map(([key, label]) => (
+                <div key={key}>
+                  <label className="block text-sm font-medium text-slate-700">{label}</label>
+                  <input
+                    type="text"
+                    value={getNestedString(["filters", key])}
+                    onChange={(e) => updateNestedString(["filters", key], e.target.value)}
+                    className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
+                  />
+                </div>
+              ))}
+              <div className="sm:col-span-2">
+                <label className="block text-sm font-medium text-slate-700">
+                  No matches message
+                </label>
+                <input
+                  type="text"
+                  value={getNestedString(["filters", "noMatchesFiltered"])}
+                  onChange={(e) =>
+                    updateNestedString(["filters", "noMatchesFiltered"], e.target.value)
+                  }
+                  className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
+                />
+              </div>
+            </div>
+          </div>
+        </>
+      ) : null}
+
+      {showPublicationsFields ? (
+        <>
+          <div className="rounded-xl border border-border bg-slate-50 p-4">
+            <p className="text-sm font-semibold uppercase tracking-wide text-slate-600">
+              Publications listing helper
+            </p>
+            <p className="mt-1 text-xs text-slate-500">
+              Hero and filter labels for{" "}
+              <code className="rounded bg-slate-100 px-0.5">/publications</code>. Reports and briefs
+              are managed under{" "}
+              <a href="/admin/publications" className="font-medium text-accent-700 hover:underline">
+                Admin → Publications
+              </a>
+              . Publication types are under{" "}
+              <a href="/admin/taxonomy" className="font-medium text-accent-700 hover:underline">
+                Taxonomy
+              </a>
+              .
+            </p>
+            <div className="mt-4 grid gap-4 sm:grid-cols-2">
+              <div className="sm:col-span-2">
+                <label className="block text-sm font-medium text-slate-700">Hero image</label>
+                <div className="mt-1 flex gap-2">
+                  <input
+                    type="text"
+                    value={quickValues.heroImage}
+                    onChange={(e) => updateJsonField("heroImage", e.target.value)}
+                    className="w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
+                    placeholder="media-... or /uploads/..."
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setPickerTarget("heroImage")}
+                    className="inline-flex shrink-0 items-center gap-1 rounded-md border border-border bg-white px-3 py-2 text-sm text-slate-700 hover:bg-slate-100"
+                    title="Pick from Media Library"
+                  >
+                    <ImagePlus className="h-4 w-4" />
+                    Library
+                  </button>
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700">Hero title</label>
+                <input
+                  type="text"
+                  value={typeof parsedJson.title === "string" ? parsedJson.title : ""}
+                  onChange={(e) => updateJsonField("title", e.target.value)}
+                  className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700">Hero subtitle</label>
+                <input
+                  type="text"
+                  value={typeof parsedJson.subtitle === "string" ? parsedJson.subtitle : ""}
+                  onChange={(e) => updateJsonField("subtitle", e.target.value)}
+                  className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
+                />
+              </div>
+              <div className="sm:col-span-2">
+                <PageContentJsonRichText
+                  label="Listing intro"
+                  editorId={`${item.slug}-intro`}
+                  value={typeof parsedJson.intro === "string" ? parsedJson.intro : ""}
+                  onChange={(html) => updateJsonField("intro", html)}
+                />
+              </div>
+              {(
+                [
+                  ["filterLabel", "Filter toolbar label"],
+                  ["textSearch", "Search placeholder"],
+                  ["publicationType", "Type filter label"],
+                  ["reset", "Reset button"],
+                  ["previous", "Previous page"],
+                  ["next", "Next page"],
+                  ["allOption", "“All” option label"],
+                ] as const
+              ).map(([key, label]) => (
+                <div key={key}>
+                  <label className="block text-sm font-medium text-slate-700">{label}</label>
+                  <input
+                    type="text"
+                    value={getNestedString(["filters", key])}
+                    onChange={(e) => updateNestedString(["filters", key], e.target.value)}
+                    className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
+                  />
+                </div>
+              ))}
+              <div className="sm:col-span-2">
+                <label className="block text-sm font-medium text-slate-700">
+                  No matches message
+                </label>
+                <input
+                  type="text"
+                  value={getNestedString(["filters", "noMatchesFiltered"])}
+                  onChange={(e) =>
+                    updateNestedString(["filters", "noMatchesFiltered"], e.target.value)
+                  }
+                  className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
+                />
+              </div>
+            </div>
+          </div>
+        </>
+      ) : null}
+
       {showDonateFields ? (
         <>
           <div className="rounded-xl border border-border bg-slate-50 p-4">
@@ -1312,6 +1529,22 @@ export function PageContentForm({ item, donationUnavailableMessage }: PageConten
                     typeof parsedJson.typeDescription === "string" ? parsedJson.typeDescription : ""
                   }
                   onChange={(html) => updateJsonField("typeDescription", html)}
+                />
+              </div>
+              <div className="sm:col-span-2">
+                <label className="block text-sm font-medium text-slate-700">
+                  Payment brands line
+                </label>
+                <input
+                  type="text"
+                  value={
+                    typeof parsedJson.paymentBrandsLine === "string"
+                      ? parsedJson.paymentBrandsLine
+                      : ""
+                  }
+                  onChange={(e) => updateJsonField("paymentBrandsLine", e.target.value)}
+                  placeholder="Mastercard · Visa · Verve · Paystack"
+                  className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
                 />
               </div>
               <div className="sm:col-span-2">
@@ -3253,8 +3486,12 @@ export function PageContentForm({ item, donationUnavailableMessage }: PageConten
             <p className="text-xs text-slate-500">
               Detail pages (<code>/get-involved/join-us</code>,{" "}
               <code>/get-involved/partnership</code>,{" "}
-              <code>/get-involved/volunteer</code>) are now edited in their own
-              entries under <strong>Admin → Page Content</strong>.
+              <code>/get-involved/volunteer</code>) are edited in their own Page Content
+              entries. The email, phone, and address in the bottom “Get in touch” block come from{" "}
+              <a href="/admin/site-settings" className="font-medium text-accent-700 hover:underline">
+                Site Settings
+              </a>
+              , not this page.
             </p>
             <div className="grid gap-3 sm:grid-cols-2">
               <div>

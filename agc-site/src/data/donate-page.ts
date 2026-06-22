@@ -13,6 +13,7 @@ export type DonatePageContent = {
   typeQuestion: string;
   typeLabel: string;
   typeDescription: string;
+  paymentBrandsLine: string;
   amountHeading: string;
   otherAmountLabel: string;
   formTitle: string;
@@ -40,6 +41,7 @@ export const donatePageContent: DonatePageContent = {
   typeLabel: "Single donation (Worldwide)",
   typeDescription:
     "Make a secure one-time gift by card. Payments are processed internationally via Paystack — Mastercard, Visa, and other major cards accepted.",
+  paymentBrandsLine: "Mastercard · Visa · Verve · Paystack",
   amountHeading: "How much would you like to give?",
   otherAmountLabel: "Other amount",
   formTitle: "Your details",

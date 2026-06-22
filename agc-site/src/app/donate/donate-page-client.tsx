@@ -286,7 +286,7 @@ export function DonatePageClient({
                         className="mt-2 text-sm text-slate-700"
                       />
                       <p className="mt-3 text-xs font-medium uppercase tracking-wide text-slate-500">
-                        Mastercard · Visa · Verve · Paystack
+                        {content.paymentBrandsLine}
                       </p>
                     </div>
                   </div>

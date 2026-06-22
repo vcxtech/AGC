@@ -26,6 +26,8 @@ function normalizeDonateContent(merged: Record<string, unknown>) {
     typeQuestion: typeof merged.typeQuestion === "string" ? merged.typeQuestion : d.typeQuestion,
     typeLabel: typeof merged.typeLabel === "string" ? merged.typeLabel : d.typeLabel,
     typeDescription: typeof merged.typeDescription === "string" ? merged.typeDescription : d.typeDescription,
+    paymentBrandsLine:
+      typeof merged.paymentBrandsLine === "string" ? merged.paymentBrandsLine : d.paymentBrandsLine,
     amountHeading: typeof merged.amountHeading === "string" ? merged.amountHeading : d.amountHeading,
     otherAmountLabel: typeof merged.otherAmountLabel === "string" ? merged.otherAmountLabel : d.otherAmountLabel,
     formTitle: typeof merged.formTitle === "string" ? merged.formTitle : d.formTitle,
