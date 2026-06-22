@@ -131,7 +131,7 @@ export function verifyPaystackWebhookSignature(
   return hash === signature;
 }
 
-/** Convert major currency units (e.g. 50 USD) to Paystack subunits (5000). */
+/** Convert major currency units (e.g. 100 GHS) to Paystack subunits (10000 pesewas). */
 export function toSubunits(amount: number): number {
   return Math.round(amount * 100);
 }

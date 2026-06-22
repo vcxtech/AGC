@@ -1,5 +1,4 @@
-import { donatePageContent } from "@/data/donate-page";
-import { placeholderImages } from "@/data/images";
+import { donatePageContent, donateDefaultHeroImage } from "@/data/donate-page";
 import { cmsStaticOrEmpty, getMergedPageContent } from "@/lib/page-content";
 import { getDonationSettings } from "@/lib/donation-settings";
 import { resolveImageUrl } from "@/lib/media";
@@ -57,8 +56,11 @@ export default async function DonatePage({ searchParams }: PageProps) {
     getDonationSettings(),
   ]);
   const content = normalizeDonateContent(raw as Record<string, unknown>);
+  const heroRef = content.heroImage.trim();
+  const heroSource =
+    !heroRef || heroRef === "/uploads/placeholder.svg" ? donateDefaultHeroImage : heroRef;
   const heroImage =
-    (await resolveImageUrl(content.heroImage)) || placeholderImages.contact;
+    (await resolveImageUrl(heroSource)) || donateDefaultHeroImage;
 
   return (
     <DonatePageClient

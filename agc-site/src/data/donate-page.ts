@@ -1,3 +1,7 @@
+/** Default donate hero (Unsplash) — replace via Admin → Page Content → donate. */
+export const donateDefaultHeroImage =
+  "https://images.unsplash.com/photo-1593113598332-cd288d649433?auto=format&fit=crop&w=2400&q=80";
+
 /** Default CMS content for `/donate` (Admin → Page Content → donate). */
 export type DonatePageContent = {
   title: string;
@@ -27,7 +31,7 @@ export type DonatePageContent = {
 export const donatePageContent: DonatePageContent = {
   title: "Support Our Work",
   subtitle: "Make a Donation",
-  heroImage: "/uploads/placeholder.svg",
+  heroImage: donateDefaultHeroImage,
   intro:
     "Your donation to the Africa Governance Centre helps sustain our independence and impact. Join supporters across Africa and around the world who believe in the power of open dialogue, evidence-based policy, and stronger governance institutions.",
   sectionEyebrow: "Give",

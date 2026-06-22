@@ -1,11 +1,11 @@
 /** Default Paystack / donation gateway settings (Admin → Donation settings). */
 export const DEFAULT_DONATION_SETTINGS = {
   enabled: true,
-  currency: "USD",
-  currencySymbol: "$",
-  presetAmounts: [50, 100, 250, 500],
-  minAmount: 5,
-  maxAmount: 50000,
+  currency: "GHS",
+  currencySymbol: "₵",
+  presetAmounts: [100, 250, 500, 1000],
+  minAmount: 10,
+  maxAmount: 500000,
   /** Optional CMS override; env `NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY` takes precedence when set. */
   publicKey: "",
   testMode: false,

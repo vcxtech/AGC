@@ -101,7 +101,7 @@ export function DonationSettingsForm({ settings, paystackStatus, webhookUrl, sav
             <input
               name="currency"
               defaultValue={settings.currency}
-              placeholder="USD"
+              placeholder="GHS"
               className="mt-1 w-full rounded-lg border border-border px-3 py-2"
             />
           </label>
@@ -110,7 +110,7 @@ export function DonationSettingsForm({ settings, paystackStatus, webhookUrl, sav
             <input
               name="currencySymbol"
               defaultValue={settings.currencySymbol}
-              placeholder="$"
+              placeholder="₵"
               className="mt-1 w-full rounded-lg border border-border px-3 py-2"
             />
           </label>

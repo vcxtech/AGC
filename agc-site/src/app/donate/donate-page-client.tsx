@@ -271,7 +271,7 @@ export function DonatePageClient({
                             }`}
                           >
                             {currencySymbol}
-                            {amount.toLocaleString()}
+                            {amount.toLocaleString("en-GH", { maximumFractionDigits: 0 })}
                           </button>
                         );
                       })}
