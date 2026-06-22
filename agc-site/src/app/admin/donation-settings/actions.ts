@@ -17,25 +17,30 @@ function parsePresetAmounts(raw: string): number[] {
     .filter((n) => Number.isFinite(n) && n > 0);
 }
 
+function formString(formData: FormData, key: string): string {
+  const value = formData.get(key);
+  return value === null ? "" : String(value);
+}
+
 export async function updateDonationSettings(formData: FormData) {
   const session = await auth();
   if (!session?.user) redirect("/admin/login");
 
   const parsed = donationSettingsFormSchema.safeParse({
-    enabled: formData.get("enabled"),
-    testMode: formData.get("testMode"),
-    sendReceiptEmail: formData.get("sendReceiptEmail"),
-    currency: formData.get("currency"),
-    currencySymbol: formData.get("currencySymbol"),
-    presetAmounts: formData.get("presetAmounts"),
-    minAmount: formData.get("minAmount"),
-    maxAmount: formData.get("maxAmount"),
-    publicKey: formData.get("publicKey") || undefined,
-    channels: formData.get("channels") || undefined,
-    successMessage: formData.get("successMessage"),
-    cancelledMessage: formData.get("cancelledMessage"),
-    unavailableMessage: formData.get("unavailableMessage"),
-    receiptEmail: formData.get("receiptEmail"),
+    enabled: formData.get("enabled") === "on",
+    testMode: formData.get("testMode") === "on",
+    sendReceiptEmail: formData.get("sendReceiptEmail") === "on",
+    currency: formString(formData, "currency"),
+    currencySymbol: formString(formData, "currencySymbol"),
+    presetAmounts: formString(formData, "presetAmounts"),
+    minAmount: formString(formData, "minAmount"),
+    maxAmount: formString(formData, "maxAmount"),
+    publicKey: formString(formData, "publicKey") || undefined,
+    channels: formString(formData, "channels") || undefined,
+    successMessage: formString(formData, "successMessage"),
+    cancelledMessage: formString(formData, "cancelledMessage"),
+    unavailableMessage: formString(formData, "unavailableMessage"),
+    receiptEmail: formString(formData, "receiptEmail"),
   });
 
   if (!parsed.success) {

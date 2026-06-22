@@ -12,6 +12,7 @@ import {
   newsContent,
   publicationsContent,
   siteConfig,
+  contactContent,
   fallbackEvents,
   fallbackNews,
   fallbackPublications,
@@ -157,10 +158,11 @@ async function main() {
     {
       slug: "contact",
       title: "Contact",
-      heroTitle: "Contact Us",
-      heroSubtitle: "Get in touch with the Africa Governance Centre",
-      intro: "We welcome your inquiries and look forward to hearing from you.",
+      heroTitle: contactContent.title,
+      heroSubtitle: contactContent.subtitle,
+      intro: contactContent.intro,
       status: "published",
+      contentJson: contactContent,
     },
     {
       slug: "donate",

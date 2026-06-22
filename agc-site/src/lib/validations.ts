@@ -433,18 +433,9 @@ export const donationVerifySchema = z.object({
 });
 
 export const donationSettingsFormSchema = z.object({
-  enabled: z
-    .string()
-    .optional()
-    .transform((v) => v === "on" || v === "true"),
-  testMode: z
-    .string()
-    .optional()
-    .transform((v) => v === "on" || v === "true"),
-  sendReceiptEmail: z
-    .string()
-    .optional()
-    .transform((v) => v === "on" || v === "true"),
+  enabled: z.boolean(),
+  testMode: z.boolean(),
+  sendReceiptEmail: z.boolean(),
   currency: z.string().min(3).max(10),
   currencySymbol: z.string().min(1).max(5),
   presetAmounts: z.string().min(1, "At least one preset amount is required").max(500),

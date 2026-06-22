@@ -24,7 +24,7 @@ export const siteConfig = {
     info: "info@africagovernancecentre.org",
   },
   phone: "+233 53 054 5528",
-  address: "32 Hackman Owusu Agyeman Street, East Legon, Accra – Ghana",
+  address: "16 Dei Street, East Legon, Accra - Ghana",
   officeHours: "Monday - Friday: 8:00 AM - 5:00 PM",
   social: {
     twitter: process.env.NEXT_PUBLIC_TWITTER_URL || "",
@@ -552,6 +552,9 @@ export const contactContent = {
   subtitle: "Connect With Us",
   intro:
     "We welcome inquiries from individuals and organizations interested in our work. Please feel free to reach out to us.",
+  sidebarEyebrow: "Direct lines",
+  sidebarHeading: "Get in touch",
+  mapHeading: "Find Us",
   formTitle: "Send us a Message",
   formDescription:
     "Fill out the form below and we'll get back to you as soon as possible.",

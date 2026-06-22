@@ -62,6 +62,7 @@ const fieldVisibilityConfig: Record<
   "get-involved-join-us": { showMainTitle: false, showDescription: false },
   "get-involved-partnership": { showDescription: false, showMainTitle: false },
   subscribe: { showMainTitle: false, showDescription: false },
+  contact: { showMainTitle: false, showDescription: false },
   donate: { showMainTitle: false, showDescription: false },
   "get-involved-volunteer": { showMainTitle: false, showDescription: false },
   news: { showMainTitle: false, showDescription: false },
@@ -106,6 +107,7 @@ export function PageContentForm({ item, donationUnavailableMessage }: PageConten
   const fieldVisibility = getFieldVisibility(item.slug);
   const showAboutExtendedFields = item.slug === "about";
   const showSubscribeFields = item.slug === "subscribe";
+  const showContactFields = item.slug === "contact";
   const showDonateFields = item.slug === "donate";
   const action = updatePageContent.bind(null, item.slug);
   const initialJson = useMemo(
@@ -955,6 +957,227 @@ export function PageContentForm({ item, donationUnavailableMessage }: PageConten
                   </div>
                 </div>
               ))}
+            </div>
+          </div>
+        </>
+      ) : null}
+
+      {showContactFields ? (
+        <>
+          <div className="rounded-xl border border-border bg-slate-50 p-4">
+            <p className="text-sm font-semibold uppercase tracking-wide text-slate-600">
+              Contact page helper
+            </p>
+            <p className="mt-1 text-xs text-slate-500">
+              Copy for <code className="rounded bg-slate-100 px-0.5">/contact</code>.{" "}
+              <strong>Address, phone, and office hours</strong> are global — edit them under{" "}
+              <a href="/admin/site-settings" className="font-medium text-accent-700 hover:underline">
+                Site Settings
+              </a>{" "}
+              (they also appear in the footer and map).
+            </p>
+            <div className="mt-4 grid gap-4 sm:grid-cols-2">
+              <div className="sm:col-span-2">
+                <label className="block text-sm font-medium text-slate-700">Hero image</label>
+                <div className="mt-1 flex gap-2">
+                  <input
+                    type="text"
+                    value={quickValues.heroImage}
+                    onChange={(e) => updateJsonField("heroImage", e.target.value)}
+                    className="w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
+                    placeholder="media-... or /uploads/..."
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setPickerTarget("heroImage")}
+                    className="inline-flex shrink-0 items-center gap-1 rounded-md border border-border bg-white px-3 py-2 text-sm text-slate-700 hover:bg-slate-100"
+                    title="Pick from Media Library"
+                  >
+                    <ImagePlus className="h-4 w-4" />
+                    Library
+                  </button>
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700">Hero title</label>
+                <input
+                  type="text"
+                  value={typeof parsedJson.title === "string" ? parsedJson.title : ""}
+                  onChange={(e) => updateJsonField("title", e.target.value)}
+                  className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700">Hero subtitle</label>
+                <input
+                  type="text"
+                  value={typeof parsedJson.subtitle === "string" ? parsedJson.subtitle : ""}
+                  onChange={(e) => updateJsonField("subtitle", e.target.value)}
+                  className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
+                />
+              </div>
+              <div className="sm:col-span-2">
+                <PageContentJsonRichText
+                  label="Intro paragraph"
+                  editorId={`${item.slug}-intro`}
+                  value={typeof parsedJson.intro === "string" ? parsedJson.intro : ""}
+                  onChange={(html) => updateJsonField("intro", html)}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700">Sidebar eyebrow</label>
+                <input
+                  type="text"
+                  value={
+                    typeof parsedJson.sidebarEyebrow === "string" ? parsedJson.sidebarEyebrow : ""
+                  }
+                  onChange={(e) => updateJsonField("sidebarEyebrow", e.target.value)}
+                  className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700">Sidebar heading</label>
+                <input
+                  type="text"
+                  value={
+                    typeof parsedJson.sidebarHeading === "string" ? parsedJson.sidebarHeading : ""
+                  }
+                  onChange={(e) => updateJsonField("sidebarHeading", e.target.value)}
+                  className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700">Form title</label>
+                <input
+                  type="text"
+                  value={typeof parsedJson.formTitle === "string" ? parsedJson.formTitle : ""}
+                  onChange={(e) => updateJsonField("formTitle", e.target.value)}
+                  className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700">Map section heading</label>
+                <input
+                  type="text"
+                  value={typeof parsedJson.mapHeading === "string" ? parsedJson.mapHeading : ""}
+                  onChange={(e) => updateJsonField("mapHeading", e.target.value)}
+                  className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
+                />
+              </div>
+              <div className="sm:col-span-2">
+                <label className="block text-sm font-medium text-slate-700">Form description</label>
+                <input
+                  type="text"
+                  value={
+                    typeof parsedJson.formDescription === "string" ? parsedJson.formDescription : ""
+                  }
+                  onChange={(e) => updateJsonField("formDescription", e.target.value)}
+                  className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700">Name placeholder</label>
+                <input
+                  type="text"
+                  value={
+                    typeof (parsedJson.formPlaceholders as { name?: string } | undefined)?.name ===
+                    "string"
+                      ? (parsedJson.formPlaceholders as { name: string }).name
+                      : ""
+                  }
+                  onChange={(e) =>
+                    updateJsonObject({
+                      ...parsedJson,
+                      formPlaceholders: {
+                        ...(typeof parsedJson.formPlaceholders === "object" &&
+                        parsedJson.formPlaceholders !== null &&
+                        !Array.isArray(parsedJson.formPlaceholders)
+                          ? parsedJson.formPlaceholders
+                          : {}),
+                        name: e.target.value,
+                      },
+                    })
+                  }
+                  className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700">Email placeholder</label>
+                <input
+                  type="text"
+                  value={
+                    typeof (parsedJson.formPlaceholders as { email?: string } | undefined)?.email ===
+                    "string"
+                      ? (parsedJson.formPlaceholders as { email: string }).email
+                      : ""
+                  }
+                  onChange={(e) =>
+                    updateJsonObject({
+                      ...parsedJson,
+                      formPlaceholders: {
+                        ...(typeof parsedJson.formPlaceholders === "object" &&
+                        parsedJson.formPlaceholders !== null &&
+                        !Array.isArray(parsedJson.formPlaceholders)
+                          ? parsedJson.formPlaceholders
+                          : {}),
+                        email: e.target.value,
+                      },
+                    })
+                  }
+                  className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700">Submit button label</label>
+                <input
+                  type="text"
+                  value={typeof parsedJson.submitLabel === "string" ? parsedJson.submitLabel : ""}
+                  onChange={(e) => updateJsonField("submitLabel", e.target.value)}
+                  className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
+                />
+              </div>
+              <div className="sm:col-span-2">
+                <label className="block text-sm font-medium text-slate-700">
+                  Division contacts (name | email per line)
+                </label>
+                <textarea
+                  rows={4}
+                  value={
+                    Array.isArray(parsedJson.divisions)
+                      ? parsedJson.divisions
+                          .filter(
+                            (d): d is { name: string; email: string } =>
+                              !!d &&
+                              typeof d === "object" &&
+                              typeof (d as { name?: string }).name === "string" &&
+                              typeof (d as { email?: string }).email === "string",
+                          )
+                          .map((d) => `${d.name} | ${d.email}`)
+                          .join("\n")
+                      : ""
+                  }
+                  onChange={(e) => {
+                    const divisions = e.target.value
+                      .split("\n")
+                      .map((line) => line.trim())
+                      .filter(Boolean)
+                      .map((line) => {
+                        const [name, ...emailParts] = line.split("|");
+                        return {
+                          name: (name || "").trim(),
+                          email: emailParts.join("|").trim(),
+                        };
+                      })
+                      .filter((d) => d.name && d.email);
+                    updateJsonField("divisions", divisions);
+                  }}
+                  placeholder={"Programs Division | programs@africagovernancecentre.org"}
+                  className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 font-mono text-sm"
+                />
+                <p className="mt-1 text-xs text-slate-500">
+                  One division per line. Use a pipe between name and email.
+                </p>
+              </div>
             </div>
           </div>
         </>

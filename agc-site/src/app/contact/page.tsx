@@ -26,6 +26,11 @@ function normalizeContactContent(merged: Record<string, unknown>) {
     title: typeof m.title === "string" ? m.title : contactDefaults.title,
     subtitle: typeof m.subtitle === "string" ? m.subtitle : contactDefaults.subtitle,
     intro: typeof m.intro === "string" ? m.intro : contactDefaults.intro,
+    sidebarEyebrow:
+      typeof m.sidebarEyebrow === "string" ? m.sidebarEyebrow : contactDefaults.sidebarEyebrow,
+    sidebarHeading:
+      typeof m.sidebarHeading === "string" ? m.sidebarHeading : contactDefaults.sidebarHeading,
+    mapHeading: typeof m.mapHeading === "string" ? m.mapHeading : contactDefaults.mapHeading,
     formTitle: typeof m.formTitle === "string" ? m.formTitle : contactDefaults.formTitle,
     formDescription: typeof m.formDescription === "string" ? m.formDescription : contactDefaults.formDescription,
     formPlaceholders: {
