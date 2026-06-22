@@ -10,8 +10,8 @@ import { getSiteSettings } from "@/lib/site-settings";
 import { RichTextContent } from "@/components/RichTextContent";
 import { richTextToPlain } from "@/lib/rich-text";
 
-/** Always read fresh CMS + media resolution so hero image updates are not stuck behind static cache. */
-export const dynamic = "force-dynamic";
+/** CMS fields overlay static legal copy; ISR keeps hero media fresh without forcing every request dynamic. */
+export const revalidate = 60;
 
 export const metadata = {
   title: "Terms of Service",

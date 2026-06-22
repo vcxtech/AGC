@@ -7,6 +7,7 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
 import { siteSettingsFormSchema } from "@/lib/validations";
 import { ADMIN_DB_ERROR_MESSAGE } from "@/lib/admin-flash-messages";
+import { SITE_SETTINGS_CACHE_TAG } from "@/lib/cache-tags";
 import { mergeSiteChrome } from "@/lib/site-settings";
 
 function parseOptionalJsonArray(raw: string | undefined, label: string): unknown[] | undefined {
@@ -293,7 +294,7 @@ export async function updateSiteSettings(formData: FormData) {
     redirect(`/admin/site-settings?error=${encodeURIComponent(ADMIN_DB_ERROR_MESSAGE)}`);
   }
 
-  updateTag("site-settings");
+  updateTag(SITE_SETTINGS_CACHE_TAG);
   // Root layout metadata (description, og tags) comes from site settings — invalidate layout, not just "/".
   revalidatePath("/", "layout");
   revalidatePath("/");

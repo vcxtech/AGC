@@ -61,6 +61,7 @@ const nextConfig: NextConfig = {
   },
   images: {
     remotePatterns: buildImageRemotePatterns(),
+    formats: ["image/avif", "image/webp"],
     /**
      * Local paths allowed for `next/image` optimization. When this list is set, anything
      * else under `public/` returns 400 from `/_next/image` (e.g. `/agc-logo.png` in admin).

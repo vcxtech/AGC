@@ -7,9 +7,6 @@ import { Analytics } from "@/components/Analytics";
 import { getSiteSettings } from "@/lib/site-settings";
 import { resolveImageUrl } from "@/lib/media";
 
-/** Header/footer/nav come from DB — avoid stale full-route or CDN HTML on refresh after deploy. */
-export const dynamic = "force-dynamic";
-
 /** Body / UI — geometric sans, strong at small sizes */
 const manrope = Manrope({
   variable: "--font-manrope",

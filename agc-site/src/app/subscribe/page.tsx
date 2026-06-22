@@ -28,6 +28,10 @@ export default async function SubscribePage() {
     ),
   ]);
   const heroImage = (await resolveImageUrl(content.heroImage || "")) || placeholderImages.news;
+  const topics =
+    Array.isArray(content.topics) && content.topics.length > 0
+      ? content.topics
+      : subscribePageContent.topics;
 
   return (
     <>
@@ -65,7 +69,7 @@ export default async function SubscribePage() {
                 />
 
                 <div className="mt-10 grid gap-4 sm:grid-cols-2">
-                  {content.topics.map((item) => (
+                  {topics.map((item) => (
                     <article
                       key={item.title}
                       className="border border-border/70 bg-slate-50 p-4"

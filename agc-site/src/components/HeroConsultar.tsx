@@ -3,7 +3,9 @@
 import type { HomePageCms } from "@/lib/home-page-data";
 import { HOME_HERO_DISPLAY_TAGLINE } from "@/data/content";
 import gsap from "gsap";
+import Image from "next/image";
 import { HeroDarkScrim } from "@/components/HeroDarkScrim";
+import { preferUnoptimizedImage } from "@/lib/image-delivery";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useState, useEffect, useCallback, useLayoutEffect, useRef, useSyncExternalStore } from "react";
 
@@ -46,6 +48,8 @@ export function HeroConsultar({ hero: _hero, sliderImages, backgroundVideoSrc }:
     getPrefersReducedMotionServerSnapshot
   );
   const slides = sliderImages.filter((s) => typeof s === "string" && s.length > 0);
+  const activeSlide = slides[current] ?? slides[0];
+  const videoPoster = slides[0];
   const useVideoBackground =
     Boolean(backgroundVideoSrc?.trim()) && !reducedMotion;
 
@@ -93,7 +97,8 @@ export function HeroConsultar({ hero: _hero, sliderImages, backgroundVideoSrc }:
             muted
             loop
             playsInline
-            preload="metadata"
+            preload="none"
+            poster={videoPoster}
           >
             <source src={backgroundVideoSrc} type="video/mp4" />
           </video>
@@ -104,25 +109,21 @@ export function HeroConsultar({ hero: _hero, sliderImages, backgroundVideoSrc }:
           <div className="absolute inset-0 bg-gradient-to-b from-slate-900 via-slate-950 to-black" />
           <HeroDarkScrim />
         </div>
-      ) : (
-        slides.map((src, i) => (
-          <div
-            key={src + i}
-            className="absolute inset-0 transition-opacity duration-1000 motion-reduce:transition-none"
-            style={{
-              opacity: i === current ? 1 : 0,
-              zIndex: i === current ? 1 : 0,
-            }}
-          >
-            <div
-              className="h-full w-full bg-cover bg-center"
-              style={{ backgroundImage: `url(${src})` }}
-              aria-hidden
-            />
-            <HeroDarkScrim />
-          </div>
-        ))
-      )}
+      ) : activeSlide ? (
+        <div className="absolute inset-0 z-0" aria-hidden>
+          <Image
+            key={activeSlide}
+            src={activeSlide}
+            alt=""
+            fill
+            className="object-cover object-center"
+            sizes="100vw"
+            priority
+            unoptimized={preferUnoptimizedImage(activeSlide)}
+          />
+          <HeroDarkScrim />
+        </div>
+      ) : null}
 
       {/* Main copy — large serif headline only */}
       <div className="relative z-10 mx-auto flex w-full max-w-4xl flex-1 flex-col items-center justify-center px-4 py-24 text-center sm:px-6 sm:py-28 lg:px-8 lg:py-32 xl:py-36">

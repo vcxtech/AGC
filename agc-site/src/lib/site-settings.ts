@@ -1,7 +1,9 @@
 import { cache } from "react";
+import { unstable_cache } from "next/cache";
 import { Prisma } from "@prisma/client";
 import { siteConfig } from "@/data/content";
 import { DEFAULT_SITE_CHROME, type SiteChrome, type SiteNavItem, type SiteNavLink } from "@/data/site-chrome";
+import { SITE_SETTINGS_CACHE_TAG } from "@/lib/cache-tags";
 import { prisma } from "@/lib/db";
 import { resolveImageUrl } from "@/lib/media";
 import { parseBottomNav, parseLinkList, parseNavList, parseWorkThumbs } from "@/lib/site-chrome-parse";
@@ -266,8 +268,8 @@ function isRetryablePrismaError(e: unknown): boolean {
 }
 
 /**
- * Loads settings from DB (retries). No cross-request `unstable_cache` here — that layer could serve
- * stale nav/chrome after deploy or behind CDNs while HTML looked “fresh” on first navigation.
+ * Loads settings from DB (retries). Wrapped in `unstable_cache` for cross-request reuse;
+ * invalidated via `updateTag(SITE_SETTINGS_CACHE_TAG)` when admin saves site settings.
  */
 async function loadSiteSettingsFromDatabase(): Promise<SiteSettings> {
   const maxAttempts = 3;
@@ -291,10 +293,19 @@ async function loadSiteSettingsFromDatabase(): Promise<SiteSettings> {
   throw new Error("getSiteSettings: exhausted retries");
 }
 
+const loadSiteSettingsCached = unstable_cache(
+  loadSiteSettingsFromDatabase,
+  ["agc-site-settings-v1"],
+  {
+    tags: [SITE_SETTINGS_CACHE_TAG],
+    revalidate: 300,
+  },
+);
+
 export const getSiteSettings = cache(async (): Promise<SiteSettings> => {
   if (shouldSkipPrismaCalls()) return DEFAULT_SITE_SETTINGS;
   try {
-    return await loadSiteSettingsFromDatabase();
+    return await loadSiteSettingsCached();
   } catch (e) {
     // Keep public routes renderable in local dev when Postgres is offline.
     markDevDatabaseUnreachable();
