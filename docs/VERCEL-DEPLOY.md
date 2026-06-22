@@ -38,6 +38,7 @@ Set for **Production**, **Preview**, and **Development**:
 | `ADMIN_PASSWORD` | Admin login password |
 | `NEXT_PUBLIC_SUPABASE_URL` | `https://qlvsxrrlalxhiocdzmku.supabase.co` |
 | `NEXT_PUBLIC_SUPABASE_MEDIA_BUCKET` | `media` |
+| `SUPABASE_SERVICE_ROLE_KEY` | Supabase **Project Settings → API → service_role** (server-only; enables admin uploads) |
 | `RESEND_API_KEY` | From Resend (optional but recommended) |
 | `RESEND_FROM_EMAIL` | Verified sender |
 
@@ -89,7 +90,7 @@ Click **Deploy**. First build takes ~3–5 minutes.
 |---------|--------|--------|
 | Public pages + DB | Works | Supabase Postgres |
 | Images / PDFs | Works | Via Supabase Storage URLs |
-| Admin media **upload** | Limited | New uploads need Supabase Storage API (future) — use Coolify admin until then, or upload via Supabase Dashboard |
+| Admin media **upload** | Works | Set `SUPABASE_SERVICE_ROLE_KEY` (writes to Storage + updates `media-library.json`) |
 | Redis rate limit | Optional | Add Upstash Redis + `REDIS_URL`, or use in-memory |
 
 ## Troubleshooting

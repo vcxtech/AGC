@@ -12,6 +12,10 @@ import {
   resolvePublicMediaUrl,
   supabasePublicObjectUrl,
 } from "@/lib/media-public-url";
+import {
+  isSupabaseUploadEnabled,
+  uploadMediaLibraryJson,
+} from "@/lib/supabase-media-storage";
 
 const UPLOADS_DIR = path.join(process.cwd(), "public", "uploads");
 const METADATA_PATH = path.join(process.cwd(), "data", "media-library.json");
@@ -142,6 +146,10 @@ export async function getMediaUrlById(
 }
 
 export async function saveMediaMetadata(items: MediaItem[]): Promise<void> {
+  if (isSupabaseUploadEnabled()) {
+    await uploadMediaLibraryJson(items);
+    return;
+  }
   await ensureDirs();
   await writeFile(METADATA_PATH, JSON.stringify(items, null, 2), "utf-8");
 }

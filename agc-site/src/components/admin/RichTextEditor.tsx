@@ -4,7 +4,6 @@ import type { ReactNode } from "react";
 import { useEditor, EditorContent, type Editor } from "@tiptap/react";
 import Placeholder from "@tiptap/extension-placeholder";
 import StarterKit from "@tiptap/starter-kit";
-import Underline from "@tiptap/extension-underline";
 import {
   Bold,
   Heading2,
@@ -186,7 +185,6 @@ export function RichTextEditor({ initialHtml, onHtmlChange, placeholder, editorI
           },
         },
       }),
-      Underline,
       Placeholder.configure({
         placeholder: placeholder ?? "Write the article body…",
       }),

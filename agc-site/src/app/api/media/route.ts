@@ -20,6 +20,40 @@ import {
   probeRasterDimensions,
 } from "@/lib/image-dimensions";
 import { formatMaxUploadBytes } from "@/lib/media-limits";
+import { isSupabaseMediaEnabled } from "@/lib/media-public-url";
+import {
+  isSupabaseUploadEnabled,
+  uploadSupabaseObject,
+} from "@/lib/supabase-media-storage";
+
+function mediaUploadErrorResponse(err: unknown): NextResponse {
+  console.error("Media upload error:", err);
+  const nodeErr = err as NodeJS.ErrnoException | undefined;
+  if (
+    nodeErr?.code === "EROFS" ||
+    nodeErr?.code === "EACCES" ||
+    nodeErr?.code === "EPERM"
+  ) {
+    return NextResponse.json(
+      {
+        error:
+          "This server cannot write uploads to disk. On Docker/Coolify, mount persistent volumes at /app/public/uploads and /app/data (see docker-compose.yml).",
+      },
+      { status: 503 },
+    );
+  }
+  if (isSupabaseMediaEnabled() && !isSupabaseUploadEnabled()) {
+    return NextResponse.json(
+      {
+        error:
+          "Admin uploads need SUPABASE_SERVICE_ROLE_KEY when using Supabase Storage. Add it in production env vars, or upload files via Supabase Dashboard → Storage → media/uploads/.",
+      },
+      { status: 503 },
+    );
+  }
+  const message = err instanceof Error ? err.message : "Failed to upload";
+  return NextResponse.json({ error: message }, { status: 500 });
+}
 
 function detectMimeFromBuffer(buffer: Buffer): string | null {
   if (
@@ -188,8 +222,6 @@ export async function POST(request: NextRequest) {
     const uploadsDir = getUploadsDir();
     const filePath = path.join(uploadsDir, filename);
 
-    await mkdir(uploadsDir, { recursive: true });
-
     // Probe dimensions only for images
     const fromForm = parseOptionalDimensionsFromForm(
       typeof widthForm === "string" ? widthForm : undefined,
@@ -219,27 +251,39 @@ export async function POST(request: NextRequest) {
       ...(width && height ? { width, height } : {}),
     };
 
+    if (isSupabaseMediaEnabled() && !isSupabaseUploadEnabled()) {
+      return mediaUploadErrorResponse(
+        new Error("Supabase upload credentials are not configured."),
+      );
+    }
+
     try {
-      // Metadata first, then file write; rollback metadata if the binary write fails.
+      // Metadata first, then binary; rollback metadata if the file write fails.
       await addMediaItem(item);
-      await writeFile(filePath, buffer);
+      if (isSupabaseUploadEnabled()) {
+        await uploadSupabaseObject(`uploads/${filename}`, buffer, detectedMime);
+      } else {
+        await mkdir(uploadsDir, { recursive: true });
+        await writeFile(filePath, buffer);
+      }
     } catch (persistErr) {
-      try {
-        await unlink(filePath);
-      } catch {
-        // Ignore if the file was not created.
+      if (!isSupabaseUploadEnabled()) {
+        try {
+          await unlink(filePath);
+        } catch {
+          // Ignore if the file was not created.
+        }
       }
       try {
         await removeMediaItem(id);
       } catch {
         // Best-effort rollback; leave a server log for operators.
       }
-      throw persistErr;
+      return mediaUploadErrorResponse(persistErr);
     }
 
     return NextResponse.json({ item: { ...item, fileMissing: false } });
   } catch (err) {
-    console.error("Media upload error:", err);
-    return NextResponse.json({ error: "Failed to upload" }, { status: 500 });
+    return mediaUploadErrorResponse(err);
   }
 }
