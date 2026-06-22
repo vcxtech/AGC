@@ -3,9 +3,10 @@
 import Image from "next/image";
 import Link from "next/link";
 import gsap from "gsap";
-import { useLayoutEffect, useRef, useSyncExternalStore } from "react";
+import { useLayoutEffect, useRef, useState, useSyncExternalStore } from "react";
 import { HeroDarkScrim } from "@/components/HeroDarkScrim";
-import { preferUnoptimizedImage } from "@/lib/image-delivery";
+import { isPlaceholderHeroSrc, preferUnoptimizedImage } from "@/lib/image-delivery";
+import { cn } from "@/lib/utils";
 
 const REDUCED_MOTION_QUERY = "(prefers-reduced-motion: reduce)";
 
@@ -85,6 +86,13 @@ export function PageHero({
     getPrefersReducedMotionSnapshot,
     getPrefersReducedMotionServerSnapshot
   );
+  const [heroImageReady, setHeroImageReady] = useState(false);
+  const heroSrc =
+    image && !isPlaceholderHeroSrc(image) ? image.trim() : "";
+
+  useLayoutEffect(() => {
+    setHeroImageReady(false);
+  }, [heroSrc]);
 
   useLayoutEffect(() => {
     if (!animateTextIntro || variant === "minimal") return;
@@ -179,7 +187,6 @@ export function PageHero({
   }
 
   if (variant === "compact") {
-    const src = image ?? "";
     const alt = imageAlt ?? "";
     const compactMinH = compactTall
       ? "min-h-[min(64vh,480px)] sm:min-h-[min(68vh,520px)] lg:min-h-[min(72vh,560px)] xl:min-h-[min(84vh,620px)]"
@@ -187,15 +194,23 @@ export function PageHero({
     return (
       <section className={`relative flex ${compactMinH} flex-col justify-center`}>
         <div className="absolute inset-0">
-          {src ? (
+          <div
+            className="absolute inset-0 bg-gradient-to-b from-slate-900 via-slate-950 to-black"
+            aria-hidden
+          />
+          {heroSrc ? (
             <Image
-              src={src}
+              src={heroSrc}
               alt={alt}
               fill
-              className="object-cover object-center"
+              className={cn(
+                "object-cover object-center transition-opacity duration-500 motion-reduce:transition-none",
+                heroImageReady ? "opacity-100" : "opacity-0",
+              )}
               sizes="100vw"
               priority
-              unoptimized={preferUnoptimizedImage(src)}
+              unoptimized={preferUnoptimizedImage(heroSrc)}
+              onLoad={() => setHeroImageReady(true)}
             />
           ) : (
             <div className="relative h-full w-full bg-slate-950" aria-hidden>
@@ -244,7 +259,6 @@ export function PageHero({
   }
 
   /* immersive */
-  const src = image ?? "";
   const alt = imageAlt ?? "";
   const sectionMinH = immersiveTall
     ? "min-h-[min(60vh,440px)] sm:min-h-[min(66vh,500px)] lg:min-h-[min(72vh,560px)] xl:min-h-[min(78vh,620px)]"
@@ -253,16 +267,26 @@ export function PageHero({
   return (
     <section className={`relative flex ${sectionMinH} flex-col justify-center`}>
       <div className="absolute inset-0">
-        {src ? (
-          <Image
-            src={src}
-            alt={alt}
-            fill
-            className="object-cover object-center"
-            sizes="100vw"
-            priority
-            unoptimized={preferUnoptimizedImage(src)}
-          />
+        {heroSrc ? (
+          <>
+            <div
+              className="absolute inset-0 bg-gradient-to-b from-slate-900 via-slate-950 to-black"
+              aria-hidden
+            />
+            <Image
+              src={heroSrc}
+              alt={alt}
+              fill
+              className={cn(
+                "object-cover object-center transition-opacity duration-500 motion-reduce:transition-none",
+                heroImageReady ? "opacity-100" : "opacity-0",
+              )}
+              sizes="100vw"
+              priority
+              unoptimized={preferUnoptimizedImage(heroSrc)}
+              onLoad={() => setHeroImageReady(true)}
+            />
+          </>
         ) : immersiveOverlay === "dark" ? (
           <div className="relative h-full w-full bg-slate-950" aria-hidden>
             <div className="absolute inset-0 bg-gradient-to-b from-slate-900 via-slate-950 to-black" aria-hidden />

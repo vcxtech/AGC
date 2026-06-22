@@ -52,9 +52,17 @@ export function preferUnoptimizedImage(src: string): boolean {
 /** Seeded Programs/Projects used this path as “no custom image”; cards should hide the image strip. */
 export const UPLOADS_PLACEHOLDER_SVG = "/uploads/placeholder.svg";
 
+/** True for the default SVG placeholder or empty refs — hide in heroes instead of flashing “Image placeholder”. */
+export function isPlaceholderHeroSrc(src: string | undefined | null): boolean {
+  const u = src?.trim();
+  if (!u) return true;
+  if (u === UPLOADS_PLACEHOLDER_SVG) return true;
+  return u.endsWith("/placeholder.svg");
+}
+
 /** Use after `resolveImageUrl`: no image area when empty or default placeholder. */
 export function cardImageUrlOrNull(resolved: string | null | undefined): string | null {
   const u = resolved?.trim();
-  if (!u || u === UPLOADS_PLACEHOLDER_SVG) return null;
+  if (!u || isPlaceholderHeroSrc(u)) return null;
   return u;
 }

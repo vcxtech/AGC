@@ -1,5 +1,28 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { preferUnoptimizedImage } from "./image-delivery";
+import {
+  cardImageUrlOrNull,
+  isPlaceholderHeroSrc,
+  preferUnoptimizedImage,
+} from "./image-delivery";
+
+describe("isPlaceholderHeroSrc", () => {
+  it("treats placeholder.svg and empty as placeholder", () => {
+    expect(isPlaceholderHeroSrc("/uploads/placeholder.svg")).toBe(true);
+    expect(isPlaceholderHeroSrc("https://cdn.example.com/uploads/placeholder.svg")).toBe(true);
+    expect(isPlaceholderHeroSrc("")).toBe(true);
+    expect(isPlaceholderHeroSrc(undefined)).toBe(true);
+    expect(isPlaceholderHeroSrc("/uploads/hero.jpg")).toBe(false);
+  });
+});
+
+describe("cardImageUrlOrNull", () => {
+  it("returns null for placeholder paths", () => {
+    expect(cardImageUrlOrNull("/uploads/placeholder.svg")).toBeNull();
+    expect(cardImageUrlOrNull("https://x.supabase.co/storage/uploads/hero.jpg")).toBe(
+      "https://x.supabase.co/storage/uploads/hero.jpg",
+    );
+  });
+});
 
 describe("preferUnoptimizedImage", () => {
   afterEach(() => {

@@ -171,7 +171,7 @@ export default async function HomePage() {
     await Promise.all(
       heroSlidesRaw.map(async (ref) => {
         const url = await resolveImageUrl(ref);
-        return url ?? ref;
+        return cardImageUrlOrNull(url ?? ref) ?? undefined;
       }),
     )
   ).filter((s): s is string => typeof s === "string" && s.length > 0);

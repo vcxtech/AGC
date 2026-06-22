@@ -5,7 +5,8 @@ import { HOME_HERO_DISPLAY_TAGLINE } from "@/data/content";
 import gsap from "gsap";
 import Image from "next/image";
 import { HeroDarkScrim } from "@/components/HeroDarkScrim";
-import { preferUnoptimizedImage } from "@/lib/image-delivery";
+import { isPlaceholderHeroSrc, preferUnoptimizedImage } from "@/lib/image-delivery";
+import { cn } from "@/lib/utils";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useState, useEffect, useCallback, useLayoutEffect, useRef, useSyncExternalStore } from "react";
 
@@ -42,12 +43,15 @@ export function HeroConsultar({ hero: _hero, sliderImages, backgroundVideoSrc }:
   const heroHeadline = _hero?.title?.trim() || HOME_HERO_DISPLAY_TAGLINE;
   const titleRef = useRef<HTMLHeadingElement>(null);
   const [current, setCurrent] = useState(0);
+  const [slideImageReady, setSlideImageReady] = useState(false);
   const reducedMotion = useSyncExternalStore(
     subscribePrefersReducedMotion,
     getPrefersReducedMotionSnapshot,
     getPrefersReducedMotionServerSnapshot
   );
-  const slides = sliderImages.filter((s) => typeof s === "string" && s.length > 0);
+  const slides = sliderImages.filter(
+    (s) => typeof s === "string" && s.length > 0 && !isPlaceholderHeroSrc(s),
+  );
   const activeSlide = slides[current] ?? slides[0];
   const videoPoster = slides[0];
   const useVideoBackground =
@@ -62,6 +66,10 @@ export function HeroConsultar({ hero: _hero, sliderImages, backgroundVideoSrc }:
     if (slides.length <= 1) return;
     setCurrent((c) => (c - 1 + slides.length) % slides.length);
   }, [slides.length]);
+
+  useEffect(() => {
+    setSlideImageReady(false);
+  }, [activeSlide]);
 
   useEffect(() => {
     if (reducedMotion || slides.length <= 1 || useVideoBackground) return;
@@ -91,14 +99,15 @@ export function HeroConsultar({ hero: _hero, sliderImages, backgroundVideoSrc }:
       {/* Video (preferred when configured), else CMS slides, else dark neutral fallback */}
       {useVideoBackground && backgroundVideoSrc ? (
         <div className="absolute inset-0 z-0" aria-hidden>
+          <div className="absolute inset-0 bg-gradient-to-b from-slate-900 via-slate-950 to-black" />
           <video
-            className="h-full w-full object-cover object-center"
+            className="relative h-full w-full object-cover object-center"
             autoPlay
             muted
             loop
             playsInline
-            preload="none"
-            poster={videoPoster}
+            preload="auto"
+            {...(videoPoster ? { poster: videoPoster } : {})}
           >
             <source src={backgroundVideoSrc} type="video/mp4" />
           </video>
@@ -111,15 +120,20 @@ export function HeroConsultar({ hero: _hero, sliderImages, backgroundVideoSrc }:
         </div>
       ) : activeSlide ? (
         <div className="absolute inset-0 z-0" aria-hidden>
+          <div className="absolute inset-0 bg-gradient-to-b from-slate-900 via-slate-950 to-black" />
           <Image
             key={activeSlide}
             src={activeSlide}
             alt=""
             fill
-            className="object-cover object-center"
+            className={cn(
+              "object-cover object-center transition-opacity duration-500 motion-reduce:transition-none",
+              slideImageReady ? "opacity-100" : "opacity-0",
+            )}
             sizes="100vw"
             priority
             unoptimized={preferUnoptimizedImage(activeSlide)}
+            onLoad={() => setSlideImageReady(true)}
           />
           <HeroDarkScrim />
         </div>
