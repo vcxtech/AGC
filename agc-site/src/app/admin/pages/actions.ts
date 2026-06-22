@@ -1,12 +1,14 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, updateTag } from "next/cache";
 import { redirect } from "next/navigation";
 import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { auth } from "@/auth";
 import { pageContentFormSchema } from "@/lib/validations";
 import { ADMIN_DB_ERROR_MESSAGE } from "@/lib/admin-flash-messages";
+import { mergeDonationSettings } from "@/lib/donation-settings";
+import { DEFAULT_DONATION_SETTINGS } from "@/data/donation-settings-defaults";
 
 export async function updatePageContent(slug: string, formData: FormData) {
   const session = await auth();
@@ -70,7 +72,36 @@ export async function updatePageContent(slug: string, formData: FormData) {
     }
   }
 
+  const donationUnavailableRaw = formData.get("donationUnavailableMessage");
+  const donationUnavailableMessage =
+    typeof donationUnavailableRaw === "string" ? donationUnavailableRaw.trim() : "";
+
   try {
+    if (slug === "donate") {
+      const existing = await prisma.pageContent.findUnique({
+        where: { slug: "donation-settings" },
+        select: { contentJson: true },
+      });
+      const merged = mergeDonationSettings(
+        existing?.contentJson ?? DEFAULT_DONATION_SETTINGS,
+      );
+      const unavailableMessage =
+        donationUnavailableMessage || merged.unavailableMessage;
+      const contentJson = { ...merged, unavailableMessage };
+      await prisma.pageContent.upsert({
+        where: { slug: "donation-settings" },
+        create: {
+          slug: "donation-settings",
+          title: "Donation Settings",
+          status: "published",
+          contentJson: contentJson as Prisma.InputJsonValue,
+        },
+        update: {
+          contentJson: contentJson as Prisma.InputJsonValue,
+        },
+      });
+    }
+
     await prisma.pageContent.update({
       where: { slug },
       data: {
@@ -107,6 +138,11 @@ export async function updatePageContent(slug: string, formData: FormData) {
   revalidatePath(`/admin/pages/${slug}/edit`);
   revalidatePath("/");
   revalidatePublicRouteForPageSlug(data.slug);
+  if (slug === "donate") {
+    revalidatePath("/donate");
+    revalidatePath("/admin/donation-settings");
+    updateTag("page-content");
+  }
   redirect(`/admin/pages/${encodeURIComponent(slug)}/edit?saved=1`);
 }
 

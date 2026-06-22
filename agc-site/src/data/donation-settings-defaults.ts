@@ -15,7 +15,7 @@ export const DEFAULT_DONATION_SETTINGS = {
     "Thank you — your donation has been received. A receipt will be sent to your email.",
   cancelledMessage: "Payment was cancelled. You can try again when ready.",
   unavailableMessage:
-    "Online donations are temporarily unavailable. Please contact programs@africagovernancecentre.org.",
+    "Online donations are temporarily unavailable. Please contact secretariat@africagovernancecentre.org.",
   receiptEmail: "programs@africagovernancecentre.org",
   sendReceiptEmail: true,
   /** Shown in admin only — helps configure Paystack dashboard webhook. */

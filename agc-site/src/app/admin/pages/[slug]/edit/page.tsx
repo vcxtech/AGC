@@ -7,6 +7,7 @@ import { AdminPageHeader } from "../../../_components/AdminPageHeader";
 import { PageContentForm } from "../../PageContentForm";
 import { requireAdminSession } from "@/lib/require-admin";
 import { ensureMissingBaselinePageRows } from "@/lib/ensure-missing-page-rows";
+import { getDonationSettings } from "@/lib/donation-settings";
 import { isPrismaUnreachable, markDevDatabaseUnreachable } from "@/lib/skip-db";
 
 export const dynamic = "force-dynamic";
@@ -53,6 +54,9 @@ export default async function AdminPagesEditPage({ params }: Props) {
     });
     if (!item) notFound();
 
+    const donationUnavailableMessage =
+      decodedSlug === "donate" ? (await getDonationSettings()).unavailableMessage : undefined;
+
     return (
       <div>
         <AdminPageHeader
@@ -62,7 +66,10 @@ export default async function AdminPagesEditPage({ params }: Props) {
         <AdminFormErrorSuspense />
         <AdminFormSuccessSuspense />
         <div className="rounded-xl border border-border bg-white p-4 shadow-sm sm:p-8">
-          <PageContentForm item={item} />
+          <PageContentForm
+            item={item}
+            donationUnavailableMessage={donationUnavailableMessage}
+          />
         </div>
       </div>
     );

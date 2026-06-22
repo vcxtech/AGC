@@ -44,6 +44,8 @@ type PageContentFormProps = {
     objectivesAgenda2063: string | null;
     contentJson?: unknown;
   };
+  /** Donate page only — yellow “unavailable” banner (stored under Donation settings). */
+  donationUnavailableMessage?: string;
 };
 
 /** Configuration for which fields should appear for each page */
@@ -100,7 +102,7 @@ function SubmitButton() {
   );
 }
 
-export function PageContentForm({ item }: PageContentFormProps) {
+export function PageContentForm({ item, donationUnavailableMessage }: PageContentFormProps) {
   const fieldVisibility = getFieldVisibility(item.slug);
   const showAboutExtendedFields = item.slug === "about";
   const showSubscribeFields = item.slug === "subscribe";
@@ -973,6 +975,21 @@ export function PageContentForm({ item }: PageContentFormProps) {
               .
             </p>
             <div className="mt-4 grid gap-4 sm:grid-cols-2">
+              <div className="sm:col-span-2">
+                <label className="block text-sm font-medium text-slate-700">
+                  Unavailable banner message
+                </label>
+                <p className="mt-0.5 text-xs text-slate-500">
+                  Amber notice at the top of the donation form when Paystack is not configured (or
+                  donations are disabled). This is not the footnote below the form.
+                </p>
+                <textarea
+                  name="donationUnavailableMessage"
+                  rows={3}
+                  defaultValue={donationUnavailableMessage ?? ""}
+                  className="mt-2 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
+                />
+              </div>
               <div className="sm:col-span-2">
                 <label className="block text-sm font-medium text-slate-700">Hero image</label>
                 <div className="mt-1 flex gap-2">
