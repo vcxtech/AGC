@@ -60,6 +60,7 @@ const fieldVisibilityConfig: Record<
   "get-involved-join-us": { showMainTitle: false, showDescription: false },
   "get-involved-partnership": { showDescription: false, showMainTitle: false },
   subscribe: { showMainTitle: false, showDescription: false },
+  donate: { showMainTitle: false, showDescription: false },
   "get-involved-volunteer": { showMainTitle: false, showDescription: false },
   news: { showMainTitle: false, showDescription: false },
   "our-work": { showMainTitle: false, showDescription: false },
@@ -103,6 +104,7 @@ export function PageContentForm({ item }: PageContentFormProps) {
   const fieldVisibility = getFieldVisibility(item.slug);
   const showAboutExtendedFields = item.slug === "about";
   const showSubscribeFields = item.slug === "subscribe";
+  const showDonateFields = item.slug === "donate";
   const action = updatePageContent.bind(null, item.slug);
   const initialJson = useMemo(
     () => (item.contentJson ? JSON.stringify(item.contentJson, null, 2) : ""),
@@ -951,6 +953,217 @@ export function PageContentForm({ item }: PageContentFormProps) {
                   </div>
                 </div>
               ))}
+            </div>
+          </div>
+        </>
+      ) : null}
+
+      {showDonateFields ? (
+        <>
+          <div className="rounded-xl border border-border bg-slate-50 p-4">
+            <p className="text-sm font-semibold uppercase tracking-wide text-slate-600">
+              Donate page helper
+            </p>
+            <p className="mt-1 text-xs text-slate-500">
+              Copy for <code className="rounded bg-slate-100 px-0.5">/donate</code>. Paystack
+              amounts and gateway are under{" "}
+              <a href="/admin/donation-settings" className="font-medium text-accent-700 hover:underline">
+                Donation settings
+              </a>
+              .
+            </p>
+            <div className="mt-4 grid gap-4 sm:grid-cols-2">
+              <div className="sm:col-span-2">
+                <label className="block text-sm font-medium text-slate-700">Hero image</label>
+                <div className="mt-1 flex gap-2">
+                  <input
+                    type="text"
+                    value={quickValues.heroImage}
+                    onChange={(e) => updateJsonField("heroImage", e.target.value)}
+                    className="w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
+                    placeholder="media-... or /uploads/..."
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setPickerTarget("heroImage")}
+                    className="inline-flex shrink-0 items-center gap-1 rounded-md border border-border bg-white px-3 py-2 text-sm text-slate-700 hover:bg-slate-100"
+                    title="Pick from Media Library"
+                  >
+                    <ImagePlus className="h-4 w-4" />
+                    Library
+                  </button>
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700">Hero title</label>
+                <input
+                  type="text"
+                  value={typeof parsedJson.title === "string" ? parsedJson.title : ""}
+                  onChange={(e) => updateJsonField("title", e.target.value)}
+                  className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700">Hero subtitle</label>
+                <input
+                  type="text"
+                  value={typeof parsedJson.subtitle === "string" ? parsedJson.subtitle : ""}
+                  onChange={(e) => updateJsonField("subtitle", e.target.value)}
+                  className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
+                />
+              </div>
+              <div className="sm:col-span-2">
+                <PageContentJsonRichText
+                  label="Intro paragraph"
+                  editorId={`${item.slug}-intro`}
+                  value={typeof parsedJson.intro === "string" ? parsedJson.intro : ""}
+                  onChange={(html) => updateJsonField("intro", html)}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700">Section eyebrow</label>
+                <input
+                  type="text"
+                  value={
+                    typeof parsedJson.sectionEyebrow === "string" ? parsedJson.sectionEyebrow : ""
+                  }
+                  onChange={(e) => updateJsonField("sectionEyebrow", e.target.value)}
+                  className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700">Section heading</label>
+                <input
+                  type="text"
+                  value={
+                    typeof parsedJson.sectionHeading === "string" ? parsedJson.sectionHeading : ""
+                  }
+                  onChange={(e) => updateJsonField("sectionHeading", e.target.value)}
+                  className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
+                />
+              </div>
+              <div className="sm:col-span-2">
+                <label className="block text-sm font-medium text-slate-700">
+                  Donation type question
+                </label>
+                <input
+                  type="text"
+                  value={
+                    typeof parsedJson.typeQuestion === "string" ? parsedJson.typeQuestion : ""
+                  }
+                  onChange={(e) => updateJsonField("typeQuestion", e.target.value)}
+                  className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700">Type card label</label>
+                <input
+                  type="text"
+                  value={typeof parsedJson.typeLabel === "string" ? parsedJson.typeLabel : ""}
+                  onChange={(e) => updateJsonField("typeLabel", e.target.value)}
+                  className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
+                />
+              </div>
+              <div className="sm:col-span-2">
+                <PageContentJsonRichText
+                  label="Type card description"
+                  editorId={`${item.slug}-type-description`}
+                  value={
+                    typeof parsedJson.typeDescription === "string" ? parsedJson.typeDescription : ""
+                  }
+                  onChange={(html) => updateJsonField("typeDescription", html)}
+                />
+              </div>
+              <div className="sm:col-span-2">
+                <label className="block text-sm font-medium text-slate-700">Amount heading</label>
+                <input
+                  type="text"
+                  value={
+                    typeof parsedJson.amountHeading === "string" ? parsedJson.amountHeading : ""
+                  }
+                  onChange={(e) => updateJsonField("amountHeading", e.target.value)}
+                  className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700">Other amount label</label>
+                <input
+                  type="text"
+                  value={
+                    typeof parsedJson.otherAmountLabel === "string"
+                      ? parsedJson.otherAmountLabel
+                      : ""
+                  }
+                  onChange={(e) => updateJsonField("otherAmountLabel", e.target.value)}
+                  className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700">Form title</label>
+                <input
+                  type="text"
+                  value={typeof parsedJson.formTitle === "string" ? parsedJson.formTitle : ""}
+                  onChange={(e) => updateJsonField("formTitle", e.target.value)}
+                  className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
+                />
+              </div>
+              <div className="sm:col-span-2">
+                <label className="block text-sm font-medium text-slate-700">Form description</label>
+                <input
+                  type="text"
+                  value={
+                    typeof parsedJson.formDescription === "string" ? parsedJson.formDescription : ""
+                  }
+                  onChange={(e) => updateJsonField("formDescription", e.target.value)}
+                  className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700">Submit button label</label>
+                <input
+                  type="text"
+                  value={typeof parsedJson.submitLabel === "string" ? parsedJson.submitLabel : ""}
+                  onChange={(e) => updateJsonField("submitLabel", e.target.value)}
+                  className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700">Success page title</label>
+                <input
+                  type="text"
+                  value={
+                    typeof parsedJson.successTitle === "string" ? parsedJson.successTitle : ""
+                  }
+                  onChange={(e) => updateJsonField("successTitle", e.target.value)}
+                  className="mt-1 w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
+                />
+              </div>
+              <div className="sm:col-span-2">
+                <PageContentJsonRichText
+                  label="Success message"
+                  editorId={`${item.slug}-success-message`}
+                  value={
+                    typeof parsedJson.successMessage === "string" ? parsedJson.successMessage : ""
+                  }
+                  onChange={(html) => updateJsonField("successMessage", html)}
+                />
+              </div>
+              <div className="sm:col-span-2">
+                <PageContentJsonRichText
+                  label="Footnote"
+                  editorId={`${item.slug}-footnote`}
+                  value={typeof parsedJson.footnote === "string" ? parsedJson.footnote : ""}
+                  onChange={(html) => updateJsonField("footnote", html)}
+                />
+              </div>
+              <div className="sm:col-span-2">
+                <PageContentStringListRichText
+                  label="Impact points (left column)"
+                  editorIdPrefix={`${item.slug}-impact-items`}
+                  items={parseJsonStringList(parsedJson.impactItems)}
+                  onChange={(impactItems) => updateJsonObject({ ...parsedJson, impactItems })}
+                />
+              </div>
             </div>
           </div>
         </>

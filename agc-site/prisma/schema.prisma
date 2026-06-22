@@ -255,3 +255,25 @@ model ContactSubmission {
   @@index([createdAt])
   @@map("contact_submissions")
 }
+
+// ============ Donations (Paystack) ============
+
+model Donation {
+  id          String    @id @default(cuid())
+  reference   String    @unique @db.VarChar(100)
+  paystackId  String?   @map("paystack_id") @db.VarChar(100)
+  amount      Int
+  currency    String    @db.VarChar(10)
+  email       String    @db.VarChar(255)
+  fullName    String    @map("full_name") @db.VarChar(255)
+  message     String?   @db.Text
+  status      String    @default("pending") @db.VarChar(50)
+  channel     String?   @db.VarChar(50)
+  paidAt      DateTime? @map("paid_at")
+  createdAt   DateTime  @default(now()) @map("created_at")
+
+  @@index([status])
+  @@index([createdAt])
+  @@index([email])
+  @@map("donations")
+}

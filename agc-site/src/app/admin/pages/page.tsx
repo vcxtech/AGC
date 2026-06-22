@@ -25,7 +25,10 @@ export default async function AdminPagesPage() {
       })
     ).filter(
       (x) =>
-        x.slug !== "site-settings" && x.slug !== "home" && x.slug !== "about",
+        x.slug !== "site-settings" &&
+        x.slug !== "home" &&
+        x.slug !== "about" &&
+        x.slug !== "donation-settings",
     );
 
     return (

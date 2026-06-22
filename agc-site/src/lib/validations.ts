@@ -415,6 +415,44 @@ export const aboutSettingsFormSchema = z.object({
   teamTabsConfig: z.string().max(5000).optional(),
 });
 
+export const donationInitializeSchema = z.object({
+  fullName: z.string().min(1, "Full name is required").max(200),
+  email: z.string().email("Valid email is required"),
+  amount: z.number().positive("Amount must be greater than zero"),
+  message: z.string().max(2000).optional(),
+  website: z.string().max(0).optional(),
+});
+
+export const donationVerifySchema = z.object({
+  reference: z.string().min(1).max(100),
+});
+
+export const donationSettingsFormSchema = z.object({
+  enabled: z
+    .string()
+    .optional()
+    .transform((v) => v === "on" || v === "true"),
+  testMode: z
+    .string()
+    .optional()
+    .transform((v) => v === "on" || v === "true"),
+  sendReceiptEmail: z
+    .string()
+    .optional()
+    .transform((v) => v === "on" || v === "true"),
+  currency: z.string().min(3).max(10),
+  currencySymbol: z.string().min(1).max(5),
+  presetAmounts: z.string().min(1, "At least one preset amount is required").max(500),
+  minAmount: z.coerce.number().positive(),
+  maxAmount: z.coerce.number().positive(),
+  publicKey: z.string().max(200).optional(),
+  channels: z.string().max(200).optional(),
+  successMessage: z.string().min(1).max(2000),
+  cancelledMessage: z.string().min(1).max(2000),
+  unavailableMessage: z.string().min(1).max(2000),
+  receiptEmail: z.string().email(),
+});
+
 export type ContactInput = z.infer<typeof contactSchema>;
 export type NewsletterInput = z.infer<typeof newsletterSchema>;
 export type ApplicationInput = z.infer<typeof applicationSchema>;

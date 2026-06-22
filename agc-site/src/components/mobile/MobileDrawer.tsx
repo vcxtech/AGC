@@ -12,6 +12,7 @@ import {
   Calendar,
   Newspaper,
   Users,
+  CircleDollarSign,
   Heart,
   Handshake,
   Briefcase,
@@ -48,6 +49,7 @@ const drawerIconByHref: Record<string, LucideIcon> = {
   "/get-involved/volunteer": Heart,
   "/get-involved/partnership": Handshake,
   "/get-involved/join-us": Briefcase,
+  "/donate": CircleDollarSign,
   "/subscribe": Mail,
   "/contact": MessageSquare,
 };

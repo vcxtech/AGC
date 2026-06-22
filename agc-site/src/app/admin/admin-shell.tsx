@@ -27,6 +27,8 @@ import {
   Tags,
   Settings,
   House,
+  CreditCard,
+  Heart,
   CircleUserRound,
 } from "lucide-react";
 import type { SiteSettings } from "@/lib/site-settings";
@@ -44,6 +46,8 @@ const navItems = [
   { href: "/admin/projects", label: "Projects", icon: Briefcase },
   { href: "/admin/advisory", label: "Advisory", icon: Layers },
   { href: "/admin/partners", label: "Partners", icon: Handshake },
+  { href: "/admin/donations", label: "Donations", icon: Heart },
+  { href: "/admin/donation-settings", label: "Donation settings", icon: CreditCard },
   { href: "/admin/pages", label: "Page Content", icon: FileText },
   { href: "/admin/home-settings", label: "Home Settings", icon: House },
   { href: "/admin/about-settings", label: "About Settings", icon: CircleUserRound },

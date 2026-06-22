@@ -46,13 +46,13 @@ export const siteConfig = {
 
 /**
  * Header top bar “Donate” link target.
- * Set `NEXT_PUBLIC_DONATE_HREF` in `.env` (e.g. `/your-page` or `https://…`). Defaults to `/contact`.
+ * Set `NEXT_PUBLIC_DONATE_HREF` in `.env` to override. Defaults to `/donate`.
  */
 export const donateHref =
   typeof process.env.NEXT_PUBLIC_DONATE_HREF === "string" &&
   process.env.NEXT_PUBLIC_DONATE_HREF.trim() !== ""
     ? process.env.NEXT_PUBLIC_DONATE_HREF.trim()
-    : "/contact";
+    : "/donate";
 
 /** Default hero backdrop when no CMS images are set (Earth from space — subtle black scrim applied in `HeroConsultar`). */
 export const defaultHomeHeroBackgroundImage =

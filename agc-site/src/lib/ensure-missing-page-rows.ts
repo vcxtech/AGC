@@ -2,6 +2,8 @@ import { Prisma } from "@prisma/client";
 import { aypfContent } from "@/data/aypf";
 import { getInvolvedContent, workContent } from "@/data/content";
 import { subscribePageContent } from "@/data/subscribe-page";
+import { donatePageContent } from "@/data/donate-page";
+import { DEFAULT_DONATION_SETTINGS } from "@/data/donation-settings-defaults";
 import { prisma } from "@/lib/db";
 import { shouldSkipPrismaCalls } from "@/lib/skip-db";
 
@@ -114,6 +116,16 @@ const BASELINE_PAGES: { slug: string; title: string; contentJson: Record<string,
     slug: "subscribe",
     title: "Subscribe",
     contentJson: subscribePageContent as unknown as Record<string, unknown>,
+  },
+  {
+    slug: "donate",
+    title: "Donate",
+    contentJson: donatePageContent as unknown as Record<string, unknown>,
+  },
+  {
+    slug: "donation-settings",
+    title: "Donation Settings",
+    contentJson: DEFAULT_DONATION_SETTINGS as unknown as Record<string, unknown>,
   },
 ];
 

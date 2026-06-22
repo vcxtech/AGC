@@ -158,6 +158,7 @@ export function mergeSiteChrome(patch: unknown): SiteChrome {
       partnership: pickStr(breadcrumbPatch.partnership, b.partnership),
       joinUs: pickStr(breadcrumbPatch.joinUs, b.joinUs),
       contact: pickStr(breadcrumbPatch.contact, b.contact),
+      donate: pickStr(breadcrumbPatch.donate, b.donate),
       news: pickStr(breadcrumbPatch.news, b.news),
       events: pickStr(breadcrumbPatch.events, b.events),
       publications: pickStr(breadcrumbPatch.publications, b.publications),

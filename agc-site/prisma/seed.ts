@@ -19,6 +19,8 @@ import {
 import { privacyPolicy, termsOfService } from "../src/data/legal";
 import { getBootstrapHomePageCms } from "../src/lib/cms-bootstrap";
 import { applicationsPageUiDefaults } from "../src/data/applications-page";
+import { donatePageContent } from "../src/data/donate-page";
+import { DEFAULT_DONATION_SETTINGS } from "../src/data/donation-settings-defaults";
 import { DEFAULT_SITE_CHROME } from "../src/data/site-chrome";
 
 const prisma = new PrismaClient();
@@ -159,6 +161,20 @@ async function main() {
       heroSubtitle: "Get in touch with the Africa Governance Centre",
       intro: "We welcome your inquiries and look forward to hearing from you.",
       status: "published",
+    },
+    {
+      slug: "donate",
+      title: "Donate",
+      heroTitle: "Support Our Work",
+      heroSubtitle: "Make a Donation",
+      status: "published",
+      contentJson: donatePageContent,
+    },
+    {
+      slug: "donation-settings",
+      title: "Donation Settings",
+      status: "published",
+      contentJson: DEFAULT_DONATION_SETTINGS,
     },
     {
       slug: "home",

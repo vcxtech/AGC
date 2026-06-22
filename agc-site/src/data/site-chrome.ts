@@ -42,6 +42,7 @@ export type SiteBreadcrumbChrome = {
   partnership: string;
   joinUs: string;
   contact: string;
+  donate: string;
   news: string;
   events: string;
   publications: string;
@@ -111,6 +112,7 @@ export const HEADER_PRIMARY_NAV_SLOTS: readonly SiteNavItem[] = [
     subLinks: [
       { href: "/get-involved/join-us", label: "CAREERS & OPPORTUNITIES" },
       { href: "/get-involved/partnership", label: "PARTNER / SPONSOR" },
+      { href: "/donate", label: "DONATE" },
       { href: "/subscribe", label: "SUBSCRIBE TO OUR NEWSLETTER" },
     ],
   },
@@ -152,6 +154,7 @@ const DEFAULT_SITE_NAV_TAIL: SiteNavItem[] = [
   { href: "/events", label: "Events" },
   { href: "/news", label: "News" },
   { href: "/publications", label: "Publications" },
+  { href: "/donate", label: "Donate" },
 ];
 
 /** Header + drawer menu: primary row order with optional `subLinks` (e.g. Get Involved); tail adds secondary pages without duplicating hrefs. */
@@ -250,6 +253,7 @@ export const DEFAULT_SITE_CHROME: SiteChrome = {
     partnership: "Partnership",
     joinUs: "Work with us",
     contact: "Contact",
+    donate: "Donate",
     news: "News",
     events: "Events",
     publications: "Publications",
