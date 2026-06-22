@@ -9,11 +9,13 @@ import { cardImageUrlOrNull, preferUnoptimizedImage } from "@/lib/image-delivery
 import { resolveImageUrl } from "@/lib/media";
 import { getSiteSettings } from "@/lib/site-settings";
 import { getBreadcrumbLabels } from "@/lib/breadcrumbs";
-import { Breadcrumbs } from "@/components/Breadcrumbs";
+import { PageHero } from "@/components/PageHero";
+import { HomeScrollReveal } from "@/components/home/HomeScrollReveal";
 import { RichTextContent } from "@/components/RichTextContent";
 import { richTextToPlain } from "@/lib/rich-text";
 import { cmsStaticOrEmpty, getMergedPageContent } from "@/lib/page-content";
 import { normalizeTeamTabs } from "@/lib/team-tabs";
+import { PAGE_LISTING_INNER_CLASS } from "@/lib/page-layout";
 
 export const revalidate = 60;
 
@@ -83,92 +85,97 @@ export default async function TeamMemberProfilePage({ params }: Props) {
   const programme = member.section ? tabMap.get(member.section) ?? null : null;
   const summary = profileSummary(member, orgName);
 
-  const categoryLine = programme != null ? `Team | ${programme}` : "Our team";
+  const categoryLine = programme != null ? `Team · ${programme}` : "Our team";
 
   return (
-    <div className="bg-[#ffffff] pb-16 pt-10 sm:pb-20 sm:pt-12">
-      <div className="mx-auto max-w-6xl px-6 sm:px-8 lg:px-11 xl:px-16 2xl:px-24">
-        <Breadcrumbs
-          items={[
-            { label: bc.home, href: "/" },
-            { label: bc.about, href: "/about" },
-            { label: member.name },
-          ]}
-        />
+    <>
+      <PageHero
+        variant="minimal"
+        title={member.name}
+        subtitle={categoryLine}
+        breadcrumbs={[
+          { label: bc.home, href: "/" },
+          { label: bc.about, href: "/about" },
+          { label: bc.team ?? "Our Team", href: "/about#team" },
+          { label: member.name },
+        ]}
+      />
 
-        <div className="grid gap-12 lg:grid-cols-12 lg:gap-14 lg:items-start">
-          <aside className="lg:col-span-4">
-            <div className="relative mx-auto aspect-square w-full max-w-md overflow-hidden bg-slate-100 lg:mx-0 lg:max-w-none">
-              {imageResolved ? (
-                <Image
-                  src={imageResolved}
-                  alt=""
-                  fill
-                  className="object-cover object-top"
-                  sizes="(max-width: 1024px) 100vw, 320px"
-                  priority
-                  unoptimized={preferUnoptimizedImage(imageResolved)}
-                />
-              ) : (
-                <div className="flex h-full items-center justify-center">
-                  <User className="h-24 w-24 text-slate-300" strokeWidth={1} aria-hidden />
+      <HomeScrollReveal variant="fadeUp" start="top 88%" className="block w-full">
+        <section className="w-full border-t border-border/80 bg-white py-8 sm:py-12 lg:py-14">
+          <div className={PAGE_LISTING_INNER_CLASS}>
+            <div className="grid gap-12 lg:grid-cols-12 lg:gap-14 lg:items-start">
+              <aside className="lg:col-span-4">
+                <div className="relative mx-auto aspect-square w-full max-w-md overflow-hidden bg-slate-100 lg:mx-0 lg:max-w-none">
+                  {imageResolved ? (
+                    <Image
+                      src={imageResolved}
+                      alt=""
+                      fill
+                      className="object-cover object-top"
+                      sizes="(max-width: 1024px) 100vw, 320px"
+                      priority
+                      unoptimized={preferUnoptimizedImage(imageResolved)}
+                    />
+                  ) : (
+                    <div className="flex h-full items-center justify-center">
+                      <User className="h-24 w-24 text-slate-300" strokeWidth={1} aria-hidden />
+                    </div>
+                  )}
                 </div>
-              )}
+
+                <dl className="mt-10 space-y-8 border-t border-border pt-10">
+                  {member.role?.trim() ? (
+                    <div>
+                      <dt className="text-[11px] font-semibold uppercase tracking-[0.18em] text-black">
+                        Work title
+                      </dt>
+                      <dd className="mt-2 font-sans text-base leading-snug text-black">{member.role.trim()}</dd>
+                    </div>
+                  ) : null}
+                  <div>
+                    <dt className="text-[11px] font-semibold uppercase tracking-[0.18em] text-black">
+                      Organisation
+                    </dt>
+                    <dd className="mt-2 font-sans text-base leading-snug text-black">{orgName}</dd>
+                  </div>
+                  {programme ? (
+                    <div>
+                      <dt className="text-[11px] font-semibold uppercase tracking-[0.18em] text-black">
+                        Programme
+                      </dt>
+                      <dd className="mt-2 font-sans text-base leading-snug text-accent-800">{programme}</dd>
+                    </div>
+                  ) : null}
+                </dl>
+              </aside>
+
+              <article className="lg:col-span-8">
+                <p className="text-sm font-medium text-accent-600">{categoryLine}</p>
+                <p className="mt-5 font-sans text-lg leading-relaxed text-black md:text-xl">{summary}</p>
+                <hr className="my-10 border-border" />
+                {member.bio?.trim() ? (
+                  <RichTextContent
+                    html={member.bio}
+                    className="font-sans text-base leading-[1.75] text-stone-700"
+                  />
+                ) : (
+                  <p className="font-sans text-stone-600">A full biography will appear here when available.</p>
+                )}
+
+                <p className="mt-12">
+                  <Link
+                    href="/about#team"
+                    className="text-sm font-medium text-accent-700 no-underline hover:underline hover:underline-offset-4"
+                  >
+                    ← Back to team
+                  </Link>
+                </p>
+              </article>
             </div>
-
-            <dl className="mt-10 space-y-8 border-t border-border pt-10">
-              {member.role?.trim() ? (
-                <div>
-                  <dt className="text-[11px] font-semibold uppercase tracking-[0.18em] text-black">
-                    Work title
-                  </dt>
-                  <dd className="mt-2 font-sans text-base leading-snug text-black">{member.role.trim()}</dd>
-                </div>
-              ) : null}
-              <div>
-                <dt className="text-[11px] font-semibold uppercase tracking-[0.18em] text-black">
-                  Organisation
-                </dt>
-                <dd className="mt-2 font-sans text-base leading-snug text-black">{orgName}</dd>
-              </div>
-              {programme ? (
-                <div>
-                  <dt className="text-[11px] font-semibold uppercase tracking-[0.18em] text-black">
-                    Programme
-                  </dt>
-                  <dd className="mt-2 font-sans text-base leading-snug text-[#002147]">{programme}</dd>
-                </div>
-              ) : null}
-            </dl>
-          </aside>
-
-          <article className="lg:col-span-8">
-            <p className="text-sm font-medium text-accent-600">{categoryLine}</p>
-            <h1 className="font-serif mt-3 text-4xl font-semibold tracking-tight text-[#002147] md:text-5xl">
-              {member.name}
-            </h1>
-            <p className="mt-5 font-sans text-lg leading-relaxed text-[#002147] md:text-xl">{summary}</p>
-            <hr className="my-10 border-border" />
-            {member.bio?.trim() ? (
-              <RichTextContent
-                html={member.bio}
-                className="font-sans text-base leading-[1.75] text-stone-700"
-              />
-            ) : (
-              <p className="font-sans text-stone-600">A full biography will appear here when available.</p>
-            )}
-
-            <p className="mt-12">
-              <Link
-                href="/about#team"
-                className="text-sm font-medium text-accent-700 no-underline hover:underline hover:underline-offset-4"
-              >
-                ← Back to team
-              </Link>
-            </p>
-          </article>
-        </div>
-      </div>
-    </div>
+          </div>
+        </section>
+      </HomeScrollReveal>
+    </>
   );
 }

@@ -755,6 +755,48 @@ export function SiteSettingsForm({
           </div>
           <div>
             <label
+              htmlFor="bcResearch"
+              className="block text-sm font-medium text-slate-700"
+            >
+              Research
+            </label>
+            <input
+              id="bcResearch"
+              name="bcResearch"
+              defaultValue={initialDraft?.bcResearch ?? bc.research}
+              className="mt-1 w-full rounded-lg border border-border px-4 py-2"
+            />
+          </div>
+          <div>
+            <label
+              htmlFor="bcTraining"
+              className="block text-sm font-medium text-slate-700"
+            >
+              Capacity building
+            </label>
+            <input
+              id="bcTraining"
+              name="bcTraining"
+              defaultValue={initialDraft?.bcTraining ?? bc.training}
+              className="mt-1 w-full rounded-lg border border-border px-4 py-2"
+            />
+          </div>
+          <div>
+            <label
+              htmlFor="bcOurPartnerships"
+              className="block text-sm font-medium text-slate-700"
+            >
+              Our partnerships
+            </label>
+            <input
+              id="bcOurPartnerships"
+              name="bcOurPartnerships"
+              defaultValue={initialDraft?.bcOurPartnerships ?? bc.ourPartnerships}
+              className="mt-1 w-full rounded-lg border border-border px-4 py-2"
+            />
+          </div>
+          <div>
+            <label
               htmlFor="bcGetInvolved"
               className="block text-sm font-medium text-slate-700"
             >
@@ -786,7 +828,7 @@ export function SiteSettingsForm({
               htmlFor="bcPartnership"
               className="block text-sm font-medium text-slate-700"
             >
-              Partnership
+              Partner / sponsor (get involved)
             </label>
             <input
               id="bcPartnership"
@@ -820,6 +862,34 @@ export function SiteSettingsForm({
               id="bcContact"
               name="bcContact"
               defaultValue={initialDraft?.bcContact ?? bc.contact}
+              className="mt-1 w-full rounded-lg border border-border px-4 py-2"
+            />
+          </div>
+          <div>
+            <label
+              htmlFor="bcDonate"
+              className="block text-sm font-medium text-slate-700"
+            >
+              Donate
+            </label>
+            <input
+              id="bcDonate"
+              name="bcDonate"
+              defaultValue={initialDraft?.bcDonate ?? bc.donate}
+              className="mt-1 w-full rounded-lg border border-border px-4 py-2"
+            />
+          </div>
+          <div>
+            <label
+              htmlFor="bcSubscribe"
+              className="block text-sm font-medium text-slate-700"
+            >
+              Subscribe
+            </label>
+            <input
+              id="bcSubscribe"
+              name="bcSubscribe"
+              defaultValue={initialDraft?.bcSubscribe ?? bc.subscribe}
               className="mt-1 w-full rounded-lg border border-border px-4 py-2"
             />
           </div>

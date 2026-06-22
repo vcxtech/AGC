@@ -44,24 +44,6 @@ const ABOUT_DELIVERY_POINTS = [
 const ABOUT_PARTNERSHIPS_TEXT =
   "The Africa Governance Centre (AGC) works with a wide range of partners across Africa and beyond, including regional and continental institutions such as Economic Community of West African States and the African Union, as well as international development partners including the European Union and United Nations Development Program. We also engage closely with the diplomatic community, academia, civil society organisations, and corporate stakeholders seeking informed perspectives on governance, policy, and development across Africa. Through these partnerships, AGC provides evidence-based analysis, facilitates strategic dialogue, and supports collaborative approaches to addressing governance and development challenges on the continent.";
 
-const EXECUTIVE_COUNCIL = [
-  "Prof. Nelson Oppong - Executive Director",
-  "Benedicta Lasi Esq. - Executive Chair",
-  "H.E. Edite Ten Jua - Member",
-  "Senator Barry N. Griffin - Member",
-  "Hon. Dithapelo Lefoko Keorapetse - Member",
-  "Senator Janice Allen - Member",
-  "Dr. Otteng Acheampong - Member",
-  "Prof. Isaac Olawale Albert - Member",
-  "Ambassador Grant Ntrakwa - Member",
-];
-
-const MANAGEMENT_TEAM = [
-  "David Quaye - Programs and Partnerships Manager",
-  "Auguster Boateng - Programs Manager",
-  "Diana Ayaim - Programs Manager",
-];
-
 function resolveTeamTabs(
   content: typeof aboutContent & {
     teamTabsList?: { key: string; label: string }[];
@@ -200,13 +182,6 @@ export default async function AboutPage() {
     })),
   );
 
-  const aboutSectionImage =
-    typeof contentMap.aboutSectionImage === "string" &&
-    contentMap.aboutSectionImage.trim().length > 0
-      ? (await resolveImageUrl(contentMap.aboutSectionImage)) ||
-        placeholderImages.about
-      : placeholderImages.about;
-
   return (
     <>
       <PageHero
@@ -233,16 +208,6 @@ export default async function AboutPage() {
                 {aboutSectionHeading}
               </h2>
             </header>
-            {/* <div className="relative mt-8 aspect-16/5 w-full overflow-hidden bg-stone-100">
-              <Image
-                src={aboutSectionImage}
-                alt="About section visual"
-                fill
-                className="object-cover object-center"
-                sizes="100vw"
-                unoptimized={preferUnoptimizedImage(aboutSectionImage)}
-              />
-            </div> */}
             <RichTextContent html={leadHtml} className="mt-8 max-w-5xl font-medium text-black" />
 
             {missionText ? (

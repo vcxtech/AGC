@@ -37,12 +37,16 @@ export type SiteBreadcrumbChrome = {
   programs: string;
   projects: string;
   advisory: string;
+  research: string;
+  training: string;
+  ourPartnerships: string;
   getInvolved: string;
   volunteer: string;
   partnership: string;
   joinUs: string;
   contact: string;
   donate: string;
+  subscribe: string;
   news: string;
   events: string;
   publications: string;
@@ -103,6 +107,8 @@ export const HEADER_PRIMARY_NAV_SLOTS: readonly SiteNavItem[] = [
       { href: "/our-work/projects", label: "PROJECTS" },
       { href: "/our-work/advisory", label: "ADVISORY" },
       { href: "/our-work/research", label: "RESEARCH" },
+      { href: "/our-work/training", label: "CAPACITY BUILDING" },
+      { href: "/our-work/partnership", label: "OUR PARTNERSHIPS" },
       { href: "/publications", label: "PUBLICATIONS" },
     ],
   },
@@ -149,6 +155,9 @@ const DEFAULT_SITE_NAV_TAIL: SiteNavItem[] = [
   { href: "/our-work#programs", label: "Programs" },
   { href: "/our-work#projects", label: "Projects" },
   { href: "/our-work#advisory", label: "Advisory" },
+  { href: "/our-work/research", label: "Research" },
+  { href: "/our-work/training", label: "Capacity Building" },
+  { href: "/our-work/partnership", label: "Our Partnerships" },
   { href: "/aypf", label: "AYPF" },
   { href: "/awpls", label: "AWPLS" },
   { href: "/events", label: "Events" },
@@ -248,12 +257,16 @@ export const DEFAULT_SITE_CHROME: SiteChrome = {
     programs: "Programs",
     projects: "Projects",
     advisory: "Advisory",
+    research: "Research",
+    training: "Capacity Building",
+    ourPartnerships: "Our Partnerships",
     getInvolved: "Get Involved",
     volunteer: "Volunteer",
     partnership: "Partnership",
     joinUs: "Work with us",
     contact: "Contact",
     donate: "Donate",
+    subscribe: "Subscribe",
     news: "News",
     events: "Events",
     publications: "Publications",

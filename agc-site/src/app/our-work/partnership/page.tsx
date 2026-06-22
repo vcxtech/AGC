@@ -10,11 +10,11 @@ import { getPartners } from "@/lib/content";
 import { PartnerGrid } from "@/components/our-work/PartnerGrid";
 import { ProgramsCarousel } from "@/components/ProgramsCarousel";
 import { RichTextContent } from "@/components/RichTextContent";
-import { PAGE_GUTTER_CLASS } from "@/lib/page-layout";
+import { PAGE_LISTING_INNER_CLASS } from "@/lib/page-layout";
 import { Section } from "@/components/Section";
 
 export const metadata = {
-  title: "Partnership",
+  title: "Our Partnerships",
   description: "Collaborate with the Africa Governance Centre on research, programmes, and convenings.",
 };
 
@@ -65,13 +65,13 @@ export default async function PartnershipWorkPage() {
         breadcrumbs={[
           { label: bc.home, href: "/" },
           { label: bc.ourWork, href: "/our-work" },
-          { label: content.title },
+          { label: bc.ourPartnerships ?? content.title },
         ]}
       />
 
       <HomeScrollReveal variant="fadeUp" start="top 88%" className="block w-full">
         <Section className="bg-white">
-          <div className={`mx-auto w-full max-w-none ${PAGE_GUTTER_CLASS}`}>
+          <div className={PAGE_LISTING_INNER_CLASS}>
             <div className="space-y-8">
               <RichTextContent
                 html={content.description?.trim() || PARTNERSHIP_SECTION_DESCRIPTION}

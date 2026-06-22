@@ -38,7 +38,8 @@ export default async function SubscribePage() {
         imageAlt="Africa Governance Centre updates"
         breadcrumbs={[
           { label: siteSettings.chrome.breadcrumbs.home, href: "/" },
-          { label: "Subscribe" },
+          { label: siteSettings.chrome.breadcrumbs.getInvolved, href: "/get-involved" },
+          { label: siteSettings.chrome.breadcrumbs.subscribe },
         ]}
       />
 

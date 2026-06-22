@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { eventsContent, fallbackEvents } from "@/data/content";
 import { placeholderImages } from "@/data/images";
 import { getEvents } from "@/lib/content";
@@ -41,7 +42,6 @@ export default async function EventsPage() {
   const content = merged as unknown as typeof eventsContent & {
     heroImage?: string;
   };
-  // console.log(content);
 
   const heroImage =
     (await resolveImageUrl(content.heroImage)) || placeholderImages.events;
@@ -65,6 +65,13 @@ export default async function EventsPage() {
   );
 
   const introBody = String(content.intro ?? "").trim() || eventsContent.intro;
+  const pastArchiveTitle =
+    (typeof content.pastArchive === "object" &&
+    content.pastArchive !== null &&
+    typeof (content.pastArchive as { title?: string }).title === "string" &&
+    (content.pastArchive as { title: string }).title.trim())
+      ? (content.pastArchive as { title: string }).title.trim()
+      : eventsContent.pastArchive.title;
 
   return (
     <>
@@ -83,10 +90,20 @@ export default async function EventsPage() {
       >
         <ListingPageSection>
           <div className="max-w-none space-y-4">
-            <p className="text-sm font-medium text-accent-800">Convenings</p>
-            <h2 className="font-serif text-[1.85rem] font-semibold tracking-tight text-black sm:text-[2.2rem] lg:text-[2.55rem] lg:leading-tight">
-              Events
-            </h2>
+            <div className="flex flex-wrap items-end justify-between gap-x-6 gap-y-2">
+              <div>
+                <p className="text-sm font-medium text-accent-800">Convenings</p>
+                <h2 className="font-serif text-[1.85rem] font-semibold tracking-tight text-black sm:text-[2.2rem] lg:text-[2.55rem] lg:leading-tight">
+                  Browse convenings
+                </h2>
+              </div>
+              <Link
+                href="/events/past"
+                className="shrink-0 text-sm font-medium text-slate-600 transition-colors hover:text-slate-900"
+              >
+                {pastArchiveTitle}
+              </Link>
+            </div>
             <EventsPageIntro intro={introBody} />
             {eventsDraftsOnly && (
               <CmsDraftNotice

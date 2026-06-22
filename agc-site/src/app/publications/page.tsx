@@ -73,6 +73,7 @@ export default async function PublicationsPage() {
         imageAlt="Publications"
         breadcrumbs={[
           { label: siteSettings.chrome.breadcrumbs.home, href: "/" },
+          { label: siteSettings.chrome.breadcrumbs.ourWork, href: "/our-work" },
           { label: siteSettings.chrome.breadcrumbs.publications },
         ]}
       />

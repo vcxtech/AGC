@@ -12,7 +12,7 @@ import { Section } from "@/components/Section";
 import { RichTextContent } from "@/components/RichTextContent";
 
 export const metadata = {
-  title: "Partnership",
+  title: "Partner / Sponsor",
   description: "Collaborate with Africa Governance Centre on research, events, and policy initiatives.",
 };
 

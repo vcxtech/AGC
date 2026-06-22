@@ -381,24 +381,23 @@ export const workContent = {
       },
     ],
   },
-  /** Homepage pillar + `/our-work/research` — placeholder until expanded in Admin → Pages. */
   research: {
     title: "Research",
     subtitle: "Evidence and inquiry",
     description:
-      "Placeholder copy for Research. Edit this section in Admin → Pages → our-work-research (or the main Our Work JSON for titles). Describe flagship studies, fellows, and knowledge products.",
+      "Our research generates rigorous, evidence-based analysis on governance, political economy, and institutional development across Africa. We prioritise work that is policy-relevant and grounded in African contexts, ensuring that our outputs contribute meaningfully to decision-making processes and public discourse.",
   },
   training: {
     title: "Capacity Building",
-    subtitle: "Capacity building",
+    subtitle: "Learning for governance practitioners",
     description:
-      "Placeholder copy for Training. Edit in Admin → Pages → our-work-training. Highlight workshops, fellowships, and tailored learning for practitioners.",
+      "AGC delivers training and capacity-building initiatives designed to equip leaders, practitioners, and emerging actors with the skills and knowledge required to navigate governance challenges. Our programmes combine theoretical grounding with practical application.",
   },
   partnership: {
-    title: "Partnership",
-    subtitle: "Collaborate with us",
+    title: "Our Partnerships",
+    subtitle: "Collaborating across sectors",
     description:
-      "Placeholder copy for Partnership. Edit in Admin → Pages → our-work-partnership. Outline how institutions, donors, and peers co-create programmes with AGC.",
+      "Partnerships are central to AGC’s approach. We collaborate with regional and international institutions, development partners, academia, civil society, and the private sector to advance shared governance objectives.",
   },
 };
 
@@ -1000,6 +999,8 @@ export const ourWorkSubLinks: { href: string; label: string }[] = [
   { href: "/our-work/projects", label: "Projects" },
   { href: "/our-work/advisory", label: "Advisory" },
   { href: "/our-work/research", label: "Research" },
+  { href: "/our-work/training", label: "Capacity Building" },
+  { href: "/our-work/partnership", label: "Our Partnerships" },
   { href: "/publications", label: "Publications" },
 ];
 
@@ -1013,6 +1014,7 @@ export const footerLinks = {
   quickLinks: [
     { href: "/about", label: "About Us" },
     { href: "/our-work", label: "Our Work" },
+    { href: "/our-work/training", label: "Capacity Building" },
     { href: "/events", label: "Events" },
     { href: "/app-summit", label: "APP Summit" },
     { href: "/news", label: "News" },

@@ -1,13 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { PageHero } from "@/components/PageHero";
+import { PageHero, type BreadcrumbItem } from "@/components/PageHero";
 import { HomeScrollReveal } from "@/components/home/HomeScrollReveal";
 import { Button } from "@/components/Button";
 import { RichTextContent } from "@/components/RichTextContent";
 import type { ApplicationsFormFields } from "@/data/applications-page";
-
-type BreadcrumbItem = { label: string; href?: string };
 
 type ApplicationsClientProps = {
   hero: {

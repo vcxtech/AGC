@@ -125,7 +125,7 @@ export default async function AwplsPage() {
   );
   const registerCardCtaLabel = getString(
     "registerCardCtaLabel",
-    "Register Now",
+    "Contact us to register",
   );
   const whatIsHeading = getString("whatIsHeading", "What AWPLS Is");
   const whatIsCards = getObjectArray("whatIsCards", [
@@ -189,7 +189,7 @@ export default async function AwplsPage() {
     "finalCtaBody",
     "Join leaders, policymakers, and partners shaping Africa’s future.",
   );
-  const finalCtaButtonLabel = getString("finalCtaButtonLabel", "Register Now");
+  const finalCtaButtonLabel = getString("finalCtaButtonLabel", "Contact us to register");
   const aboutBodyHtml = resolveRichHtml({
     html: typeof contentMap.aboutBody === "string" ? contentMap.aboutBody : undefined,
     paragraphs: aboutParagraphs,

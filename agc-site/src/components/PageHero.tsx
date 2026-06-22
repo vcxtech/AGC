@@ -96,22 +96,22 @@ export function PageHero({
       if (!h || !nav) return;
 
       if (reducedMotion) {
-        const nodes = sub ? [h, sub, nav] : [h, nav];
+        const nodes = sub ? [nav, h, sub] : [nav, h];
         gsap.set(nodes, { autoAlpha: 1, y: 0, clearProps: "transform" });
         return;
       }
 
       const ctx = gsap.context(() => {
+        gsap.set(nav, { autoAlpha: 0, y: 18 });
         gsap.set(h, { autoAlpha: 0, y: 40 });
         if (sub) gsap.set(sub, { autoAlpha: 0, y: 28 });
-        gsap.set(nav, { autoAlpha: 0, y: 20 });
 
         const tl = gsap.timeline({ defaults: { ease: "power4.out" } });
-        tl.to(h, { autoAlpha: 1, y: 0, duration: 1.15 });
+        tl.to(nav, { autoAlpha: 1, y: 0, duration: 0.75 });
+        tl.to(h, { autoAlpha: 1, y: 0, duration: 1.15 }, "+=0.2");
         if (sub) {
           tl.to(sub, { autoAlpha: 1, y: 0, duration: 0.95 }, "+=0.28");
         }
-        tl.to(nav, { autoAlpha: 1, y: 0, duration: 0.85 }, "+=0.22");
       });
 
       return () => ctx.revert();
@@ -282,21 +282,7 @@ export function PageHero({
 
       <div className="container relative z-10 mx-auto w-full px-4 py-16 text-center sm:px-6 sm:py-20 lg:px-8 lg:py-24">
         <div className="mx-auto max-w-3xl [text-shadow:0_1px_2px_rgba(0,0,0,0.2),0_2px_16px_rgba(0,0,0,0.28)]">
-          <h1
-            ref={immersiveTitleRef}
-            className={
-              titleClassName ||
-              "font-serif text-4xl font-semibold leading-tight text-white sm:text-5xl lg:text-6xl xl:text-[3.75rem] xl:leading-tight"
-            }
-          >
-            {title}
-          </h1>
-          {subtitle ? (
-            <p ref={immersiveSubtitleRef} className="mt-4 text-lg text-white sm:text-xl lg:text-2xl">
-              {subtitle}
-            </p>
-          ) : null}
-          <nav ref={immersiveCrumbsRef} aria-label="Breadcrumb" className="mt-8">
+          <nav ref={immersiveCrumbsRef} aria-label="Breadcrumb" className="mb-6 sm:mb-8">
             <ol className="flex flex-wrap items-center justify-center gap-1.5 text-sm text-white sm:gap-2 sm:text-base">
               {items.map((item, i) => (
                 <li key={i} className="flex items-center gap-1 sm:gap-2">
@@ -319,6 +305,20 @@ export function PageHero({
               ))}
             </ol>
           </nav>
+          <h1
+            ref={immersiveTitleRef}
+            className={
+              titleClassName ||
+              "font-serif text-4xl font-semibold leading-tight text-white sm:text-5xl lg:text-6xl xl:text-[3.75rem] xl:leading-tight"
+            }
+          >
+            {title}
+          </h1>
+          {subtitle ? (
+            <p ref={immersiveSubtitleRef} className="mt-4 text-lg text-white sm:text-xl lg:text-2xl">
+              {subtitle}
+            </p>
+          ) : null}
         </div>
       </div>
     </section>

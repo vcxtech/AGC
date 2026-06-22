@@ -8,6 +8,7 @@ import { Button } from "@/components/Button";
 import { getBreadcrumbLabels } from "@/lib/breadcrumbs";
 import { ProgramsCarousel } from "@/components/ProgramsCarousel";
 import { RichTextContent } from "@/components/RichTextContent";
+import { PAGE_LISTING_INNER_CLASS } from "@/lib/page-layout";
 import { Section } from "@/components/Section";
 
 export const metadata = {
@@ -77,7 +78,7 @@ export default async function ProgramsPage() {
         className="block w-full"
       >
         <Section className="bg-white">
-          <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className={PAGE_LISTING_INNER_CLASS}>
             <div className="space-y-8">
               <h2 className="font-serif text-[1.85rem] font-semibold tracking-tight text-black sm:text-[2.2rem] lg:text-[2.55rem] lg:leading-tight">
                 Programs
